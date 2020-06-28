@@ -5,10 +5,6 @@
 
 #include <stdio.h>
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 /*
  * Default values for #define'd symbols
  */
@@ -240,9 +236,5 @@ void scheme_register_foreign_func_list(scheme * sc,
                                        int n);
 
 #endif /* !STANDALONE */
-
-#ifdef __cplusplus
-}
-#endif
 
 #endif
