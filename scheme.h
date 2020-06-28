@@ -246,10 +246,3 @@ void scheme_register_foreign_func_list(scheme * sc,
 #endif
 
 #endif
-
-
-/*
-Local variables:
-c-file-style: "k&r"
-End:
-*/
