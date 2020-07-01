@@ -4737,7 +4737,7 @@ static struct scheme_interface vtbl ={
 };
 #endif
 
-scheme *scheme_init_new() {
+scheme *ts_init_new() {
   scheme *sc=(scheme*)malloc(sizeof(scheme));
   if(!ts_init(sc)) {
     free(sc);
