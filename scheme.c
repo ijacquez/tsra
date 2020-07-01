@@ -4732,7 +4732,7 @@ static struct scheme_interface vtbl ={
   ts_is_immutable,
   ts_set_immutable,
 
-  scheme_load_file,
+  ts_load_file,
   ts_load_str
 };
 #endif
@@ -4928,7 +4928,7 @@ void scheme_deinit(scheme *sc) {
 #endif
 }
 
-void scheme_load_file(scheme *sc, FILE *fin)
+void ts_load_file(scheme *sc, FILE *fin)
 { ts_load_named_file(sc,fin,0); }
 
 void ts_load_named_file(scheme *sc, FILE *fin, const char *filename) {
