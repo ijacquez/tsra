@@ -297,7 +297,7 @@ INTERFACE int is_port(pointer p)     { return (type(p)==T_PORT); }
 INTERFACE int is_inport(pointer p)  { return is_port(p) && p->_object._port->kind & port_input; }
 INTERFACE int is_outport(pointer p) { return is_port(p) && p->_object._port->kind & port_output; }
 
-INTERFACE int is_pair(pointer p)     { return (type(p)==T_PAIR); }
+INTERFACE int ts_is_pair(pointer p)     { return (type(p)==T_PAIR); }
 #define car(p)           ((p)->_object._cons._car)
 #define cdr(p)           ((p)->_object._cons._cdr)
 INTERFACE pointer pair_car(pointer p)   { return car(p); }
@@ -1953,7 +1953,7 @@ static int token(scheme *sc) {
 }
 
 /* ========== Routines for Printing ========== */
-#define   ok_abbrev(x)   (is_pair(x) && cdr(x) == sc->NIL)
+#define   ok_abbrev(x)   (ts_is_pair(x) && cdr(x) == sc->NIL)
 
 static void printslashstring(scheme *sc, char *p, int len) {
   int i;
@@ -2174,7 +2174,7 @@ static pointer reverse(scheme *sc, pointer a) {
 /* a must be checked by gc */
      pointer p = sc->NIL;
 
-     for ( ; is_pair(a); a = cdr(a)) {
+     for ( ; ts_is_pair(a); a = cdr(a)) {
           p = cons(sc, car(a), p);
      }
      return (p);
@@ -2198,7 +2198,7 @@ static pointer revappend(scheme *sc, pointer a, pointer b) {
     pointer result = a;
     pointer p = b;
 
-    while (is_pair(p)) {
+    while (ts_is_pair(p)) {
         result = cons(sc, car(p), result);
         p = cdr(p);
     }
@@ -2686,7 +2686,7 @@ static pointer opexe_0(scheme *sc, enum scheme_opcodes op) {
                } else {
                     Error_1(sc,"eval: unbound variable:", sc->code);
                }
-          } else if (is_pair(sc->code)) {
+          } else if (ts_is_pair(sc->code)) {
                if (is_syntax(x = car(sc->code))) {     /* SYNTAX */
                     sc->code = cdr(sc->code);
                     s_goto(sc,syntaxnum(x));
@@ -2713,7 +2713,7 @@ static pointer opexe_0(scheme *sc, enum scheme_opcodes op) {
 
      case OP_E1ARGS:     /* eval arguments */
           sc->args = cons(sc, sc->value, sc->args);
-          if (is_pair(sc->code)) { /* continue */
+          if (ts_is_pair(sc->code)) { /* continue */
                s_save(sc,OP_E1ARGS, sc->args, cdr(sc->code));
                sc->code = car(sc->code);
                sc->args = sc->NIL;
@@ -2759,7 +2759,7 @@ static pointer opexe_0(scheme *sc, enum scheme_opcodes op) {
                /* make environment */
                new_frame_in_env(sc, closure_env(sc->code));
                for (x = car(closure_code(sc->code)), y = sc->args;
-                    is_pair(x); x = cdr(x), y = cdr(y)) {
+                    ts_is_pair(x); x = cdr(x), y = cdr(y)) {
                     if (y == sc->NIL) {
                          Error_0(sc,"not enough arguments");
                     } else {
@@ -2836,7 +2836,7 @@ static pointer opexe_0(scheme *sc, enum scheme_opcodes op) {
           if(is_immutable(car(sc->code)))
             Error_1(sc,"define: unable to alter immutable", car(sc->code));
 
-          if (is_pair(car(sc->code))) {
+          if (ts_is_pair(car(sc->code))) {
                x = caar(sc->code);
                sc->code = cons(sc, sc->LAMBDA, cons(sc, cdar(sc->code), cdr(sc->code)));
           } else {
@@ -2884,7 +2884,7 @@ static pointer opexe_0(scheme *sc, enum scheme_opcodes op) {
 
 
      case OP_BEGIN:      /* begin */
-          if (!is_pair(sc->code)) {
+          if (!ts_is_pair(sc->code)) {
                s_return(sc,sc->code);
           }
           if (cdr(sc->code) != sc->NIL) {
@@ -2914,8 +2914,8 @@ static pointer opexe_0(scheme *sc, enum scheme_opcodes op) {
 
      case OP_LET1:       /* let (calculate parameters) */
           sc->args = cons(sc, sc->value, sc->args);
-          if (is_pair(sc->code)) { /* continue */
-               if (!is_pair(car(sc->code)) || !is_pair(cdar(sc->code))) {
+          if (ts_is_pair(sc->code)) { /* continue */
+               if (!ts_is_pair(car(sc->code)) || !ts_is_pair(cdar(sc->code))) {
                     Error_1(sc, "Bad syntax of binding spec in let :",
                             car(sc->code));
                }
@@ -2938,7 +2938,7 @@ static pointer opexe_0(scheme *sc, enum scheme_opcodes op) {
           }
           if (ts_is_sym(car(sc->code))) {    /* named let */
                for (x = cadr(sc->code), sc->args = sc->NIL; x != sc->NIL; x = cdr(x)) {
-                    if (!is_pair(x))
+                    if (!ts_is_pair(x))
                         Error_1(sc, "Bad syntax of binding in let :", x);
                     if (!ts_is_list(sc, car(x)))
                         Error_1(sc, "Bad syntax of binding in let :", car(x));
@@ -2960,7 +2960,7 @@ static pointer opexe_0(scheme *sc, enum scheme_opcodes op) {
                sc->code = cdr(sc->code);
                s_goto(sc,OP_BEGIN);
           }
-          if(!is_pair(car(sc->code)) || !is_pair(caar(sc->code)) || !is_pair(cdaar(sc->code))) {
+          if(!ts_is_pair(car(sc->code)) || !ts_is_pair(caar(sc->code)) || !ts_is_pair(cdaar(sc->code))) {
                Error_1(sc,"Bad syntax of binding spec in let* :",car(sc->code));
           }
           s_save(sc,OP_LET1AST, cdr(sc->code), car(sc->code));
@@ -2974,7 +2974,7 @@ static pointer opexe_0(scheme *sc, enum scheme_opcodes op) {
      case OP_LET2AST:    /* let* (calculate parameters) */
           new_slot_in_env(sc, caar(sc->code), sc->value);
           sc->code = cdr(sc->code);
-          if (is_pair(sc->code)) { /* continue */
+          if (ts_is_pair(sc->code)) { /* continue */
                s_save(sc,OP_LET2AST, sc->args, sc->code);
                sc->code = cadar(sc->code);
                sc->args = sc->NIL;
@@ -3004,8 +3004,8 @@ static pointer opexe_1(scheme *sc, enum scheme_opcodes op) {
 
      case OP_LET1REC:    /* letrec (calculate parameters) */
           sc->args = cons(sc, sc->value, sc->args);
-          if (is_pair(sc->code)) { /* continue */
-               if (!is_pair(car(sc->code)) || !is_pair(cdar(sc->code))) {
+          if (ts_is_pair(sc->code)) { /* continue */
+               if (!ts_is_pair(car(sc->code)) || !ts_is_pair(cdar(sc->code))) {
                     Error_1(sc, "Bad syntax of binding spec in letrec :",
                             car(sc->code));
                }
@@ -3029,7 +3029,7 @@ static pointer opexe_1(scheme *sc, enum scheme_opcodes op) {
           s_goto(sc,OP_BEGIN);
 
      case OP_COND0:      /* cond */
-          if (!is_pair(sc->code)) {
+          if (!ts_is_pair(sc->code)) {
                Error_0(sc,"syntax error in cond");
           }
           s_save(sc,OP_COND1, sc->NIL, sc->code);
@@ -3042,7 +3042,7 @@ static pointer opexe_1(scheme *sc, enum scheme_opcodes op) {
                     s_return(sc,sc->value);
                }
                if(!sc->code || car(sc->code)==sc->FEED_TO) {
-                    if(!is_pair(cdr(sc->code))) {
+                    if(!ts_is_pair(cdr(sc->code))) {
                          Error_0(sc,"syntax error in cond");
                     }
                     x=cons(sc, sc->QUOTE, cons(sc, sc->value, sc->NIL));
@@ -3115,7 +3115,7 @@ static pointer opexe_1(scheme *sc, enum scheme_opcodes op) {
           s_return(sc,cons(sc, sc->args, x));
 
      case OP_MACRO0:     /* macro */
-          if (is_pair(car(sc->code))) {
+          if (ts_is_pair(car(sc->code))) {
                x = caar(sc->code);
                sc->code = cons(sc, sc->LAMBDA, cons(sc, cdar(sc->code), cdr(sc->code)));
           } else {
@@ -3145,7 +3145,7 @@ static pointer opexe_1(scheme *sc, enum scheme_opcodes op) {
 
      case OP_CASE1:      /* case */
           for (x = sc->code; x != sc->NIL; x = cdr(x)) {
-               if (!is_pair(y = caar(x))) {
+               if (!ts_is_pair(y = caar(x))) {
                     break;
                }
                for ( ; y != sc->NIL; y = cdr(y)) {
@@ -3158,7 +3158,7 @@ static pointer opexe_1(scheme *sc, enum scheme_opcodes op) {
                }
           }
           if (x != sc->NIL) {
-               if (is_pair(caar(x))) {
+               if (ts_is_pair(caar(x))) {
                     sc->code = cdar(x);
                     s_goto(sc,OP_BEGIN);
                } else {/* else */
@@ -3633,7 +3633,7 @@ static pointer opexe_2(scheme *sc, enum scheme_opcodes op) {
           }
           vec=mk_vector(sc,len);
           if(sc->no_memory) { s_return(sc, sc->sink); }
-          for (x = sc->args, i = 0; is_pair(x); x = cdr(x), i++) {
+          for (x = sc->args, i = 0; ts_is_pair(x); x = cdr(x), i++) {
                ts_set_vec_elem(vec,i,car(x));
           }
           s_return(sc,vec);
@@ -3724,13 +3724,13 @@ int list_length(scheme *sc, pointer a) {
     {
         if (fast == sc->NIL)
                 return i;
-        if (!is_pair(fast))
+        if (!ts_is_pair(fast))
                 return -2 - i;
         fast = cdr(fast);
         ++i;
         if (fast == sc->NIL)
                 return i;
-        if (!is_pair(fast))
+        if (!ts_is_pair(fast))
                 return -2 - i;
         ++i;
         fast = cdr(fast);
@@ -3825,7 +3825,7 @@ static pointer opexe_3(scheme *sc, enum scheme_opcodes op) {
           s_retbool(is_proc(car(sc->args)) || is_closure(car(sc->args))
                  || is_continuation(car(sc->args)) || is_foreign(car(sc->args)));
      case OP_PAIRP:       /* pair? */
-          s_retbool(is_pair(car(sc->args)));
+          s_retbool(ts_is_pair(car(sc->args)));
      case OP_LISTP:       /* list? */
        s_retbool(list_length(sc,car(sc->args)) >= 0);
 
@@ -3866,7 +3866,7 @@ static pointer opexe_4(scheme *sc, enum scheme_opcodes op) {
      case OP_WRITE:      /* write */
      case OP_DISPLAY:    /* display */
      case OP_WRITE_CHAR: /* write-char */
-          if(is_pair(cdr(sc->args))) {
+          if(ts_is_pair(cdr(sc->args))) {
                if(cadr(sc->args)!=sc->outport) {
                     x=cons(sc,sc->outport,sc->NIL);
                     s_save(sc,OP_SET_OUTPORT, x, sc->NIL);
@@ -3882,7 +3882,7 @@ static pointer opexe_4(scheme *sc, enum scheme_opcodes op) {
           s_goto(sc,OP_P0LIST);
 
      case OP_NEWLINE:    /* newline */
-          if(is_pair(sc->args)) {
+          if(ts_is_pair(sc->args)) {
                if(car(sc->args)!=sc->outport) {
                     x=cons(sc,sc->outport,sc->NIL);
                     s_save(sc,OP_SET_OUTPORT, x, sc->NIL);
@@ -3977,7 +3977,7 @@ static pointer opexe_4(scheme *sc, enum scheme_opcodes op) {
           }
 #endif /* USE_PLIST */
      case OP_QUIT:       /* quit */
-          if(is_pair(sc->args)) {
+          if(ts_is_pair(sc->args)) {
                sc->retcode=ivalue(car(sc->args));
           }
           return (sc->NIL);
@@ -3994,7 +3994,7 @@ static pointer opexe_4(scheme *sc, enum scheme_opcodes op) {
      }
 
      case OP_NEWSEGMENT: /* new-segment */
-          if (!is_pair(sc->args) || !is_number(car(sc->args))) {
+          if (!ts_is_pair(sc->args) || !is_number(car(sc->args))) {
                Error_0(sc,"new-segment: argument must be a number");
           }
           alloc_cellseg(sc, (int) ivalue(car(sc->args)));
@@ -4118,7 +4118,7 @@ static pointer opexe_5(scheme *sc, enum scheme_opcodes op) {
      switch (op) {
      /* ========== reading part ========== */
      case OP_READ:
-          if(!is_pair(sc->args)) {
+          if(!ts_is_pair(sc->args)) {
                s_goto(sc,OP_READ_INTERNAL);
           }
           if(!is_inport(car(sc->args))) {
@@ -4136,7 +4136,7 @@ static pointer opexe_5(scheme *sc, enum scheme_opcodes op) {
      case OP_READ_CHAR: /* read-char */
      case OP_PEEK_CHAR: /* peek-char */ {
           int c;
-          if(is_pair(sc->args)) {
+          if(ts_is_pair(sc->args)) {
                if(car(sc->args)!=sc->inport) {
                     x=sc->inport;
                     x=cons(sc,x,sc->NIL);
@@ -4157,7 +4157,7 @@ static pointer opexe_5(scheme *sc, enum scheme_opcodes op) {
      case OP_CHAR_READY: /* char-ready? */ {
           pointer p=sc->inport;
           int res;
-          if(is_pair(sc->args)) {
+          if(ts_is_pair(sc->args)) {
                p=car(sc->args);
           }
           res=p->_object._port->kind&port_string;
@@ -4333,7 +4333,7 @@ static pointer opexe_5(scheme *sc, enum scheme_opcodes op) {
           } else if(is_environment(sc->args)) {
                putstr(sc,"#<ENVIRONMENT>");
                s_return(sc,sc->T);
-          } else if (!is_pair(sc->args)) {
+          } else if (!ts_is_pair(sc->args)) {
                printatom(sc, sc->args, sc->print_flag);
                s_return(sc,sc->T);
           } else if (car(sc->args) == sc->QUOTE && ok_abbrev(cdr(sc->args))) {
@@ -4360,7 +4360,7 @@ static pointer opexe_5(scheme *sc, enum scheme_opcodes op) {
           }
 
      case OP_P1LIST:
-          if (is_pair(sc->args)) {
+          if (ts_is_pair(sc->args)) {
             s_save(sc,OP_P1LIST, cdr(sc->args), sc->NIL);
             putstr(sc, " ");
             sc->args = car(sc->args);
@@ -4417,14 +4417,14 @@ static pointer opexe_6(scheme *sc, enum scheme_opcodes op) {
 
      case OP_ASSQ:       /* assq */     /* a.k */
           x = car(sc->args);
-          for (y = cadr(sc->args); is_pair(y); y = cdr(y)) {
-               if (!is_pair(car(y))) {
+          for (y = cadr(sc->args); ts_is_pair(y); y = cdr(y)) {
+               if (!ts_is_pair(car(y))) {
                     Error_0(sc,"unable to handle non pair element");
                }
                if (x == caar(y))
                     break;
           }
-          if (is_pair(y)) {
+          if (ts_is_pair(y)) {
                s_return(sc,car(y));
           } else {
                s_return(sc,sc->F);
@@ -4479,7 +4479,7 @@ static struct {
   {is_inport,"input port"},
   {is_outport,"output port"},
   {is_environment, "environment"},
-  {is_pair, "pair"},
+  {ts_is_pair, "pair"},
   {0, "pair or '()"},
   {is_character, "character"},
   {is_vector, "vector"},
@@ -4564,7 +4564,7 @@ static void Eval_Cycle(scheme *sc, enum scheme_opcodes op) {
             pointer arg=car(arglist);
             j=(int)t[0];
             if(j==TST_LIST[0]) {
-                  if(arg!=sc->NIL && !is_pair(arg)) break;
+                  if(arg!=sc->NIL && !ts_is_pair(arg)) break;
             } else {
               if(!tests[j].fct(arg)) break;
             }
@@ -4708,7 +4708,7 @@ static struct scheme_interface vtbl ={
   ts_vec_elem,
   ts_set_vec_elem,
   is_port,
-  is_pair,
+  ts_is_pair,
   pair_car,
   pair_cdr,
   set_car,
