@@ -1022,7 +1022,7 @@ static pointer mk_port(scheme *sc, port *p) {
   return (x);
 }
 
-pointer mk_foreign_func(scheme *sc, foreign_func f) {
+pointer ts_mk_foreign_func(scheme *sc, foreign_func f) {
   pointer x = get_cell(sc, sc->NIL, sc->NIL);
 
   typeflag(x) = (T_FOREIGN | T_ATOM);
@@ -4686,7 +4686,7 @@ static struct scheme_interface vtbl ={
   mk_counted_string,
   mk_character,
   ts_mk_vec,
-  mk_foreign_func,
+  ts_mk_foreign_func,
   ts_put_str,
   ts_put_char,
 
@@ -5002,7 +5002,7 @@ void scheme_register_foreign_func(scheme * sc, scheme_registerable * sr)
   scheme_define(sc,
                 sc->global_env,
                 mk_symbol(sc,sr->name),
-                mk_foreign_func(sc, sr->f));
+                ts_mk_foreign_func(sc, sr->f));
 }
 
 void scheme_register_foreign_func_list(scheme * sc,
@@ -5116,7 +5116,7 @@ int main(int argc, char **argv) {
   scheme_set_input_port_file(&sc, stdin);
   scheme_set_output_port_file(&sc, stdout);
 #if USE_DL
-  scheme_define(&sc,sc.global_env,mk_symbol(&sc,"load-extension"),mk_foreign_func(&sc, scm_load_ext));
+  scheme_define(&sc,sc.global_env,mk_symbol(&sc,"load-extension"),ts_mk_foreign_func(&sc, scm_load_ext));
 #endif
   argv++;
   if(access(file_name,0)!=0) {
