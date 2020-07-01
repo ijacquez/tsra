@@ -233,7 +233,7 @@ SCHEME_EXPORT int is_syntax(pointer p);
 SCHEME_EXPORT int is_proc(pointer p);
 SCHEME_EXPORT int is_foreign(pointer p);
 SCHEME_EXPORT char *syntaxname(pointer p);
-SCHEME_EXPORT int is_closure(pointer p);
+SCHEME_EXPORT int ts_is_closure(pointer p);
 SCHEME_EXPORT int ts_is_macro(pointer p);
 SCHEME_EXPORT pointer ts_closure_code(pointer p);
 SCHEME_EXPORT pointer ts_closure_env(pointer p);

@@ -319,7 +319,7 @@ INTERFACE char *syntaxname(pointer p) { return strvalue(car(p)); }
 #define procnum(p)       ts_int_val(p)
 static const char *procname(pointer x);
 
-INTERFACE int is_closure(pointer p)  { return (type(p)==T_CLOSURE); }
+INTERFACE int ts_is_closure(pointer p)  { return (type(p)==T_CLOSURE); }
 INTERFACE int ts_is_macro(pointer p)    { return (type(p)==T_MACRO); }
 INTERFACE pointer ts_closure_code(pointer p)   { return car(p); }
 INTERFACE pointer ts_closure_env(pointer p)    { return cdr(p); }
@@ -2116,7 +2116,7 @@ static void atom2str(scheme *sc, pointer l, int f, char **pp, int *plen) {
           snprintf(p,STRBUFFSIZE,"#<%s PROCEDURE %ld>", procname(l),procnum(l));
      } else if (ts_is_macro(l)) {
           p = "#<MACRO>";
-     } else if (is_closure(l)) {
+     } else if (ts_is_closure(l)) {
           p = "#<CLOSURE>";
      } else if (ts_is_promise(l)) {
           p = "#<PROMISE>";
@@ -2753,7 +2753,7 @@ static pointer opexe_0(scheme *sc, enum scheme_opcodes op) {
               push_recent_alloc(sc,sc->args,sc->NIL);
                x=sc->code->_object._ff(sc,sc->args);
                s_return(sc,x);
-          } else if (is_closure(sc->code) || ts_is_macro(sc->code)
+          } else if (ts_is_closure(sc->code) || ts_is_macro(sc->code)
              || ts_is_promise(sc->code)) { /* CLOSURE */
         /* Should not accept promise */
                /* make environment */
@@ -3822,7 +3822,7 @@ static pointer opexe_3(scheme *sc, enum scheme_opcodes op) {
               * (call-with-current-continuation procedure?) ==> #t
                  * in R^3 report sec. 6.9
               */
-          s_retbool(is_proc(car(sc->args)) || is_closure(car(sc->args))
+          s_retbool(is_proc(car(sc->args)) || ts_is_closure(car(sc->args))
                  || is_continuation(car(sc->args)) || is_foreign(car(sc->args)));
      case OP_PAIRP:       /* pair? */
           s_retbool(ts_is_pair(car(sc->args)));
@@ -4435,7 +4435,7 @@ static pointer opexe_6(scheme *sc, enum scheme_opcodes op) {
           sc->args = car(sc->args);
           if (sc->args == sc->NIL) {
                s_return(sc,sc->F);
-          } else if (is_closure(sc->args)) {
+          } else if (ts_is_closure(sc->args)) {
                s_return(sc,cons(sc, sc->LAMBDA, ts_closure_code(sc->value)));
           } else if (ts_is_macro(sc->args)) {
                s_return(sc,cons(sc, sc->LAMBDA, ts_closure_code(sc->value)));
@@ -4447,7 +4447,7 @@ static pointer opexe_6(scheme *sc, enum scheme_opcodes op) {
            * Note, macro object is also a closure.
            * Therefore, (closure? <#MACRO>) ==> #t
            */
-          s_retbool(is_closure(car(sc->args)));
+          s_retbool(ts_is_closure(car(sc->args)));
      case OP_MACROP:          /* macro? */
           s_retbool(ts_is_macro(car(sc->args)));
      default:
@@ -4721,7 +4721,7 @@ static struct scheme_interface vtbl ={
   is_proc,
   is_foreign,
   syntaxname,
-  is_closure,
+  ts_is_closure,
   ts_is_macro,
   ts_closure_code,
   ts_closure_env,
