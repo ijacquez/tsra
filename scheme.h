@@ -178,7 +178,7 @@ SCHEME_EXPORT scheme *scheme_init_new_custom_alloc(func_alloc malloc, func_deall
 SCHEME_EXPORT int scheme_init(scheme *sc);
 SCHEME_EXPORT int scheme_init_custom_alloc(scheme *sc, func_alloc, func_dealloc);
 SCHEME_EXPORT void scheme_deinit(scheme *sc);
-SCHEME_EXPORT void scheme_set_input_port_file(scheme *sc, FILE *fin);
+SCHEME_EXPORT void ts_set_in_port_file(scheme *sc, FILE *fin);
 SCHEME_EXPORT void ts_set_in_port_str(scheme *sc, char *start, char *past_the_end);
 SCHEME_EXPORT void ts_set_out_port_file(scheme *sc, FILE *fin);
 SCHEME_EXPORT void ts_set_out_port_str(scheme *sc, char *start, char *past_the_end);

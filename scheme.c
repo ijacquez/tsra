@@ -4863,7 +4863,7 @@ int scheme_init_custom_alloc(scheme *sc, func_alloc malloc, func_dealloc free) {
   return !sc->no_memory;
 }
 
-void scheme_set_input_port_file(scheme *sc, FILE *fin) {
+void ts_set_in_port_file(scheme *sc, FILE *fin) {
   sc->inport=port_from_file(sc,fin,port_input);
 }
 
@@ -5113,7 +5113,7 @@ int main(int argc, char **argv) {
     fprintf(stderr,"Could not initialize!\n");
     return 2;
   }
-  scheme_set_input_port_file(&sc, stdin);
+  ts_set_in_port_file(&sc, stdin);
   ts_set_out_port_file(&sc, stdout);
 #if USE_DL
   ts_def(&sc,sc.global_env,ts_mk_sym(&sc,"load-extension"),ts_mk_foreign_func(&sc, scm_load_ext));
