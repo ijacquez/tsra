@@ -249,7 +249,7 @@ static int num_le(num a, num b);
 static double round_per_R5RS(double x);
 #endif
 static int is_zero_double(double x);
-static int num_is_integer(pointer p) {
+static int num_ts_is_int(pointer p) {
   return ((p)->_object._number.is_fixnum);
 }
 
@@ -270,10 +270,10 @@ INTERFACE static void ts_fill_vec(pointer vec, pointer obj);
 INTERFACE static pointer ts_vec_elem(pointer vec, int ielem);
 INTERFACE static pointer ts_set_vec_elem(pointer vec, int ielem, pointer a);
 INTERFACE int is_number(pointer p)    { return (type(p)==T_NUMBER); }
-INTERFACE int is_integer(pointer p) {
+INTERFACE int ts_is_int(pointer p) {
   if (!is_number(p))
       return 0;
-  if (num_is_integer(p) || (double)ts_int_val(p) == rvalue(p))
+  if (num_ts_is_int(p) || (double)ts_int_val(p) == rvalue(p))
       return 1;
   return 0;
 }
@@ -285,8 +285,8 @@ INTERFACE int ts_is_real(pointer p) {
 INTERFACE int ts_is_char(pointer p) { return (type(p)==T_CHARACTER); }
 INTERFACE char *string_value(pointer p) { return strvalue(p); }
 num nvalue(pointer p)       { return ((p)->_object._number); }
-INTERFACE long ts_int_val(pointer p)      { return (num_is_integer(p)?(p)->_object._number.value.ivalue:(long)(p)->_object._number.value.rvalue); }
-INTERFACE double rvalue(pointer p)    { return (!num_is_integer(p)?(p)->_object._number.value.rvalue:(double)(p)->_object._number.value.ivalue); }
+INTERFACE long ts_int_val(pointer p)      { return (num_ts_is_int(p)?(p)->_object._number.value.ivalue:(long)(p)->_object._number.value.rvalue); }
+INTERFACE double rvalue(pointer p)    { return (!num_ts_is_int(p)?(p)->_object._number.value.rvalue:(double)(p)->_object._number.value.ivalue); }
 #define ivalue_unchecked(p)       ((p)->_object._number.value.ivalue)
 #define rvalue_unchecked(p)       ((p)->_object._number.value.rvalue)
 #define set_num_integer(p)   (p)->_object._number.is_fixnum=1;
@@ -2029,7 +2029,7 @@ static void atom2str(scheme *sc, pointer l, int f, char **pp, int *plen) {
      } else if (is_number(l)) {
           p = sc->strbuff;
           if (f <= 1 || f == 10) /* f is the base for numbers if > 1 */ {
-              if(num_is_integer(l)) {
+              if(num_ts_is_int(l)) {
                    snprintf(p, STRBUFFSIZE, "%ld", ivalue_unchecked(l));
               } else {
                    snprintf(p, STRBUFFSIZE, "%.10g", rvalue_unchecked(l));
@@ -2219,7 +2219,7 @@ int eqv(pointer a, pointer b) {
                return (0);
      } else if (is_number(a)) {
           if (is_number(b)) {
-               if (num_is_integer(a) == num_is_integer(b))
+               if (num_ts_is_int(a) == num_ts_is_int(b))
                     return num_eq(nvalue(a),nvalue(b));
           }
           return (0);
@@ -3213,7 +3213,7 @@ static pointer opexe_2(scheme *sc, enum scheme_opcodes op) {
 #if USE_MATH
      case OP_INEX2EX:    /* inexact->exact */
           x=car(sc->args);
-          if(num_is_integer(x)) {
+          if(num_ts_is_int(x)) {
                s_return(sc,x);
           } else if(modf(rvalue_unchecked(x),&dd)==0.0) {
                s_return(sc,mk_integer(sc,ts_int_val(x)));
@@ -3267,7 +3267,7 @@ static pointer opexe_2(scheme *sc, enum scheme_opcodes op) {
           int real_result=1;
           pointer y=cadr(sc->args);
           x=car(sc->args);
-          if (num_is_integer(x) && num_is_integer(y))
+          if (num_ts_is_int(x) && num_ts_is_int(y))
              real_result=0;
           /* This 'if' is an R5RS compatibility fix. */
           /* NOTE: Remove this 'if' fix for R6RS.    */
@@ -3312,7 +3312,7 @@ static pointer opexe_2(scheme *sc, enum scheme_opcodes op) {
 
      case OP_ROUND:
         x=car(sc->args);
-        if (num_is_integer(x))
+        if (num_ts_is_int(x))
             s_return(sc, x);
         s_return(sc, mk_real(sc, round_per_R5RS(rvalue(x))));
 #endif
@@ -3535,7 +3535,7 @@ static pointer opexe_2(scheme *sc, enum scheme_opcodes op) {
           str=strvalue(car(sc->args));
 
           x=cadr(sc->args);
-          if (is_integer(x)) {
+          if (ts_is_int(x)) {
                Error_1(sc,"string-ref: index must be exact:",x);
           }
 
@@ -3559,7 +3559,7 @@ static pointer opexe_2(scheme *sc, enum scheme_opcodes op) {
           str=strvalue(car(sc->args));
 
           x=cadr(sc->args);
-          if (is_integer(x)) {
+          if (ts_is_int(x)) {
                Error_1(sc,"string-set!: index must be exact:",x);
           }
 
@@ -3665,7 +3665,7 @@ static pointer opexe_2(scheme *sc, enum scheme_opcodes op) {
           int index;
 
           x=cadr(sc->args);
-          if (is_integer(x)) {
+          if (ts_is_int(x)) {
                Error_1(sc,"vector-ref: index must be exact:",x);
           }
           index=ts_int_val(x);
@@ -3686,7 +3686,7 @@ static pointer opexe_2(scheme *sc, enum scheme_opcodes op) {
           }
 
           x=cadr(sc->args);
-          if (is_integer(x)) {
+          if (ts_is_int(x)) {
                Error_1(sc,"vector-set!: index must be exact:",x);
           }
 
@@ -3793,7 +3793,7 @@ static pointer opexe_3(scheme *sc, enum scheme_opcodes op) {
      case OP_STRINGP:     /* string? */
           s_retbool(is_string(car(sc->args)));
      case OP_INTEGERP:     /* integer? */
-          s_retbool(is_integer(car(sc->args)));
+          s_retbool(ts_is_int(car(sc->args)));
      case OP_REALP:     /* real? */
           s_retbool(is_number(car(sc->args))); /* All numbers are real */
      case OP_CHARP:     /* char? */
@@ -4463,7 +4463,7 @@ typedef int (*test_predicate)(pointer);
 static int is_any(pointer p) { return 1;}
 
 static int is_nonneg(pointer p) {
-  return ts_int_val(p)>=0 && is_integer(p);
+  return ts_int_val(p)>=0 && ts_is_int(p);
 }
 
 /* Correspond carefully with following defines! */
@@ -4484,7 +4484,7 @@ static struct {
   {ts_is_char, "character"},
   {ts_is_vec, "vector"},
   {is_number, "number"},
-  {is_integer, "integer"},
+  {ts_is_int, "integer"},
   {is_nonneg, "non-negative integer"}
 };
 
@@ -4696,7 +4696,7 @@ static struct scheme_interface vtbl ={
   nvalue,
   ts_int_val,
   rvalue,
-  is_integer,
+  ts_is_int,
   ts_is_real,
   ts_is_char,
   ts_char_val,
