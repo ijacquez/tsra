@@ -291,7 +291,7 @@ INTERFACE double rvalue(pointer p)    { return (!num_is_integer(p)?(p)->_object.
 #define rvalue_unchecked(p)       ((p)->_object._number.value.rvalue)
 #define set_num_integer(p)   (p)->_object._number.is_fixnum=1;
 #define set_num_real(p)      (p)->_object._number.is_fixnum=0;
-INTERFACE  long charvalue(pointer p)  { return ivalue_unchecked(p); }
+INTERFACE  long ts_char_val(pointer p)  { return ivalue_unchecked(p); }
 
 INTERFACE int ts_is_port(pointer p)     { return (type(p)==T_PORT); }
 INTERFACE int is_inport(pointer p)  { return ts_is_port(p) && p->_object._port->kind & port_input; }
@@ -2071,7 +2071,7 @@ static void atom2str(scheme *sc, pointer l, int f, char **pp, int *plen) {
                return;
           }
      } else if (is_character(l)) {
-          int c=charvalue(l);
+          int c=ts_char_val(l);
           p = sc->strbuff;
           if (!f) {
                p[0]=c;
@@ -2225,7 +2225,7 @@ int eqv(pointer a, pointer b) {
           return (0);
      } else if (is_character(a)) {
           if (is_character(b))
-               return charvalue(a)==charvalue(b);
+               return ts_char_val(a)==ts_char_val(b);
           else
                return (0);
      } else if (ts_is_port(a)) {
@@ -3519,7 +3519,7 @@ static pointer opexe_2(scheme *sc, enum scheme_opcodes op) {
           len=ts_int_val(car(sc->args));
 
           if(cdr(sc->args)!=sc->NIL) {
-               fill=charvalue(cadr(sc->args));
+               fill=ts_char_val(cadr(sc->args));
           }
           s_return(sc,mk_empty_string(sc,len,(char)fill));
      }
@@ -3568,7 +3568,7 @@ static pointer opexe_2(scheme *sc, enum scheme_opcodes op) {
                Error_1(sc,"string-set!: out of bounds:",x);
           }
 
-          c=charvalue(caddr(sc->args));
+          c=ts_char_val(caddr(sc->args));
 
           str[index]=(char)c;
           s_return(sc,car(sc->args));
@@ -4699,7 +4699,7 @@ static struct scheme_interface vtbl ={
   is_integer,
   is_real,
   is_character,
-  charvalue,
+  ts_char_val,
   ts_is_list,
   ts_is_vec,
   list_length,
