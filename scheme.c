@@ -282,7 +282,7 @@ INTERFACE int is_real(pointer p) {
   return is_number(p) && (!(p)->_object._number.is_fixnum);
 }
 
-INTERFACE int is_character(pointer p) { return (type(p)==T_CHARACTER); }
+INTERFACE int ts_is_char(pointer p) { return (type(p)==T_CHARACTER); }
 INTERFACE char *string_value(pointer p) { return strvalue(p); }
 num nvalue(pointer p)       { return ((p)->_object._number); }
 INTERFACE long ts_int_val(pointer p)      { return (num_is_integer(p)?(p)->_object._number.value.ivalue:(long)(p)->_object._number.value.rvalue); }
@@ -2070,7 +2070,7 @@ static void atom2str(scheme *sc, pointer l, int f, char **pp, int *plen) {
                printslashstring(sc, strvalue(l), strlength(l));
                return;
           }
-     } else if (is_character(l)) {
+     } else if (ts_is_char(l)) {
           int c=ts_char_val(l);
           p = sc->strbuff;
           if (!f) {
@@ -2223,8 +2223,8 @@ int eqv(pointer a, pointer b) {
                     return num_eq(nvalue(a),nvalue(b));
           }
           return (0);
-     } else if (is_character(a)) {
-          if (is_character(b))
+     } else if (ts_is_char(a)) {
+          if (ts_is_char(b))
                return ts_char_val(a)==ts_char_val(b);
           else
                return (0);
@@ -3502,7 +3502,7 @@ static pointer opexe_2(scheme *sc, enum scheme_opcodes op) {
           }
           if (pf < 0) {
             Error_1(sc, "atom->string: bad base:", cadr(sc->args));
-          } else if(is_number(x) || is_character(x) || is_string(x) || ts_is_sym(x)) {
+          } else if(is_number(x) || ts_is_char(x) || is_string(x) || ts_is_sym(x)) {
             char *p;
             int len;
             atom2str(sc,x,(int )pf,&p,&len);
@@ -3797,7 +3797,7 @@ static pointer opexe_3(scheme *sc, enum scheme_opcodes op) {
      case OP_REALP:     /* real? */
           s_retbool(is_number(car(sc->args))); /* All numbers are real */
      case OP_CHARP:     /* char? */
-          s_retbool(is_character(car(sc->args)));
+          s_retbool(ts_is_char(car(sc->args)));
 #if USE_CHAR_CLASSIFIERS
      case OP_CHARAP:     /* char-alphabetic? */
           s_retbool(Cisalpha(ts_int_val(car(sc->args))));
@@ -4481,7 +4481,7 @@ static struct {
   {ts_is_env, "environment"},
   {ts_is_pair, "pair"},
   {0, "pair or '()"},
-  {is_character, "character"},
+  {ts_is_char, "character"},
   {ts_is_vec, "vector"},
   {is_number, "number"},
   {is_integer, "integer"},
@@ -4698,7 +4698,7 @@ static struct scheme_interface vtbl ={
   rvalue,
   is_integer,
   is_real,
-  is_character,
+  ts_is_char,
   ts_char_val,
   ts_is_list,
   ts_is_vec,
