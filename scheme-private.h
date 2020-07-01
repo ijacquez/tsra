@@ -15,7 +15,7 @@ enum scheme_opcodes {
 };
 
 
-#define cons(sc,a,b) _cons(sc,a,b,0)
-#define immutable_cons(sc,a,b) _cons(sc,a,b,1)
+#define cons(sc,a,b) ts_cons(sc,a,b,0)
+#define immutablets_cons(sc,a,b) ts_cons(sc,a,b,1)
 
 #endif

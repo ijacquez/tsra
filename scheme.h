@@ -191,7 +191,7 @@ SCHEME_EXPORT pointer scheme_eval(scheme *sc, pointer obj);
 SCHEME_EXPORT void scheme_set_external_data(scheme *sc, void *p);
 SCHEME_EXPORT void scheme_define(scheme *sc, pointer env, pointer symbol, pointer value);
 
-SCHEME_EXPORT pointer _cons(scheme *sc, pointer a, pointer b, int immutable);
+SCHEME_EXPORT pointer ts_cons(scheme *sc, pointer a, pointer b, int immutable);
 SCHEME_EXPORT pointer mk_integer(scheme *sc, long num);
 SCHEME_EXPORT pointer mk_real(scheme *sc, double num);
 SCHEME_EXPORT pointer mk_symbol(scheme *sc, const char *name);

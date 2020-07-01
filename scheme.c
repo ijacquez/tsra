@@ -904,7 +904,7 @@ static void check_range_alloced(pointer p, int n, int expect_alloced)
 /* Medium level cell allocation */
 
 /* get new cons cell */
-pointer _cons(scheme *sc, pointer a, pointer b, int immutable) {
+pointer ts_cons(scheme *sc, pointer a, pointer b, int immutable) {
   pointer x = get_cell(sc,a, b);
 
   typeflag(x) = T_PAIR;
@@ -933,13 +933,13 @@ static pointer oblist_add_by_name(scheme *sc, const char *name)
   pointer x;
   int location;
 
-  x = immutable_cons(sc, mk_string(sc, name), sc->NIL);
+  x = immutablets_cons(sc, mk_string(sc, name), sc->NIL);
   typeflag(x) = T_SYMBOL;
   setimmutable(car(x));
 
   location = hash_fn(name, ivalue_unchecked(sc->oblist));
   ts_set_vec_elem(sc->oblist, location,
-                  immutable_cons(sc, x, ts_vec_elem(sc->oblist, location)));
+                  immutablets_cons(sc, x, ts_vec_elem(sc->oblist, location)));
   return x;
 }
 
@@ -1001,10 +1001,10 @@ static pointer oblist_add_by_name(scheme *sc, const char *name)
 {
   pointer x;
 
-  x = immutable_cons(sc, mk_string(sc, name), sc->NIL);
+  x = immutablets_cons(sc, mk_string(sc, name), sc->NIL);
   typeflag(x) = T_SYMBOL;
   setimmutable(car(x));
-  sc->oblist = immutable_cons(sc, x, sc->oblist);
+  sc->oblist = immutablets_cons(sc, x, sc->oblist);
   return x;
 }
 static pointer oblist_all_symbols(scheme *sc)
@@ -2288,22 +2288,22 @@ static void new_frame_in_env(scheme *sc, pointer old_env)
     new_frame = sc->NIL;
   }
 
-  sc->envir = immutable_cons(sc, new_frame, old_env);
+  sc->envir = immutablets_cons(sc, new_frame, old_env);
   setenvironment(sc->envir);
 }
 
 static void new_slot_spec_in_env(scheme *sc, pointer env,
                                         pointer variable, pointer value)
 {
-  pointer slot = immutable_cons(sc, variable, value);
+  pointer slot = immutablets_cons(sc, variable, value);
 
   if (is_vector(car(env))) {
     int location = hash_fn(symname(variable), ivalue_unchecked(car(env)));
 
     ts_set_vec_elem(car(env), location,
-                    immutable_cons(sc, slot, ts_vec_elem(car(env), location)));
+                    immutablets_cons(sc, slot, ts_vec_elem(car(env), location)));
   } else {
-    car(env) = immutable_cons(sc, slot, car(env));
+    car(env) = immutablets_cons(sc, slot, car(env));
   }
 }
 
@@ -2341,14 +2341,14 @@ static pointer find_slot_in_env(scheme *sc, pointer env, pointer hdl, int all)
 
 static void new_frame_in_env(scheme *sc, pointer old_env)
 {
-  sc->envir = immutable_cons(sc, sc->NIL, old_env);
+  sc->envir = immutablets_cons(sc, sc->NIL, old_env);
   setenvironment(sc->envir);
 }
 
 static void new_slot_spec_in_env(scheme *sc, pointer env,
                                         pointer variable, pointer value)
 {
-  car(env) = immutable_cons(sc, immutable_cons(sc, variable, value), car(env));
+  car(env) = immutablets_cons(sc, immutablets_cons(sc, variable, value), car(env));
 }
 
 static pointer find_slot_in_env(scheme *sc, pointer env, pointer hdl, int all)
@@ -4666,17 +4666,17 @@ static int syntaxnum(pointer p) {
 
 /* initialization of TinyScheme */
 #if USE_INTERFACE
-INTERFACE static pointer s_cons(scheme *sc, pointer a, pointer b) {
+INTERFACE static pointer sts_cons(scheme *sc, pointer a, pointer b) {
  return cons(sc,a,b);
 }
-INTERFACE static pointer s_immutable_cons(scheme *sc, pointer a, pointer b) {
- return immutable_cons(sc,a,b);
+INTERFACE static pointer s_immutablets_cons(scheme *sc, pointer a, pointer b) {
+ return immutablets_cons(sc,a,b);
 }
 
 static struct scheme_interface vtbl ={
   scheme_define,
-  s_cons,
-  s_immutable_cons,
+  sts_cons,
+  s_immutablets_cons,
   reserve_cells,
   mk_integer,
   mk_real,
