@@ -313,7 +313,7 @@ SCHEME_EXPORT int hasprop(pointer p)     { return (typeflag(p)&T_SYMBOL); }
 #endif
 
 INTERFACE int is_syntax(pointer p)   { return (typeflag(p)&T_SYNTAX); }
-INTERFACE int is_proc(pointer p)     { return (type(p)==T_PROC); }
+INTERFACE int ts_is_proc(pointer p)     { return (type(p)==T_PROC); }
 INTERFACE int ts_is_foreign(pointer p)  { return (type(p)==T_FOREIGN); }
 INTERFACE char *ts_syntax_name(pointer p) { return strvalue(car(p)); }
 #define procnum(p)       ts_int_val(p)
@@ -2111,7 +2111,7 @@ static void atom2str(scheme *sc, pointer l, int f, char **pp, int *plen) {
           }
      } else if (ts_is_sym(l)) {
           p = symname(l);
-     } else if (is_proc(l)) {
+     } else if (ts_is_proc(l)) {
           p = sc->strbuff;
           snprintf(p,STRBUFFSIZE,"#<%s PROCEDURE %ld>", procname(l),procnum(l));
      } else if (ts_is_macro(l)) {
@@ -2233,8 +2233,8 @@ int eqv(pointer a, pointer b) {
                return a==b;
           else
                return (0);
-     } else if (is_proc(a)) {
-          if (is_proc(b))
+     } else if (ts_is_proc(a)) {
+          if (ts_is_proc(b))
                return procnum(a)==procnum(b);
           else
                return (0);
@@ -2745,7 +2745,7 @@ static pointer opexe_0(scheme *sc, enum scheme_opcodes op) {
        /* fall through */
      case OP_REAL_APPLY:
 #endif
-          if (is_proc(sc->code)) {
+          if (ts_is_proc(sc->code)) {
                s_goto(sc,procnum(sc->code));   /* PROCEDURE */
           } else if (ts_is_foreign(sc->code))
             {
@@ -3822,7 +3822,7 @@ static pointer opexe_3(scheme *sc, enum scheme_opcodes op) {
               * (call-with-current-continuation procedure?) ==> #t
                  * in R^3 report sec. 6.9
               */
-          s_retbool(is_proc(car(sc->args)) || ts_is_closure(car(sc->args))
+          s_retbool(ts_is_proc(car(sc->args)) || ts_is_closure(car(sc->args))
                  || is_continuation(car(sc->args)) || ts_is_foreign(car(sc->args)));
      case OP_PAIRP:       /* pair? */
           s_retbool(ts_is_pair(car(sc->args)));
@@ -4718,7 +4718,7 @@ static struct scheme_interface vtbl ={
   symname,
 
   is_syntax,
-  is_proc,
+  ts_is_proc,
   ts_is_foreign,
   ts_syntax_name,
   ts_is_closure,
