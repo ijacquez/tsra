@@ -109,6 +109,7 @@ typedef struct cell *pointer;
 
 typedef void * (*func_alloc)(size_t);
 typedef void (*func_dealloc)(void *);
+typedef pointer (*foreign_func)(scheme *, pointer);
 
 /* num, for generic arithmetic */
 typedef struct num {
@@ -118,6 +119,150 @@ typedef struct num {
           double rvalue;
      } value;
 } num;
+
+enum scheme_port_kind {
+  port_free=0,
+  port_file=1,
+  port_string=2,
+  port_srfi6=4,
+  port_input=16,
+  port_output=32,
+  port_saw_EOF=64
+};
+
+typedef struct port {
+  unsigned char kind;
+  union {
+    struct {
+      FILE *file;
+      int closeit;
+#if SHOW_ERROR_LINE
+      int curr_line;
+      char *filename;
+#endif
+    } stdio;
+    struct {
+      char *start;
+      char *past_the_end;
+      char *curr;
+    } string;
+  } rep;
+} port;
+
+/* cell structure */
+struct cell {
+  unsigned int _flag;
+  union {
+    struct {
+      char   *_svalue;
+      int   _length;
+    } _string;
+    num _number;
+    port *_port;
+    foreign_func _ff;
+    struct {
+      struct cell *_car;
+      struct cell *_cdr;
+    } _cons;
+  } _object;
+};
+
+struct scheme {
+/* arrays for segments */
+func_alloc malloc;
+func_dealloc free;
+
+/* return code */
+int retcode;
+int tracing;
+
+
+#ifndef CELL_SEGSIZE
+#define CELL_SEGSIZE    5000  /* # of cells in one segment */
+#endif
+#ifndef CELL_NSEGMENT
+#define CELL_NSEGMENT   10    /* # of segments for cells */
+#endif
+char *alloc_seg[CELL_NSEGMENT];
+pointer cell_seg[CELL_NSEGMENT];
+int     last_cell_seg;
+
+/* We use 4 registers. */
+pointer args;            /* register for arguments of function */
+pointer envir;           /* stack register for current environment */
+pointer code;            /* register for current code */
+pointer dump;            /* stack register for next evaluation */
+
+int interactive_repl;    /* are we in an interactive REPL? */
+
+struct cell _sink;
+pointer sink;            /* when mem. alloc. fails */
+struct cell _NIL;
+pointer NIL;             /* special cell representing empty cell */
+struct cell _HASHT;
+pointer T;               /* special cell representing #t */
+struct cell _HASHF;
+pointer F;               /* special cell representing #f */
+struct cell _EOF_OBJ;
+pointer EOF_OBJ;         /* special cell representing end-of-file object */
+pointer oblist;          /* pointer to symbol table */
+pointer global_env;      /* pointer to global environment */
+pointer c_nest;          /* stack for nested calls from C */
+
+/* global pointers to special symbols */
+pointer LAMBDA;               /* pointer to syntax lambda */
+pointer QUOTE;           /* pointer to syntax quote */
+
+pointer QQUOTE;               /* pointer to symbol quasiquote */
+pointer UNQUOTE;         /* pointer to symbol unquote */
+pointer UNQUOTESP;       /* pointer to symbol unquote-splicing */
+pointer FEED_TO;         /* => */
+pointer COLON_HOOK;      /* *colon-hook* */
+pointer ERROR_HOOK;      /* *error-hook* */
+pointer SHARP_HOOK;  /* *sharp-hook* */
+pointer COMPILE_HOOK;  /* *compile-hook* */
+
+pointer free_cell;       /* pointer to top of free cells */
+long    fcells;          /* # of free cells */
+
+pointer inport;
+pointer outport;
+pointer save_inport;
+pointer loadport;
+
+#ifndef MAXFIL
+#define MAXFIL 64
+#endif
+port load_stack[MAXFIL];     /* Stack of open files for port -1 (LOADing) */
+int nesting_stack[MAXFIL];
+int file_i;
+int nesting;
+
+char    gc_verbose;      /* if gc_verbose is not zero, print gc status */
+char    no_memory;       /* Whether mem. alloc. has failed */
+
+#ifndef LINESIZE
+#define LINESIZE 1024
+#endif
+char    linebuff[LINESIZE];
+#ifndef STRBUFFSIZE
+#define STRBUFFSIZE 256
+#endif
+char    strbuff[STRBUFFSIZE];
+
+FILE *tmpfp;
+int tok;
+int print_flag;
+pointer value;
+int op;
+
+void *ext_data;     /* For the benefit of foreign functions */
+long gensym_cnt;
+
+struct scheme_interface *vptr;
+void *dump_base;    /* pointer to base of allocated dump stack */
+int dump_size;      /* number of frames allocated for dump stack */
+};
 
 SCHEME_EXPORT scheme *scheme_init_new(void);
 SCHEME_EXPORT scheme *scheme_init_new_custom_alloc(func_alloc malloc, func_dealloc free);
@@ -136,8 +281,6 @@ SCHEME_EXPORT pointer scheme_call(scheme *sc, pointer func, pointer args);
 SCHEME_EXPORT pointer scheme_eval(scheme *sc, pointer obj);
 void scheme_set_external_data(scheme *sc, void *p);
 SCHEME_EXPORT void scheme_define(scheme *sc, pointer env, pointer symbol, pointer value);
-
-typedef pointer (*foreign_func)(scheme *, pointer);
 
 pointer _cons(scheme *sc, pointer a, pointer b, int immutable);
 pointer mk_integer(scheme *sc, long num);
