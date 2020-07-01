@@ -2211,7 +2211,7 @@ static pointer revappend(scheme *sc, pointer a, pointer b) {
 }
 
 /* equivalence of atoms */
-int eqv(pointer a, pointer b) {
+int ts_eqv(pointer a, pointer b) {
      if (ts_is_str(a)) {
           if (ts_is_str(b))
                return (stts_real_val(a) == stts_real_val(b));
@@ -3149,7 +3149,7 @@ static pointer opexe_1(scheme *sc, enum scheme_opcodes op) {
                     break;
                }
                for ( ; y != sc->NIL; y = cdr(y)) {
-                    if (eqv(car(y), sc->value)) {
+                    if (ts_eqv(car(y), sc->value)) {
                          break;
                     }
                }
@@ -3836,7 +3836,7 @@ static pointer opexe_3(scheme *sc, enum scheme_opcodes op) {
      case OP_EQ:         /* eq? */
           s_retbool(car(sc->args) == cadr(sc->args));
      case OP_EQV:        /* eqv? */
-          s_retbool(eqv(car(sc->args), cadr(sc->args)));
+          s_retbool(ts_eqv(car(sc->args), cadr(sc->args)));
      default:
           snprintf(sc->strbuff,STRBUFFSIZE,"%d: illegal operator", sc->op);
           Error_0(sc,sc->strbuff);
