@@ -4871,7 +4871,7 @@ void scheme_set_input_port_string(scheme *sc, char *start, char *past_the_end) {
   sc->inport=port_from_string(sc,start,past_the_end,port_input);
 }
 
-void scheme_set_output_port_file(scheme *sc, FILE *fout) {
+void ts_set_out_port_file(scheme *sc, FILE *fout) {
   sc->outport=port_from_file(sc,fout,port_output);
 }
 
@@ -5114,7 +5114,7 @@ int main(int argc, char **argv) {
     return 2;
   }
   scheme_set_input_port_file(&sc, stdin);
-  scheme_set_output_port_file(&sc, stdout);
+  ts_set_out_port_file(&sc, stdout);
 #if USE_DL
   ts_def(&sc,sc.global_env,ts_mk_sym(&sc,"load-extension"),ts_mk_foreign_func(&sc, scm_load_ext));
 #endif
