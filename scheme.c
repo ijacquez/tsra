@@ -5005,7 +5005,7 @@ void scheme_register_foreign_func(scheme * sc, scheme_registerable * sr)
                 ts_mk_foreign_func(sc, sr->f));
 }
 
-void scheme_register_foreign_func_list(scheme * sc,
+void ts_register_foreign_func_list(scheme * sc,
                                        scheme_registerable * list,
                                        int count)
 {

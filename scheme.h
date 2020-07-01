@@ -314,7 +314,7 @@ typedef struct scheme_registerable
 }
 scheme_registerable;
 
-SCHEME_EXPORT void scheme_register_foreign_func_list(scheme * sc,
+SCHEME_EXPORT void ts_register_foreign_func_list(scheme * sc,
                                        scheme_registerable * list,
                                        int n);
 #endif
