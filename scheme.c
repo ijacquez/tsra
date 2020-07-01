@@ -5017,7 +5017,7 @@ void scheme_register_foreign_func_list(scheme * sc,
 }
 
 pointer scheme_apply0(scheme *sc, const char *procname)
-{ return scheme_eval(sc, cons(sc,ts_mk_sym(sc,procname),sc->NIL)); }
+{ return ts_eval(sc, cons(sc,ts_mk_sym(sc,procname),sc->NIL)); }
 
 void save_from_C_call(scheme *sc)
 {
@@ -5058,7 +5058,7 @@ pointer scheme_call(scheme *sc, pointer func, pointer args)
   return sc->value;
 }
 
-pointer scheme_eval(scheme *sc, pointer obj)
+pointer ts_eval(scheme *sc, pointer obj)
 {
   int old_repl = sc->interactive_repl;
   sc->interactive_repl = 0;

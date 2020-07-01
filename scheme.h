@@ -187,7 +187,7 @@ SCHEME_EXPORT void scheme_load_named_file(scheme *sc, FILE *fin, const char *fil
 SCHEME_EXPORT void scheme_load_string(scheme *sc, const char *cmd);
 SCHEME_EXPORT pointer scheme_apply0(scheme *sc, const char *procname);
 SCHEME_EXPORT pointer scheme_call(scheme *sc, pointer func, pointer args);
-SCHEME_EXPORT pointer scheme_eval(scheme *sc, pointer obj);
+SCHEME_EXPORT pointer ts_eval(scheme *sc, pointer obj);
 SCHEME_EXPORT void ts_set_extern_data(scheme *sc, void *p);
 SCHEME_EXPORT void ts_def(scheme *sc, pointer env, pointer symbol, pointer value);
 
