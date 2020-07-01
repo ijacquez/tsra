@@ -933,7 +933,7 @@ static pointer oblist_add_by_name(scheme *sc, const char *name)
   pointer x;
   int location;
 
-  x = immutablets_cons(sc, mk_string(sc, name), sc->NIL);
+  x = immutablets_cons(sc, ts_mk_str(sc, name), sc->NIL);
   typeflag(x) = T_SYMBOL;
   ts_set_immutable(car(x));
 
@@ -1001,7 +1001,7 @@ static pointer oblist_add_by_name(scheme *sc, const char *name)
 {
   pointer x;
 
-  x = immutablets_cons(sc, mk_string(sc, name), sc->NIL);
+  x = immutablets_cons(sc, ts_mk_str(sc, name), sc->NIL);
   typeflag(x) = T_SYMBOL;
   ts_set_immutable(car(x));
   sc->oblist = immutablets_cons(sc, x, sc->oblist);
@@ -1085,7 +1085,7 @@ static char *store_string(scheme *sc, int len_str, const char *str, char fill) {
 }
 
 /* get new string */
-INTERFACE pointer mk_string(scheme *sc, const char *str) {
+INTERFACE pointer ts_mk_str(scheme *sc, const char *str) {
      return ts_mk_counted_str(sc,str,strlen(str));
 }
 
@@ -2428,7 +2428,7 @@ static pointer _Error_1(scheme *sc, const char *s, pointer a) {
          } else {
                sc->code = sc->NIL;
          }
-         sc->code = cons(sc, mk_string(sc, str), sc->code);
+         sc->code = cons(sc, ts_mk_str(sc, str), sc->code);
          ts_set_immutable(car(sc->code));
          sc->code = cons(sc, slot_value_in_env(x), sc->code);
          sc->op = (int)OP_EVAL;
@@ -2441,7 +2441,7 @@ static pointer _Error_1(scheme *sc, const char *s, pointer a) {
     } else {
           sc->args = sc->NIL;
     }
-    sc->args = cons(sc, mk_string(sc, str), sc->args);
+    sc->args = cons(sc, ts_mk_str(sc, str), sc->args);
     ts_set_immutable(car(sc->args));
     sc->op = (int)OP_ERR0;
     return sc->T;
@@ -3482,7 +3482,7 @@ static pointer opexe_2(scheme *sc, enum scheme_opcodes op) {
         }
 
      case OP_SYM2STR: /* symbol->string */
-          x=mk_string(sc,ts_sym_name(car(sc->args)));
+          x=ts_mk_str(sc,ts_sym_name(car(sc->args)));
           ts_set_immutable(x);
           s_return(sc,x);
 
@@ -3895,7 +3895,7 @@ static pointer opexe_4(scheme *sc, enum scheme_opcodes op) {
      case OP_ERR0:  /* error */
           sc->retcode=-1;
           if (!ts_is_str(car(sc->args))) {
-               sc->args=cons(sc,mk_string(sc," -- "),sc->args);
+               sc->args=cons(sc,ts_mk_str(sc," -- "),sc->args);
                ts_set_immutable(car(sc->args));
           }
           ts_put_str(sc, "Error: ");
@@ -4075,7 +4075,7 @@ static pointer opexe_4(scheme *sc, enum scheme_opcodes op) {
 
                     memcpy(str,p->rep.string.start,size-1);
                     str[size-1]='\0';
-                    s=mk_string(sc,str);
+                    s=ts_mk_str(sc,str);
                     sc->free(str);
                     s_return(sc,s);
                }
@@ -4682,7 +4682,7 @@ static struct scheme_interface vtbl ={
   mk_real,
   mk_symbol,
   gensym,
-  mk_string,
+  ts_mk_str,
   ts_mk_counted_str,
   ts_mk_char,
   ts_mk_vec,
@@ -5138,7 +5138,7 @@ int main(int argc, char **argv) {
         fin=fopen(file_name,"r");
       }
       for(;*argv;argv++) {
-        pointer value=mk_string(&sc,*argv);
+        pointer value=ts_mk_str(&sc,*argv);
         args=cons(&sc,value,args);
       }
       args=reverse_in_place(&sc,sc.NIL,args);
