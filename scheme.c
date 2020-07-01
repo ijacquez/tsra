@@ -322,7 +322,7 @@ static const char *procname(pointer x);
 INTERFACE int is_closure(pointer p)  { return (type(p)==T_CLOSURE); }
 INTERFACE int ts_is_macro(pointer p)    { return (type(p)==T_MACRO); }
 INTERFACE pointer closure_code(pointer p)   { return car(p); }
-INTERFACE pointer closure_env(pointer p)    { return cdr(p); }
+INTERFACE pointer ts_closure_env(pointer p)    { return cdr(p); }
 
 INTERFACE int is_continuation(pointer p)    { return (type(p)==T_CONTINUATION); }
 #define cont_dump(p)     cdr(p)
@@ -2757,7 +2757,7 @@ static pointer opexe_0(scheme *sc, enum scheme_opcodes op) {
              || ts_is_promise(sc->code)) { /* CLOSURE */
         /* Should not accept promise */
                /* make environment */
-               new_frame_in_env(sc, closure_env(sc->code));
+               new_frame_in_env(sc, ts_closure_env(sc->code));
                for (x = car(closure_code(sc->code)), y = sc->args;
                     ts_is_pair(x); x = cdr(x), y = cdr(y)) {
                     if (y == sc->NIL) {
@@ -4724,7 +4724,7 @@ static struct scheme_interface vtbl ={
   is_closure,
   ts_is_macro,
   closure_code,
-  closure_env,
+  ts_closure_env,
 
   is_continuation,
   ts_is_promise,
