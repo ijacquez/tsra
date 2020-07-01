@@ -183,7 +183,7 @@ SCHEME_EXPORT void scheme_set_input_port_string(scheme *sc, char *start, char *p
 SCHEME_EXPORT void scheme_set_output_port_file(scheme *sc, FILE *fin);
 SCHEME_EXPORT void scheme_set_output_port_string(scheme *sc, char *start, char *past_the_end);
 SCHEME_EXPORT void scheme_load_file(scheme *sc, FILE *fin);
-SCHEME_EXPORT void scheme_load_named_file(scheme *sc, FILE *fin, const char *filename);
+SCHEME_EXPORT void ts_load_named_file(scheme *sc, FILE *fin, const char *filename);
 SCHEME_EXPORT void ts_load_str(scheme *sc, const char *cmd);
 SCHEME_EXPORT pointer ts_apply0(scheme *sc, const char *procname);
 SCHEME_EXPORT pointer ts_call(scheme *sc, pointer func, pointer args);
