@@ -433,7 +433,7 @@ static int count_consecutive_cells(pointer x, int needed);
 static pointer find_slot_in_env(scheme *sc, pointer env, pointer sym, int all);
 static pointer mk_number(scheme *sc, num n);
 static char *store_string(scheme *sc, int len, const char *str, char fill);
-static pointer mk_vector(scheme *sc, int len);
+static pointer ts_mk_vec(scheme *sc, int len);
 static pointer mk_atom(scheme *sc, char *q);
 static pointer mk_sharp_const(scheme *sc, char *name);
 static pointer mk_port(scheme *sc, port *p);
@@ -924,7 +924,7 @@ static int hash_fn(const char *key, int table_size);
 
 static pointer oblist_initial_value(scheme *sc)
 {
-  return mk_vector(sc, 461); /* probably should be bigger */
+  return ts_mk_vec(sc, 461); /* probably should be bigger */
 }
 
 /* returns the new symbol */
@@ -1105,7 +1105,7 @@ INTERFACE pointer mk_empty_string(scheme *sc, int len, char fill) {
      return (x);
 }
 
-INTERFACE static pointer mk_vector(scheme *sc, int len)
+INTERFACE static pointer ts_mk_vec(scheme *sc, int len)
 { return get_vector_object(sc,len,sc->NIL); }
 
 INTERFACE static void ts_fill_vec(pointer vec, pointer obj) {
@@ -2283,7 +2283,7 @@ static void new_frame_in_env(scheme *sc, pointer old_env)
 
   /* The interaction-environment has about 300 variables in it. */
   if (old_env == sc->NIL) {
-    new_frame = mk_vector(sc, 461);
+    new_frame = ts_mk_vec(sc, 461);
   } else {
     new_frame = sc->NIL;
   }
@@ -3631,7 +3631,7 @@ static pointer opexe_2(scheme *sc, enum scheme_opcodes op) {
           if(len<0) {
                Error_1(sc,"vector: not a proper list:",sc->args);
           }
-          vec=mk_vector(sc,len);
+          vec=ts_mk_vec(sc,len);
           if(sc->no_memory) { s_return(sc, sc->sink); }
           for (x = sc->args, i = 0; ts_is_pair(x); x = cdr(x), i++) {
                ts_set_vec_elem(vec,i,car(x));
@@ -3649,7 +3649,7 @@ static pointer opexe_2(scheme *sc, enum scheme_opcodes op) {
           if(cdr(sc->args)!=sc->NIL) {
                fill=cadr(sc->args);
           }
-          vec=mk_vector(sc,len);
+          vec=ts_mk_vec(sc,len);
           if(sc->no_memory) { s_return(sc, sc->sink); }
           if(fill!=sc->NIL) {
                ts_fill_vec(vec,fill);
@@ -4685,7 +4685,7 @@ static struct scheme_interface vtbl ={
   mk_string,
   mk_counted_string,
   mk_character,
-  mk_vector,
+  ts_mk_vec,
   mk_foreign_func,
   putstr,
   ts_put_char,
