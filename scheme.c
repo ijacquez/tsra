@@ -1040,7 +1040,7 @@ INTERFACE pointer ts_mk_char(scheme *sc, int c) {
 }
 
 /* get number atom (integer) */
-INTERFACE pointer mk_integer(scheme *sc, long num) {
+INTERFACE pointer ts_mk_int(scheme *sc, long num) {
   pointer x = get_cell(sc,sc->NIL, sc->NIL);
 
   typeflag(x) = (T_NUMBER | T_ATOM);
@@ -1060,7 +1060,7 @@ INTERFACE pointer ts_mk_real(scheme *sc, double n) {
 
 static pointer mk_number(scheme *sc, num n) {
  if(n.is_fixnum) {
-     return mk_integer(sc,n.value.ivalue);
+     return ts_mk_int(sc,n.value.ivalue);
  } else {
      return ts_mk_real(sc,n.value.rvalue);
  }
@@ -1235,7 +1235,7 @@ static pointer mk_atom(scheme *sc, char *q) {
      if(has_dec_point) {
           return ts_mk_real(sc,atof(q));
      }
-     return (mk_integer(sc, atol(q)));
+     return (ts_mk_int(sc, atol(q)));
 }
 
 /* make constant */
@@ -1250,17 +1250,17 @@ static pointer mk_sharp_const(scheme *sc, char *name) {
      else if (*name == 'o') {/* #o (octal) */
           snprintf(tmp, STRBUFFSIZE, "0%s", name+1);
           sscanf(tmp, "%lo", (long unsigned *)&x);
-          return (mk_integer(sc, x));
+          return (ts_mk_int(sc, x));
      } else if (*name == 'd') {    /* #d (decimal) */
           sscanf(name+1, "%ld", (long int *)&x);
-          return (mk_integer(sc, x));
+          return (ts_mk_int(sc, x));
      } else if (*name == 'x') {    /* #x (hex) */
           snprintf(tmp, STRBUFFSIZE, "0x%s", name+1);
           sscanf(tmp, "%lx", (long unsigned *)&x);
-          return (mk_integer(sc, x));
+          return (ts_mk_int(sc, x));
      } else if (*name == 'b') {    /* #b (binary) */
           x = binary_decode(name+1);
-          return (mk_integer(sc, x));
+          return (ts_mk_int(sc, x));
      } else if (*name == '\\') { /* #\w (character) */
           int c=0;
           if(stricmp(name+1,"space")==0) {
@@ -2574,7 +2574,7 @@ static pointer _s_return(scheme *sc, pointer a) {
 static void s_save(scheme *sc, enum scheme_opcodes op, pointer args, pointer code) {
     sc->dump = cons(sc, sc->envir, cons(sc, (code), sc->dump));
     sc->dump = cons(sc, (args), sc->dump);
-    sc->dump = cons(sc, mk_integer(sc, (long)(op)), sc->dump);
+    sc->dump = cons(sc, ts_mk_int(sc, (long)(op)), sc->dump);
 }
 
 static void dump_stack_mark(scheme *sc)
@@ -2599,7 +2599,7 @@ static pointer opexe_0(scheme *sc, enum scheme_opcodes op) {
           }
       else
         {
-          sc->args = mk_integer(sc,sc->file_i);
+          sc->args = ts_mk_int(sc,sc->file_i);
           s_goto(sc,OP_T0LVL);
         }
 
@@ -2729,7 +2729,7 @@ static pointer opexe_0(scheme *sc, enum scheme_opcodes op) {
      case OP_TRACING: {
        int tr=sc->tracing;
        sc->tracing=ts_int_val(car(sc->args));
-       s_return(sc,mk_integer(sc,tr));
+       s_return(sc,ts_mk_int(sc,tr));
      }
 #endif
 
@@ -3216,7 +3216,7 @@ static pointer opexe_2(scheme *sc, enum scheme_opcodes op) {
           if(num_ts_is_int(x)) {
                s_return(sc,x);
           } else if(modf(rvalue_unchecked(x),&dd)==0.0) {
-               s_return(sc,mk_integer(sc,ts_int_val(x)));
+               s_return(sc,ts_mk_int(sc,ts_int_val(x)));
           } else {
                Error_1(sc,"inexact->exact: not integral:",x);
           }
@@ -3287,7 +3287,7 @@ static pointer opexe_2(scheme *sc, enum scheme_opcodes op) {
           if (real_result) {
              s_return(sc, ts_mk_real(sc, result));
           } else {
-             s_return(sc, mk_integer(sc, result));
+             s_return(sc, ts_mk_int(sc, result));
           }
      }
 
@@ -3420,7 +3420,7 @@ static pointer opexe_2(scheme *sc, enum scheme_opcodes op) {
      case OP_CHAR2INT: { /* char->integer */
           char c;
           c=(char)ts_int_val(car(sc->args));
-          s_return(sc,mk_integer(sc,(unsigned char)c));
+          s_return(sc,ts_mk_int(sc,(unsigned char)c));
      }
 
      case OP_INT2CHAR: { /* integer->char */
@@ -3472,7 +3472,7 @@ static pointer opexe_2(scheme *sc, enum scheme_opcodes op) {
               char *ep;
               long iv = strtol(s,&ep,(int )pf);
               if (*ep == 0) {
-                s_return(sc, mk_integer(sc, iv));
+                s_return(sc, ts_mk_int(sc, iv));
               }
               else {
                 s_return(sc, sc->F);
@@ -3525,7 +3525,7 @@ static pointer opexe_2(scheme *sc, enum scheme_opcodes op) {
      }
 
      case OP_STRLEN:  /* string-length */
-          s_return(sc,mk_integer(sc,strlength(car(sc->args))));
+          s_return(sc,ts_mk_int(sc,strlength(car(sc->args))));
 
      case OP_STRREF: { /* string-ref */
           char *str;
@@ -3658,7 +3658,7 @@ static pointer opexe_2(scheme *sc, enum scheme_opcodes op) {
      }
 
      case OP_VECLEN:  /* vector-length */
-          s_return(sc,mk_integer(sc,ts_int_val(car(sc->args))));
+          s_return(sc,ts_mk_int(sc,ts_int_val(car(sc->args))));
 
      case OP_VECREF: { /* vector-ref */
           pointer x;
@@ -4112,7 +4112,7 @@ static pointer opexe_5(scheme *sc, enum scheme_opcodes op) {
           int n=sc->nesting;
           sc->nesting=0;
           sc->retcode=-1;
-          Error_1(sc,"unmatched parentheses:",mk_integer(sc,n));
+          Error_1(sc,"unmatched parentheses:",ts_mk_int(sc,n));
      }
 
      switch (op) {
@@ -4328,7 +4328,7 @@ static pointer opexe_5(scheme *sc, enum scheme_opcodes op) {
      case OP_P0LIST:
           if(ts_is_vec(sc->args)) {
                ts_put_str(sc,"#(");
-               sc->args=cons(sc,sc->args,mk_integer(sc,0));
+               sc->args=cons(sc,sc->args,ts_mk_int(sc,0));
                s_goto(sc,OP_PVECFROM);
           } else if(ts_is_env(sc->args)) {
                ts_put_str(sc,"#<ENVIRONMENT>");
@@ -4413,7 +4413,7 @@ static pointer opexe_6(scheme *sc, enum scheme_opcodes op) {
           if(v<0) {
                Error_1(sc,"length: not a list:",car(sc->args));
           }
-          s_return(sc,mk_integer(sc, v));
+          s_return(sc,ts_mk_int(sc, v));
 
      case OP_ASSQ:       /* assq */     /* a.k */
           x = car(sc->args);
@@ -4678,7 +4678,7 @@ static struct scheme_interface vtbl ={
   sts_cons,
   s_immutablets_cons,
   ts_reserve_cells,
-  mk_integer,
+  ts_mk_int,
   ts_mk_real,
   ts_mk_sym,
   ts_gen_sym,
@@ -4957,7 +4957,7 @@ void scheme_load_named_file(scheme *sc, FILE *fin, const char *filename) {
 #endif
 
   sc->inport=sc->loadport;
-  sc->args = mk_integer(sc,sc->file_i);
+  sc->args = ts_mk_int(sc,sc->file_i);
   Eval_Cycle(sc, OP_T0LVL);
   typeflag(sc->loadport)=T_ATOM;
   if(sc->retcode==0) {
@@ -4977,7 +4977,7 @@ void scheme_load_string(scheme *sc, const char *cmd) {
   sc->retcode=0;
   sc->interactive_repl=0;
   sc->inport=sc->loadport;
-  sc->args = mk_integer(sc,sc->file_i);
+  sc->args = ts_mk_int(sc,sc->file_i);
   Eval_Cycle(sc, OP_T0LVL);
   typeflag(sc->loadport)=T_ATOM;
   if(sc->retcode==0) {
