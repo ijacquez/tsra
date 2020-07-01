@@ -278,7 +278,7 @@ INTERFACE int is_integer(pointer p) {
   return 0;
 }
 
-INTERFACE int is_real(pointer p) {
+INTERFACE int ts_is_real(pointer p) {
   return is_number(p) && (!(p)->_object._number.is_fixnum);
 }
 
@@ -4697,7 +4697,7 @@ static struct scheme_interface vtbl ={
   ts_int_val,
   rvalue,
   is_integer,
-  is_real,
+  ts_is_real,
   ts_is_char,
   ts_char_val,
   ts_is_list,

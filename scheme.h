@@ -212,7 +212,7 @@ SCHEME_EXPORT num nvalue(pointer p);
 SCHEME_EXPORT long ts_int_val(pointer p);
 SCHEME_EXPORT double rvalue(pointer p);
 SCHEME_EXPORT int is_integer(pointer p);
-SCHEME_EXPORT int is_real(pointer p);
+SCHEME_EXPORT int ts_is_real(pointer p);
 SCHEME_EXPORT int ts_is_char(pointer p);
 SCHEME_EXPORT long ts_char_val(pointer p);
 SCHEME_EXPORT int ts_is_vec(pointer p);
