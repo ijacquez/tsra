@@ -303,7 +303,7 @@ INTERFACE int ts_is_pair(pointer p)     { return (type(p)==T_PAIR); }
 INTERFACE pointer pair_car(pointer p)   { return car(p); }
 INTERFACE pointer pair_cdr(pointer p)   { return cdr(p); }
 INTERFACE pointer set_car(pointer p, pointer q) { return car(p)=q; }
-INTERFACE pointer set_cdr(pointer p, pointer q) { return cdr(p)=q; }
+INTERFACE pointer ts_set_cdr(pointer p, pointer q) { return cdr(p)=q; }
 
 INTERFACE int ts_is_sym(pointer p)   { return (type(p)==T_SYMBOL); }
 INTERFACE char *ts_sym_name(pointer p)   { return strvalue(car(p)); }
@@ -4712,7 +4712,7 @@ static struct scheme_interface vtbl ={
   pair_car,
   pair_cdr,
   set_car,
-  set_cdr,
+  ts_set_cdr,
 
   ts_is_sym,
   ts_sym_name,
