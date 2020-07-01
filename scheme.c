@@ -341,7 +341,7 @@ INTERFACE int is_environment(pointer p) { return (type(p)==T_ENVIRONMENT); }
 #define setmark(p)       typeflag(p) |= MARK
 #define clrmark(p)       typeflag(p) &= UNMARK
 
-INTERFACE int is_immutable(pointer p) { return (typeflag(p)&T_IMMUTABLE); }
+INTERFACE int ts_is_immutable(pointer p) { return (typeflag(p)&T_IMMUTABLE); }
 /*#define ts_set_immutable(p)  typeflag(p) |= T_IMMUTABLE*/
 INTERFACE void ts_set_immutable(pointer p) { typeflag(p) |= T_IMMUTABLE; }
 
@@ -2833,7 +2833,7 @@ static pointer opexe_0(scheme *sc, enum scheme_opcodes op) {
           s_return(sc,car(sc->code));
 
      case OP_DEF0:  /* define */
-          if(is_immutable(car(sc->code)))
+          if(ts_is_immutable(car(sc->code)))
             Error_1(sc,"define: unable to alter immutable", car(sc->code));
 
           if (ts_is_pair(car(sc->code))) {
@@ -2867,7 +2867,7 @@ static pointer opexe_0(scheme *sc, enum scheme_opcodes op) {
           s_retbool(find_slot_in_env(sc,x,car(sc->args),1)!=sc->NIL);
 
      case OP_SET0:       /* set! */
-          if(is_immutable(car(sc->code)))
+          if(ts_is_immutable(car(sc->code)))
                 Error_1(sc,"set!: unable to alter immutable variable",car(sc->code));
           s_save(sc,OP_SET1, sc->NIL, car(sc->code));
           sc->code = cadr(sc->code);
@@ -3402,7 +3402,7 @@ static pointer opexe_2(scheme *sc, enum scheme_opcodes op) {
           s_return(sc,sc->args);
 
      case OP_SETCAR:     /* set-car! */
-       if(!is_immutable(car(sc->args))) {
+       if(!ts_is_immutable(car(sc->args))) {
          caar(sc->args) = cadr(sc->args);
          s_return(sc,car(sc->args));
        } else {
@@ -3410,7 +3410,7 @@ static pointer opexe_2(scheme *sc, enum scheme_opcodes op) {
        }
 
      case OP_SETCDR:     /* set-cdr! */
-       if(!is_immutable(car(sc->args))) {
+       if(!ts_is_immutable(car(sc->args))) {
          cdar(sc->args) = cadr(sc->args);
          s_return(sc,car(sc->args));
        } else {
@@ -3553,7 +3553,7 @@ static pointer opexe_2(scheme *sc, enum scheme_opcodes op) {
           int index;
           int c;
 
-          if(is_immutable(car(sc->args))) {
+          if(ts_is_immutable(car(sc->args))) {
                Error_1(sc,"string-set!: unable to alter immutable string:",car(sc->args));
           }
           str=strvalue(car(sc->args));
@@ -3681,7 +3681,7 @@ static pointer opexe_2(scheme *sc, enum scheme_opcodes op) {
           pointer x;
           int index;
 
-          if(is_immutable(car(sc->args))) {
+          if(ts_is_immutable(car(sc->args))) {
                Error_1(sc,"vector-set!: unable to alter immutable vector:",car(sc->args));
           }
 
@@ -4729,7 +4729,7 @@ static struct scheme_interface vtbl ={
   is_continuation,
   is_promise,
   is_environment,
-  is_immutable,
+  ts_is_immutable,
   ts_set_immutable,
 
   scheme_load_file,
