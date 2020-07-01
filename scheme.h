@@ -205,6 +205,45 @@ SCHEME_EXPORT void putstr(scheme *sc, const char *s);
 SCHEME_EXPORT int list_length(scheme *sc, pointer a);
 SCHEME_EXPORT int eqv(pointer a, pointer b);
 
+SCHEME_EXPORT int is_string(pointer p);
+SCHEME_EXPORT char *string_value(pointer p);
+SCHEME_EXPORT int is_number(pointer p);
+SCHEME_EXPORT num nvalue(pointer p);
+SCHEME_EXPORT long ivalue(pointer p);
+SCHEME_EXPORT double rvalue(pointer p);
+SCHEME_EXPORT int is_integer(pointer p);
+SCHEME_EXPORT int is_real(pointer p);
+SCHEME_EXPORT int is_character(pointer p);
+SCHEME_EXPORT long charvalue(pointer p);
+SCHEME_EXPORT int is_vector(pointer p);
+
+SCHEME_EXPORT int is_port(pointer p);
+
+SCHEME_EXPORT int is_pair(pointer p);
+SCHEME_EXPORT pointer pair_car(pointer p);
+SCHEME_EXPORT pointer pair_cdr(pointer p);
+SCHEME_EXPORT pointer set_car(pointer p, pointer q);
+SCHEME_EXPORT pointer set_cdr(pointer p, pointer q);
+
+SCHEME_EXPORT int is_symbol(pointer p);
+SCHEME_EXPORT char *symname(pointer p);
+SCHEME_EXPORT int hasprop(pointer p);
+
+SCHEME_EXPORT int is_syntax(pointer p);
+SCHEME_EXPORT int is_proc(pointer p);
+SCHEME_EXPORT int is_foreign(pointer p);
+SCHEME_EXPORT char *syntaxname(pointer p);
+SCHEME_EXPORT int is_closure(pointer p);
+SCHEME_EXPORT int is_macro(pointer p);
+SCHEME_EXPORT pointer closure_code(pointer p);
+SCHEME_EXPORT pointer closure_env(pointer p);
+
+SCHEME_EXPORT int is_continuation(pointer p);
+SCHEME_EXPORT int is_promise(pointer p);
+SCHEME_EXPORT int is_environment(pointer p);
+SCHEME_EXPORT int is_immutable(pointer p);
+SCHEME_EXPORT void setimmutable(pointer p);
+
 struct scheme_interface {
   void (*scheme_define)(scheme *sc, pointer env, pointer symbol, pointer value);
   pointer (*cons)(scheme *sc, pointer a, pointer b);
