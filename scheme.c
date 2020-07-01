@@ -4739,7 +4739,7 @@ static struct scheme_interface vtbl ={
 
 scheme *scheme_init_new() {
   scheme *sc=(scheme*)malloc(sizeof(scheme));
-  if(!scheme_init(sc)) {
+  if(!ts_init(sc)) {
     free(sc);
     return 0;
   } else {
@@ -4758,7 +4758,7 @@ scheme *scheme_init_new_custom_alloc(func_alloc malloc, func_dealloc free) {
 }
 
 
-int scheme_init(scheme *sc) {
+int ts_init(scheme *sc) {
  return ts_init_custom_alloc(sc,malloc,free);
 }
 
@@ -5109,7 +5109,7 @@ int main(int argc, char **argv) {
     printf("Use - as filename for stdin.\n");
     return 1;
   }
-  if(!scheme_init(&sc)) {
+  if(!ts_init(&sc)) {
     fprintf(stderr,"Could not initialize!\n");
     return 2;
   }
