@@ -240,7 +240,7 @@ SCHEME_EXPORT pointer closure_env(pointer p);
 
 SCHEME_EXPORT int is_continuation(pointer p);
 SCHEME_EXPORT int is_promise(pointer p);
-SCHEME_EXPORT int is_environment(pointer p);
+SCHEME_EXPORT int ts_is_env(pointer p);
 SCHEME_EXPORT int ts_is_immutable(pointer p);
 SCHEME_EXPORT void ts_set_immutable(pointer p);
 

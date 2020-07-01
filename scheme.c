@@ -330,7 +330,7 @@ INTERFACE int is_continuation(pointer p)    { return (type(p)==T_CONTINUATION); 
 /* To do: promise should be forced ONCE only */
 INTERFACE int is_promise(pointer p)  { return (type(p)==T_PROMISE); }
 
-INTERFACE int is_environment(pointer p) { return (type(p)==T_ENVIRONMENT); }
+INTERFACE int ts_is_env(pointer p) { return (type(p)==T_ENVIRONMENT); }
 #define setenvironment(p)    typeflag(p) = T_ENVIRONMENT
 
 #define is_atom(p)       (typeflag(p)&T_ATOM)
@@ -3830,7 +3830,7 @@ static pointer opexe_3(scheme *sc, enum scheme_opcodes op) {
        s_retbool(list_length(sc,car(sc->args)) >= 0);
 
      case OP_ENVP:        /* environment? */
-          s_retbool(is_environment(car(sc->args)));
+          s_retbool(ts_is_env(car(sc->args)));
      case OP_VECTORP:     /* vector? */
           s_retbool(is_vector(car(sc->args)));
      case OP_EQ:         /* eq? */
@@ -4330,7 +4330,7 @@ static pointer opexe_5(scheme *sc, enum scheme_opcodes op) {
                putstr(sc,"#(");
                sc->args=cons(sc,sc->args,mk_integer(sc,0));
                s_goto(sc,OP_PVECFROM);
-          } else if(is_environment(sc->args)) {
+          } else if(ts_is_env(sc->args)) {
                putstr(sc,"#<ENVIRONMENT>");
                s_return(sc,sc->T);
           } else if (!ts_is_pair(sc->args)) {
@@ -4478,7 +4478,7 @@ static struct {
   {is_port, "port"},
   {is_inport,"input port"},
   {is_outport,"output port"},
-  {is_environment, "environment"},
+  {ts_is_env, "environment"},
   {ts_is_pair, "pair"},
   {0, "pair or '()"},
   {is_character, "character"},
@@ -4728,7 +4728,7 @@ static struct scheme_interface vtbl ={
 
   is_continuation,
   is_promise,
-  is_environment,
+  ts_is_env,
   ts_is_immutable,
   ts_set_immutable,
 
