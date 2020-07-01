@@ -321,7 +321,7 @@ static const char *procname(pointer x);
 
 INTERFACE int is_closure(pointer p)  { return (type(p)==T_CLOSURE); }
 INTERFACE int ts_is_macro(pointer p)    { return (type(p)==T_MACRO); }
-INTERFACE pointer closure_code(pointer p)   { return car(p); }
+INTERFACE pointer ts_closure_code(pointer p)   { return car(p); }
 INTERFACE pointer ts_closure_env(pointer p)    { return cdr(p); }
 
 INTERFACE int is_continuation(pointer p)    { return (type(p)==T_CONTINUATION); }
@@ -2758,7 +2758,7 @@ static pointer opexe_0(scheme *sc, enum scheme_opcodes op) {
         /* Should not accept promise */
                /* make environment */
                new_frame_in_env(sc, ts_closure_env(sc->code));
-               for (x = car(closure_code(sc->code)), y = sc->args;
+               for (x = car(ts_closure_code(sc->code)), y = sc->args;
                     ts_is_pair(x); x = cdr(x), y = cdr(y)) {
                     if (y == sc->NIL) {
                          Error_0(sc,"not enough arguments");
@@ -2777,7 +2777,7 @@ static pointer opexe_0(scheme *sc, enum scheme_opcodes op) {
                else {
                     Error_1(sc,"syntax error in closure: not a symbol:", x);
                }
-               sc->code = cdr(closure_code(sc->code));
+               sc->code = cdr(ts_closure_code(sc->code));
                sc->args = sc->NIL;
                s_goto(sc,OP_BEGIN);
           } else if (is_continuation(sc->code)) { /* CONTINUATION */
@@ -4436,9 +4436,9 @@ static pointer opexe_6(scheme *sc, enum scheme_opcodes op) {
           if (sc->args == sc->NIL) {
                s_return(sc,sc->F);
           } else if (is_closure(sc->args)) {
-               s_return(sc,cons(sc, sc->LAMBDA, closure_code(sc->value)));
+               s_return(sc,cons(sc, sc->LAMBDA, ts_closure_code(sc->value)));
           } else if (ts_is_macro(sc->args)) {
-               s_return(sc,cons(sc, sc->LAMBDA, closure_code(sc->value)));
+               s_return(sc,cons(sc, sc->LAMBDA, ts_closure_code(sc->value)));
           } else {
                s_return(sc,sc->F);
           }
@@ -4723,7 +4723,7 @@ static struct scheme_interface vtbl ={
   syntaxname,
   is_closure,
   ts_is_macro,
-  closure_code,
+  ts_closure_code,
   ts_closure_env,
 
   is_continuation,
