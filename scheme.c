@@ -284,7 +284,7 @@ INTERFACE int ts_is_real(pointer p) {
 
 INTERFACE int ts_is_char(pointer p) { return (type(p)==T_CHARACTER); }
 INTERFACE char *string_value(pointer p) { return stts_real_val(p); }
-num nvalue(pointer p)       { return ((p)->_object._number); }
+num ts_num_val(pointer p)       { return ((p)->_object._number); }
 INTERFACE long ts_int_val(pointer p)      { return (num_ts_is_int(p)?(p)->_object._number.value.ivalue:(long)(p)->_object._number.value.rvalue); }
 INTERFACE double ts_real_val(pointer p)    { return (!num_ts_is_int(p)?(p)->_object._number.value.rvalue:(double)(p)->_object._number.value.ivalue); }
 #define ivalue_unchecked(p)       ((p)->_object._number.value.ivalue)
@@ -2220,7 +2220,7 @@ int eqv(pointer a, pointer b) {
      } else if (is_number(a)) {
           if (is_number(b)) {
                if (num_ts_is_int(a) == num_ts_is_int(b))
-                    return num_eq(nvalue(a),nvalue(b));
+                    return num_eq(ts_num_val(a),ts_num_val(b));
           }
           return (0);
      } else if (ts_is_char(a)) {
@@ -3320,14 +3320,14 @@ static pointer opexe_2(scheme *sc, enum scheme_opcodes op) {
      case OP_ADD:        /* + */
        v=num_zero;
        for (x = sc->args; x != sc->NIL; x = cdr(x)) {
-         v=num_add(v,nvalue(car(x)));
+         v=num_add(v,ts_num_val(car(x)));
        }
        s_return(sc,mk_number(sc, v));
 
      case OP_MUL:        /* * */
        v=num_one;
        for (x = sc->args; x != sc->NIL; x = cdr(x)) {
-         v=num_mul(v,nvalue(car(x)));
+         v=num_mul(v,ts_num_val(car(x)));
        }
        s_return(sc,mk_number(sc, v));
 
@@ -3337,10 +3337,10 @@ static pointer opexe_2(scheme *sc, enum scheme_opcodes op) {
          v=num_zero;
        } else {
          x = cdr(sc->args);
-         v = nvalue(car(sc->args));
+         v = ts_num_val(car(sc->args));
        }
        for (; x != sc->NIL; x = cdr(x)) {
-         v=num_sub(v,nvalue(car(x)));
+         v=num_sub(v,ts_num_val(car(x)));
        }
        s_return(sc,mk_number(sc, v));
 
@@ -3350,11 +3350,11 @@ static pointer opexe_2(scheme *sc, enum scheme_opcodes op) {
          v=num_one;
        } else {
          x = cdr(sc->args);
-         v = nvalue(car(sc->args));
+         v = ts_num_val(car(sc->args));
        }
        for (; x != sc->NIL; x = cdr(x)) {
          if (!is_zero_double(ts_real_val(car(x))))
-           v=num_div(v,nvalue(car(x)));
+           v=num_div(v,ts_num_val(car(x)));
          else {
            Error_0(sc,"/: division by zero");
          }
@@ -3362,30 +3362,30 @@ static pointer opexe_2(scheme *sc, enum scheme_opcodes op) {
        s_return(sc,mk_number(sc, v));
 
      case OP_INTDIV:        /* quotient */
-          v = nvalue(car(sc->args));
+          v = ts_num_val(car(sc->args));
           x = cadr(sc->args);
           if (ts_int_val(x) != 0)
-               v=num_intdiv(v,nvalue(x));
+               v=num_intdiv(v,ts_num_val(x));
           else {
                Error_0(sc,"quotient: division by zero");
           }
           s_return(sc,mk_number(sc, v));
 
      case OP_REM:        /* remainder */
-          v = nvalue(car(sc->args));
+          v = ts_num_val(car(sc->args));
           x = cadr(sc->args);
           if (ts_int_val(x) != 0)
-               v=num_rem(v,nvalue(x));
+               v=num_rem(v,ts_num_val(x));
           else {
                Error_0(sc,"remainder: division by zero");
           }
           s_return(sc,mk_number(sc, v));
 
      case OP_MOD:        /* modulo */
-          v = nvalue(car(sc->args));
+          v = ts_num_val(car(sc->args));
           x = cadr(sc->args);
           if (ts_int_val(x) != 0)
-               v=num_mod(v,nvalue(x));
+               v=num_mod(v,ts_num_val(x));
           else {
                Error_0(sc,"modulo: division by zero");
           }
@@ -3776,14 +3776,14 @@ static pointer opexe_3(scheme *sc, enum scheme_opcodes op) {
                default:       break;    /* Quiet the compiler */
           }
           x=sc->args;
-          v=nvalue(car(x));
+          v=ts_num_val(car(x));
           x=cdr(x);
 
           for (; x != sc->NIL; x = cdr(x)) {
-               if(!comp_func(v,nvalue(car(x)))) {
+               if(!comp_func(v,ts_num_val(car(x)))) {
                     s_retbool(0);
                }
-           v=nvalue(car(x));
+           v=ts_num_val(car(x));
           }
           s_retbool(1);
      case OP_SYMBOLP:     /* symbol? */
@@ -4693,7 +4693,7 @@ static struct scheme_interface vtbl ={
   is_string,
   string_value,
   is_number,
-  nvalue,
+  ts_num_val,
   ts_int_val,
   ts_real_val,
   ts_is_int,
