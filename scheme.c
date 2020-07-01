@@ -265,7 +265,7 @@ INTERFACE int is_string(pointer p)     { return (type(p)==T_STRING); }
 #define strlength(p)        ((p)->_object._string._length)
 
 INTERFACE static int ts_is_list(scheme *sc, pointer p);
-INTERFACE int is_vector(pointer p)    { return (type(p)==T_VECTOR); }
+INTERFACE int ts_is_vec(pointer p)    { return (type(p)==T_VECTOR); }
 INTERFACE static void ts_fill_vec(pointer vec, pointer obj);
 INTERFACE static pointer ts_vec_elem(pointer vec, int ielem);
 INTERFACE static pointer ts_set_vec_elem(pointer vec, int ielem, pointer a);
@@ -1305,7 +1305,7 @@ static void mark(pointer a) {
      t = (pointer) 0;
      p = a;
 E2:  setmark(p);
-     if(is_vector(p)) {
+     if(ts_is_vec(p)) {
           int i;
           int num=ivalue_unchecked(p)/2+ivalue_unchecked(p)%2;
           for(i=0; i<num; i++) {
@@ -2297,7 +2297,7 @@ static void new_slot_spec_in_env(scheme *sc, pointer env,
 {
   pointer slot = immutablets_cons(sc, variable, value);
 
-  if (is_vector(car(env))) {
+  if (ts_is_vec(car(env))) {
     int location = hash_fn(ts_sym_name(variable), ivalue_unchecked(car(env)));
 
     ts_set_vec_elem(car(env), location,
@@ -2313,7 +2313,7 @@ static pointer find_slot_in_env(scheme *sc, pointer env, pointer hdl, int all)
   int location;
 
   for (x = env; x != sc->NIL; x = cdr(x)) {
-    if (is_vector(car(x))) {
+    if (ts_is_vec(car(x))) {
       location = hash_fn(ts_sym_name(hdl), ivalue_unchecked(car(x)));
       y = ts_vec_elem(car(x), location);
     } else {
@@ -3832,7 +3832,7 @@ static pointer opexe_3(scheme *sc, enum scheme_opcodes op) {
      case OP_ENVP:        /* environment? */
           s_retbool(ts_is_env(car(sc->args)));
      case OP_VECTORP:     /* vector? */
-          s_retbool(is_vector(car(sc->args)));
+          s_retbool(ts_is_vec(car(sc->args)));
      case OP_EQ:         /* eq? */
           s_retbool(car(sc->args) == cadr(sc->args));
      case OP_EQV:        /* eqv? */
@@ -4326,7 +4326,7 @@ static pointer opexe_5(scheme *sc, enum scheme_opcodes op) {
 
      /* ========== printing part ========== */
      case OP_P0LIST:
-          if(is_vector(sc->args)) {
+          if(ts_is_vec(sc->args)) {
                putstr(sc,"#(");
                sc->args=cons(sc,sc->args,mk_integer(sc,0));
                s_goto(sc,OP_PVECFROM);
@@ -4365,7 +4365,7 @@ static pointer opexe_5(scheme *sc, enum scheme_opcodes op) {
             putstr(sc, " ");
             sc->args = car(sc->args);
             s_goto(sc,OP_P0LIST);
-          } else if(is_vector(sc->args)) {
+          } else if(ts_is_vec(sc->args)) {
             s_save(sc,OP_P1LIST,sc->NIL,sc->NIL);
             putstr(sc, " . ");
             s_goto(sc,OP_P0LIST);
@@ -4482,7 +4482,7 @@ static struct {
   {ts_is_pair, "pair"},
   {0, "pair or '()"},
   {is_character, "character"},
-  {is_vector, "vector"},
+  {ts_is_vec, "vector"},
   {is_number, "number"},
   {is_integer, "integer"},
   {is_nonneg, "non-negative integer"}
@@ -4701,7 +4701,7 @@ static struct scheme_interface vtbl ={
   is_character,
   charvalue,
   ts_is_list,
-  is_vector,
+  ts_is_vec,
   list_length,
   ts_int_val,
   ts_fill_vec,
