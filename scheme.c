@@ -4747,7 +4747,7 @@ scheme *scheme_init_new() {
   }
 }
 
-scheme *scheme_init_new_custom_alloc(func_alloc malloc, func_dealloc free) {
+scheme *ts_init_new_custom_alloc(func_alloc malloc, func_dealloc free) {
   scheme *sc=(scheme*)malloc(sizeof(scheme));
   if(!ts_init_custom_alloc(sc,malloc,free)) {
     free(sc);
