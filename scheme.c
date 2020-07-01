@@ -315,7 +315,7 @@ SCHEME_EXPORT int hasprop(pointer p)     { return (typeflag(p)&T_SYMBOL); }
 INTERFACE int is_syntax(pointer p)   { return (typeflag(p)&T_SYNTAX); }
 INTERFACE int is_proc(pointer p)     { return (type(p)==T_PROC); }
 INTERFACE int is_foreign(pointer p)  { return (type(p)==T_FOREIGN); }
-INTERFACE char *syntaxname(pointer p) { return strvalue(car(p)); }
+INTERFACE char *ts_syntax_name(pointer p) { return strvalue(car(p)); }
 #define procnum(p)       ts_int_val(p)
 static const char *procname(pointer x);
 
@@ -4720,7 +4720,7 @@ static struct scheme_interface vtbl ={
   is_syntax,
   is_proc,
   is_foreign,
-  syntaxname,
+  ts_syntax_name,
   ts_is_closure,
   ts_is_macro,
   ts_closure_code,
