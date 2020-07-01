@@ -205,7 +205,7 @@ SCHEME_EXPORT void putstr(scheme *sc, const char *s);
 SCHEME_EXPORT int list_length(scheme *sc, pointer a);
 SCHEME_EXPORT int eqv(pointer a, pointer b);
 
-SCHEME_EXPORT int is_string(pointer p);
+SCHEME_EXPORT int ts_is_str(pointer p);
 SCHEME_EXPORT char *ts_str_val(pointer p);
 SCHEME_EXPORT int ts_is_num(pointer p);
 SCHEME_EXPORT num ts_num_val(pointer p);

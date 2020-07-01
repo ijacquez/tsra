@@ -260,7 +260,7 @@ static num num_one;
 #define typeflag(p)      ((p)->_flag)
 #define type(p)          (typeflag(p)&T_MASKTYPE)
 
-INTERFACE int is_string(pointer p)     { return (type(p)==T_STRING); }
+INTERFACE int ts_is_str(pointer p)     { return (type(p)==T_STRING); }
 #define stts_real_val(p)      ((p)->_object._string._svalue)
 #define strlength(p)        ((p)->_object._string._length)
 
@@ -1418,7 +1418,7 @@ static void gc(scheme *sc, pointer a, pointer b) {
 }
 
 static void finalize_cell(scheme *sc, pointer a) {
-  if(is_string(a)) {
+  if(ts_is_str(a)) {
     sc->free(stts_real_val(a));
   } else if(ts_is_port(a)) {
     if(a->_object._port->kind&port_file
@@ -2061,7 +2061,7 @@ static void atom2str(scheme *sc, pointer l, int f, char **pp, int *plen) {
                   if (v < 0) *--p = '-';
               }
           }
-     } else if (is_string(l)) {
+     } else if (ts_is_str(l)) {
           if (!f) {
                p = stts_real_val(l);
           } else { /* Hack, uses the fact that printing is needed */
@@ -2212,8 +2212,8 @@ static pointer revappend(scheme *sc, pointer a, pointer b) {
 
 /* equivalence of atoms */
 int eqv(pointer a, pointer b) {
-     if (is_string(a)) {
-          if (is_string(b))
+     if (ts_is_str(a)) {
+          if (ts_is_str(b))
                return (stts_real_val(a) == stts_real_val(b));
           else
                return (0);
@@ -3502,7 +3502,7 @@ static pointer opexe_2(scheme *sc, enum scheme_opcodes op) {
           }
           if (pf < 0) {
             Error_1(sc, "atom->string: bad base:", cadr(sc->args));
-          } else if(ts_is_num(x) || ts_is_char(x) || is_string(x) || ts_is_sym(x)) {
+          } else if(ts_is_num(x) || ts_is_char(x) || ts_is_str(x) || ts_is_sym(x)) {
             char *p;
             int len;
             atom2str(sc,x,(int )pf,&p,&len);
@@ -3791,7 +3791,7 @@ static pointer opexe_3(scheme *sc, enum scheme_opcodes op) {
      case OP_NUMBERP:     /* number? */
           s_retbool(ts_is_num(car(sc->args)));
      case OP_STRINGP:     /* string? */
-          s_retbool(is_string(car(sc->args)));
+          s_retbool(ts_is_str(car(sc->args)));
      case OP_INTEGERP:     /* integer? */
           s_retbool(ts_is_int(car(sc->args)));
      case OP_REALP:     /* real? */
@@ -3894,7 +3894,7 @@ static pointer opexe_4(scheme *sc, enum scheme_opcodes op) {
 
      case OP_ERR0:  /* error */
           sc->retcode=-1;
-          if (!is_string(car(sc->args))) {
+          if (!ts_is_str(car(sc->args))) {
                sc->args=cons(sc,mk_string(sc," -- "),sc->args);
                ts_set_immutable(car(sc->args));
           }
@@ -4473,7 +4473,7 @@ static struct {
 } tests[]={
   {0,0}, /* unused */
   {is_any, 0},
-  {is_string, "string"},
+  {ts_is_str, "string"},
   {ts_is_sym, "symbol"},
   {ts_is_port, "port"},
   {is_inport,"input port"},
@@ -4690,7 +4690,7 @@ static struct scheme_interface vtbl ={
   putstr,
   putcharacter,
 
-  is_string,
+  ts_is_str,
   ts_str_val,
   ts_is_num,
   ts_num_val,
