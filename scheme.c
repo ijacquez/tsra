@@ -320,7 +320,7 @@ INTERFACE char *syntaxname(pointer p) { return strvalue(car(p)); }
 static const char *procname(pointer x);
 
 INTERFACE int is_closure(pointer p)  { return (type(p)==T_CLOSURE); }
-INTERFACE int is_macro(pointer p)    { return (type(p)==T_MACRO); }
+INTERFACE int ts_is_macro(pointer p)    { return (type(p)==T_MACRO); }
 INTERFACE pointer closure_code(pointer p)   { return car(p); }
 INTERFACE pointer closure_env(pointer p)    { return cdr(p); }
 
@@ -2114,7 +2114,7 @@ static void atom2str(scheme *sc, pointer l, int f, char **pp, int *plen) {
      } else if (is_proc(l)) {
           p = sc->strbuff;
           snprintf(p,STRBUFFSIZE,"#<%s PROCEDURE %ld>", procname(l),procnum(l));
-     } else if (is_macro(l)) {
+     } else if (ts_is_macro(l)) {
           p = "#<MACRO>";
      } else if (is_closure(l)) {
           p = "#<CLOSURE>";
@@ -2701,7 +2701,7 @@ static pointer opexe_0(scheme *sc, enum scheme_opcodes op) {
           }
 
      case OP_E0ARGS:     /* eval arguments */
-          if (is_macro(sc->value)) {    /* macro expansion */
+          if (ts_is_macro(sc->value)) {    /* macro expansion */
                s_save(sc,OP_DOMACRO, sc->NIL, sc->NIL);
                sc->args = cons(sc,sc->code, sc->NIL);
                sc->code = sc->value;
@@ -2753,7 +2753,7 @@ static pointer opexe_0(scheme *sc, enum scheme_opcodes op) {
               push_recent_alloc(sc,sc->args,sc->NIL);
                x=sc->code->_object._ff(sc,sc->args);
                s_return(sc,x);
-          } else if (is_closure(sc->code) || is_macro(sc->code)
+          } else if (is_closure(sc->code) || ts_is_macro(sc->code)
              || is_promise(sc->code)) { /* CLOSURE */
         /* Should not accept promise */
                /* make environment */
@@ -4437,7 +4437,7 @@ static pointer opexe_6(scheme *sc, enum scheme_opcodes op) {
                s_return(sc,sc->F);
           } else if (is_closure(sc->args)) {
                s_return(sc,cons(sc, sc->LAMBDA, closure_code(sc->value)));
-          } else if (is_macro(sc->args)) {
+          } else if (ts_is_macro(sc->args)) {
                s_return(sc,cons(sc, sc->LAMBDA, closure_code(sc->value)));
           } else {
                s_return(sc,sc->F);
@@ -4449,7 +4449,7 @@ static pointer opexe_6(scheme *sc, enum scheme_opcodes op) {
            */
           s_retbool(is_closure(car(sc->args)));
      case OP_MACROP:          /* macro? */
-          s_retbool(is_macro(car(sc->args)));
+          s_retbool(ts_is_macro(car(sc->args)));
      default:
           snprintf(sc->strbuff,STRBUFFSIZE,"%d: illegal operator", sc->op);
           Error_0(sc,sc->strbuff);
@@ -4722,7 +4722,7 @@ static struct scheme_interface vtbl ={
   is_foreign,
   syntaxname,
   is_closure,
-  is_macro,
+  ts_is_macro,
   closure_code,
   closure_env,
 
