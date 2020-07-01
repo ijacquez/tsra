@@ -269,9 +269,9 @@ INTERFACE int ts_is_vec(pointer p)    { return (type(p)==T_VECTOR); }
 INTERFACE static void ts_fill_vec(pointer vec, pointer obj);
 INTERFACE static pointer ts_vec_elem(pointer vec, int ielem);
 INTERFACE static pointer ts_set_vec_elem(pointer vec, int ielem, pointer a);
-INTERFACE int is_number(pointer p)    { return (type(p)==T_NUMBER); }
+INTERFACE int ts_is_num(pointer p)    { return (type(p)==T_NUMBER); }
 INTERFACE int ts_is_int(pointer p) {
-  if (!is_number(p))
+  if (!ts_is_num(p))
       return 0;
   if (num_ts_is_int(p) || (double)ts_int_val(p) == ts_real_val(p))
       return 1;
@@ -279,7 +279,7 @@ INTERFACE int ts_is_int(pointer p) {
 }
 
 INTERFACE int ts_is_real(pointer p) {
-  return is_number(p) && (!(p)->_object._number.is_fixnum);
+  return ts_is_num(p) && (!(p)->_object._number.is_fixnum);
 }
 
 INTERFACE int ts_is_char(pointer p) { return (type(p)==T_CHARACTER); }
@@ -2026,7 +2026,7 @@ static void atom2str(scheme *sc, pointer l, int f, char **pp, int *plen) {
           p = "#<EOF>";
      } else if (ts_is_port(l)) {
           p = "#<PORT>";
-     } else if (is_number(l)) {
+     } else if (ts_is_num(l)) {
           p = sc->strbuff;
           if (f <= 1 || f == 10) /* f is the base for numbers if > 1 */ {
               if(num_ts_is_int(l)) {
@@ -2217,8 +2217,8 @@ int eqv(pointer a, pointer b) {
                return (stts_real_val(a) == stts_real_val(b));
           else
                return (0);
-     } else if (is_number(a)) {
-          if (is_number(b)) {
+     } else if (ts_is_num(a)) {
+          if (ts_is_num(b)) {
                if (num_ts_is_int(a) == num_ts_is_int(b))
                     return num_eq(ts_num_val(a),ts_num_val(b));
           }
@@ -3493,7 +3493,7 @@ static pointer opexe_2(scheme *sc, enum scheme_opcodes op) {
             /* we know cadr(sc->args) is a natural number */
             /* see if it is 2, 8, 10, or 16, or error */
             pf = ivalue_unchecked(cadr(sc->args));
-            if(is_number(x) && (pf == 16 || pf == 10 || pf == 8 || pf == 2)) {
+            if(ts_is_num(x) && (pf == 16 || pf == 10 || pf == 8 || pf == 2)) {
               /* base is OK */
             }
             else {
@@ -3502,7 +3502,7 @@ static pointer opexe_2(scheme *sc, enum scheme_opcodes op) {
           }
           if (pf < 0) {
             Error_1(sc, "atom->string: bad base:", cadr(sc->args));
-          } else if(is_number(x) || ts_is_char(x) || is_string(x) || ts_is_sym(x)) {
+          } else if(ts_is_num(x) || ts_is_char(x) || is_string(x) || ts_is_sym(x)) {
             char *p;
             int len;
             atom2str(sc,x,(int )pf,&p,&len);
@@ -3789,13 +3789,13 @@ static pointer opexe_3(scheme *sc, enum scheme_opcodes op) {
      case OP_SYMBOLP:     /* symbol? */
           s_retbool(ts_is_sym(car(sc->args)));
      case OP_NUMBERP:     /* number? */
-          s_retbool(is_number(car(sc->args)));
+          s_retbool(ts_is_num(car(sc->args)));
      case OP_STRINGP:     /* string? */
           s_retbool(is_string(car(sc->args)));
      case OP_INTEGERP:     /* integer? */
           s_retbool(ts_is_int(car(sc->args)));
      case OP_REALP:     /* real? */
-          s_retbool(is_number(car(sc->args))); /* All numbers are real */
+          s_retbool(ts_is_num(car(sc->args))); /* All numbers are real */
      case OP_CHARP:     /* char? */
           s_retbool(ts_is_char(car(sc->args)));
 #if USE_CHAR_CLASSIFIERS
@@ -3994,7 +3994,7 @@ static pointer opexe_4(scheme *sc, enum scheme_opcodes op) {
      }
 
      case OP_NEWSEGMENT: /* new-segment */
-          if (!ts_is_pair(sc->args) || !is_number(car(sc->args))) {
+          if (!ts_is_pair(sc->args) || !ts_is_num(car(sc->args))) {
                Error_0(sc,"new-segment: argument must be a number");
           }
           alloc_cellseg(sc, (int) ts_int_val(car(sc->args)));
@@ -4483,7 +4483,7 @@ static struct {
   {0, "pair or '()"},
   {ts_is_char, "character"},
   {ts_is_vec, "vector"},
-  {is_number, "number"},
+  {ts_is_num, "number"},
   {ts_is_int, "integer"},
   {is_nonneg, "non-negative integer"}
 };
@@ -4692,7 +4692,7 @@ static struct scheme_interface vtbl ={
 
   is_string,
   string_value,
-  is_number,
+  ts_is_num,
   ts_num_val,
   ts_int_val,
   ts_real_val,
