@@ -273,7 +273,7 @@ INTERFACE int is_number(pointer p)    { return (type(p)==T_NUMBER); }
 INTERFACE int is_integer(pointer p) {
   if (!is_number(p))
       return 0;
-  if (num_is_integer(p) || (double)ivalue(p) == rvalue(p))
+  if (num_is_integer(p) || (double)ts_int_val(p) == rvalue(p))
       return 1;
   return 0;
 }
@@ -285,7 +285,7 @@ INTERFACE int is_real(pointer p) {
 INTERFACE int is_character(pointer p) { return (type(p)==T_CHARACTER); }
 INTERFACE char *string_value(pointer p) { return strvalue(p); }
 num nvalue(pointer p)       { return ((p)->_object._number); }
-INTERFACE long ivalue(pointer p)      { return (num_is_integer(p)?(p)->_object._number.value.ivalue:(long)(p)->_object._number.value.rvalue); }
+INTERFACE long ts_int_val(pointer p)      { return (num_is_integer(p)?(p)->_object._number.value.ivalue:(long)(p)->_object._number.value.rvalue); }
 INTERFACE double rvalue(pointer p)    { return (!num_is_integer(p)?(p)->_object._number.value.rvalue:(double)(p)->_object._number.value.ivalue); }
 #define ivalue_unchecked(p)       ((p)->_object._number.value.ivalue)
 #define rvalue_unchecked(p)       ((p)->_object._number.value.rvalue)
@@ -316,7 +316,7 @@ INTERFACE int is_syntax(pointer p)   { return (typeflag(p)&T_SYNTAX); }
 INTERFACE int is_proc(pointer p)     { return (type(p)==T_PROC); }
 INTERFACE int is_foreign(pointer p)  { return (type(p)==T_FOREIGN); }
 INTERFACE char *syntaxname(pointer p) { return strvalue(car(p)); }
-#define procnum(p)       ivalue(p)
+#define procnum(p)       ts_int_val(p)
 static const char *procname(pointer x);
 
 INTERFACE int is_closure(pointer p)  { return (type(p)==T_CLOSURE); }
@@ -475,7 +475,7 @@ static void assign_syntax(scheme *sc, char *name);
 static int syntaxnum(pointer p);
 static void assign_proc(scheme *sc, enum scheme_opcodes, char *name);
 
-#define num_ivalue(n)       (n.is_fixnum?(n).value.ivalue:(long)(n).value.rvalue)
+#define num_ts_int_val(n)       (n.is_fixnum?(n).value.ivalue:(long)(n).value.rvalue)
 #define num_rvalue(n)       (!n.is_fixnum?(n).value.rvalue:(double)(n).value.ivalue)
 
 static num num_add(num a, num b) {
@@ -537,8 +537,8 @@ static num num_rem(num a, num b) {
  num ret;
  long e1, e2, res;
  ret.is_fixnum=a.is_fixnum && b.is_fixnum;
- e1=num_ivalue(a);
- e2=num_ivalue(b);
+ e1=num_ts_int_val(a);
+ e2=num_ts_int_val(b);
  res=e1%e2;
  /* remainder should have same sign as second operand */
  if (res > 0) {
@@ -562,8 +562,8 @@ static num num_mod(num a, num b) {
  num ret;
  long e1, e2, res;
  ret.is_fixnum=a.is_fixnum && b.is_fixnum;
- e1=num_ivalue(a);
- e2=num_ivalue(b);
+ e1=num_ts_int_val(a);
+ e2=num_ts_int_val(b);
  res=e1%e2;
  /* modulo should have same sign as second operand */
  if (res * e2 < 0) {
@@ -1110,7 +1110,7 @@ INTERFACE static pointer mk_vector(scheme *sc, int len)
 
 INTERFACE static void ts_fill_vec(pointer vec, pointer obj) {
      int i;
-     int num=ivalue(vec)/2+ivalue(vec)%2;
+     int num=ts_int_val(vec)/2+ts_int_val(vec)%2;
      for(i=0; i<num; i++) {
           typeflag(vec+1+i) = T_PAIR;
           setimmutable(vec+1+i);
@@ -2042,7 +2042,7 @@ static void atom2str(scheme *sc, pointer l, int f, char **pp, int *plen) {
                    }
               }
           } else {
-              long v = ivalue(l);
+              long v = ts_int_val(l);
               if (f == 16) {
                   if (v >= 0)
                     snprintf(p, STRBUFFSIZE, "%lx", v);
@@ -2563,7 +2563,7 @@ static void dump_stack_free(scheme *sc)
 static pointer _s_return(scheme *sc, pointer a) {
     sc->value = (a);
     if(sc->dump==sc->NIL) return sc->NIL;
-    sc->op = ivalue(car(sc->dump));
+    sc->op = ts_int_val(car(sc->dump));
     sc->args = cadr(sc->dump);
     sc->envir = caddr(sc->dump);
     sc->code = cadddr(sc->dump);
@@ -2728,7 +2728,7 @@ static pointer opexe_0(scheme *sc, enum scheme_opcodes op) {
 #if USE_TRACING
      case OP_TRACING: {
        int tr=sc->tracing;
-       sc->tracing=ivalue(car(sc->args));
+       sc->tracing=ts_int_val(car(sc->args));
        s_return(sc,mk_integer(sc,tr));
      }
 #endif
@@ -3216,7 +3216,7 @@ static pointer opexe_2(scheme *sc, enum scheme_opcodes op) {
           if(num_is_integer(x)) {
                s_return(sc,x);
           } else if(modf(rvalue_unchecked(x),&dd)==0.0) {
-               s_return(sc,mk_integer(sc,ivalue(x)));
+               s_return(sc,mk_integer(sc,ts_int_val(x)));
           } else {
                Error_1(sc,"inexact->exact: not integral:",x);
           }
@@ -3364,7 +3364,7 @@ static pointer opexe_2(scheme *sc, enum scheme_opcodes op) {
      case OP_INTDIV:        /* quotient */
           v = nvalue(car(sc->args));
           x = cadr(sc->args);
-          if (ivalue(x) != 0)
+          if (ts_int_val(x) != 0)
                v=num_intdiv(v,nvalue(x));
           else {
                Error_0(sc,"quotient: division by zero");
@@ -3374,7 +3374,7 @@ static pointer opexe_2(scheme *sc, enum scheme_opcodes op) {
      case OP_REM:        /* remainder */
           v = nvalue(car(sc->args));
           x = cadr(sc->args);
-          if (ivalue(x) != 0)
+          if (ts_int_val(x) != 0)
                v=num_rem(v,nvalue(x));
           else {
                Error_0(sc,"remainder: division by zero");
@@ -3384,7 +3384,7 @@ static pointer opexe_2(scheme *sc, enum scheme_opcodes op) {
      case OP_MOD:        /* modulo */
           v = nvalue(car(sc->args));
           x = cadr(sc->args);
-          if (ivalue(x) != 0)
+          if (ts_int_val(x) != 0)
                v=num_mod(v,nvalue(x));
           else {
                Error_0(sc,"modulo: division by zero");
@@ -3419,26 +3419,26 @@ static pointer opexe_2(scheme *sc, enum scheme_opcodes op) {
 
      case OP_CHAR2INT: { /* char->integer */
           char c;
-          c=(char)ivalue(car(sc->args));
+          c=(char)ts_int_val(car(sc->args));
           s_return(sc,mk_integer(sc,(unsigned char)c));
      }
 
      case OP_INT2CHAR: { /* integer->char */
           unsigned char c;
-          c=(unsigned char)ivalue(car(sc->args));
+          c=(unsigned char)ts_int_val(car(sc->args));
           s_return(sc,mk_character(sc,(char)c));
      }
 
      case OP_CHARUPCASE: {
           unsigned char c;
-          c=(unsigned char)ivalue(car(sc->args));
+          c=(unsigned char)ts_int_val(car(sc->args));
           c=toupper(c);
           s_return(sc,mk_character(sc,(char)c));
      }
 
      case OP_CHARDNCASE: {
           unsigned char c;
-          c=(unsigned char)ivalue(car(sc->args));
+          c=(unsigned char)ts_int_val(car(sc->args));
           c=tolower(c);
           s_return(sc,mk_character(sc,(char)c));
      }
@@ -3516,7 +3516,7 @@ static pointer opexe_2(scheme *sc, enum scheme_opcodes op) {
           int fill=' ';
           int len;
 
-          len=ivalue(car(sc->args));
+          len=ts_int_val(car(sc->args));
 
           if(cdr(sc->args)!=sc->NIL) {
                fill=charvalue(cadr(sc->args));
@@ -3539,7 +3539,7 @@ static pointer opexe_2(scheme *sc, enum scheme_opcodes op) {
                Error_1(sc,"string-ref: index must be exact:",x);
           }
 
-          index=ivalue(x);
+          index=ts_int_val(x);
           if(index>=strlength(car(sc->args))) {
                Error_1(sc,"string-ref: out of bounds:",x);
           }
@@ -3563,7 +3563,7 @@ static pointer opexe_2(scheme *sc, enum scheme_opcodes op) {
                Error_1(sc,"string-set!: index must be exact:",x);
           }
 
-          index=ivalue(x);
+          index=ts_int_val(x);
           if(index>=strlength(car(sc->args))) {
                Error_1(sc,"string-set!: out of bounds:",x);
           }
@@ -3601,14 +3601,14 @@ static pointer opexe_2(scheme *sc, enum scheme_opcodes op) {
 
           str=strvalue(car(sc->args));
 
-          index0=ivalue(cadr(sc->args));
+          index0=ts_int_val(cadr(sc->args));
 
           if(index0>strlength(car(sc->args))) {
                Error_1(sc,"substring: start out of bounds:",cadr(sc->args));
           }
 
           if(cddr(sc->args)!=sc->NIL) {
-               index1=ivalue(caddr(sc->args));
+               index1=ts_int_val(caddr(sc->args));
                if(index1>strlength(car(sc->args)) || index1<index0) {
                     Error_1(sc,"substring: end out of bounds:",caddr(sc->args));
                }
@@ -3644,7 +3644,7 @@ static pointer opexe_2(scheme *sc, enum scheme_opcodes op) {
           int len;
           pointer vec;
 
-          len=ivalue(car(sc->args));
+          len=ts_int_val(car(sc->args));
 
           if(cdr(sc->args)!=sc->NIL) {
                fill=cadr(sc->args);
@@ -3658,7 +3658,7 @@ static pointer opexe_2(scheme *sc, enum scheme_opcodes op) {
      }
 
      case OP_VECLEN:  /* vector-length */
-          s_return(sc,mk_integer(sc,ivalue(car(sc->args))));
+          s_return(sc,mk_integer(sc,ts_int_val(car(sc->args))));
 
      case OP_VECREF: { /* vector-ref */
           pointer x;
@@ -3668,9 +3668,9 @@ static pointer opexe_2(scheme *sc, enum scheme_opcodes op) {
           if (is_integer(x)) {
                Error_1(sc,"vector-ref: index must be exact:",x);
           }
-          index=ivalue(x);
+          index=ts_int_val(x);
 
-          if(index>=ivalue(car(sc->args))) {
+          if(index>=ts_int_val(car(sc->args))) {
                Error_1(sc,"vector-ref: out of bounds:",x);
           }
 
@@ -3690,8 +3690,8 @@ static pointer opexe_2(scheme *sc, enum scheme_opcodes op) {
                Error_1(sc,"vector-set!: index must be exact:",x);
           }
 
-          index=ivalue(x);
-          if(index>=ivalue(car(sc->args))) {
+          index=ts_int_val(x);
+          if(index>=ts_int_val(car(sc->args))) {
                Error_1(sc,"vector-set!: out of bounds:",x);
           }
 
@@ -3800,15 +3800,15 @@ static pointer opexe_3(scheme *sc, enum scheme_opcodes op) {
           s_retbool(is_character(car(sc->args)));
 #if USE_CHAR_CLASSIFIERS
      case OP_CHARAP:     /* char-alphabetic? */
-          s_retbool(Cisalpha(ivalue(car(sc->args))));
+          s_retbool(Cisalpha(ts_int_val(car(sc->args))));
      case OP_CHARNP:     /* char-numeric? */
-          s_retbool(Cisdigit(ivalue(car(sc->args))));
+          s_retbool(Cisdigit(ts_int_val(car(sc->args))));
      case OP_CHARWP:     /* char-whitespace? */
-          s_retbool(Cisspace(ivalue(car(sc->args))));
+          s_retbool(Cisspace(ts_int_val(car(sc->args))));
      case OP_CHARUP:     /* char-upper-case? */
-          s_retbool(Cisupper(ivalue(car(sc->args))));
+          s_retbool(Cisupper(ts_int_val(car(sc->args))));
      case OP_CHARLP:     /* char-lower-case? */
-          s_retbool(Cislower(ivalue(car(sc->args))));
+          s_retbool(Cislower(ts_int_val(car(sc->args))));
 #endif
      case OP_PORTP:     /* port? */
           s_retbool(is_port(car(sc->args)));
@@ -3978,7 +3978,7 @@ static pointer opexe_4(scheme *sc, enum scheme_opcodes op) {
 #endif /* USE_PLIST */
      case OP_QUIT:       /* quit */
           if(ts_is_pair(sc->args)) {
-               sc->retcode=ivalue(car(sc->args));
+               sc->retcode=ts_int_val(car(sc->args));
           }
           return (sc->NIL);
 
@@ -3997,7 +3997,7 @@ static pointer opexe_4(scheme *sc, enum scheme_opcodes op) {
           if (!ts_is_pair(sc->args) || !is_number(car(sc->args))) {
                Error_0(sc,"new-segment: argument must be a number");
           }
-          alloc_cellseg(sc, (int) ivalue(car(sc->args)));
+          alloc_cellseg(sc, (int) ts_int_val(car(sc->args)));
           s_return(sc,sc->T);
 
      case OP_OBLIST: /* oblist */
@@ -4463,7 +4463,7 @@ typedef int (*test_predicate)(pointer);
 static int is_any(pointer p) { return 1;}
 
 static int is_nonneg(pointer p) {
-  return ivalue(p)>=0 && is_integer(p);
+  return ts_int_val(p)>=0 && is_integer(p);
 }
 
 /* Correspond carefully with following defines! */
@@ -4694,7 +4694,7 @@ static struct scheme_interface vtbl ={
   string_value,
   is_number,
   nvalue,
-  ivalue,
+  ts_int_val,
   rvalue,
   is_integer,
   is_real,
@@ -4703,7 +4703,7 @@ static struct scheme_interface vtbl ={
   ts_is_list,
   is_vector,
   list_length,
-  ivalue,
+  ts_int_val,
   ts_fill_vec,
   ts_vec_elem,
   ts_set_vec_elem,

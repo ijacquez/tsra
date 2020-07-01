@@ -209,7 +209,7 @@ SCHEME_EXPORT int is_string(pointer p);
 SCHEME_EXPORT char *string_value(pointer p);
 SCHEME_EXPORT int is_number(pointer p);
 SCHEME_EXPORT num nvalue(pointer p);
-SCHEME_EXPORT long ivalue(pointer p);
+SCHEME_EXPORT long ts_int_val(pointer p);
 SCHEME_EXPORT double rvalue(pointer p);
 SCHEME_EXPORT int is_integer(pointer p);
 SCHEME_EXPORT int is_real(pointer p);
