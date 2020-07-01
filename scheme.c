@@ -4883,7 +4883,7 @@ void ts_set_extern_data(scheme *sc, void *p) {
  sc->ext_data=p;
 }
 
-void scheme_deinit(scheme *sc) {
+void ts_deinit(scheme *sc) {
   int i;
 
 #if SHOW_ERROR_LINE
@@ -5170,7 +5170,7 @@ int main(int argc, char **argv) {
     ts_load_named_file(&sc,stdin,0);
   }
   retcode=sc.retcode;
-  scheme_deinit(&sc);
+  ts_deinit(&sc);
 
   return retcode;
 }
