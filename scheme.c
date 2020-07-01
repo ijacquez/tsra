@@ -4674,7 +4674,7 @@ INTERFACE static pointer s_immutablets_cons(scheme *sc, pointer a, pointer b) {
 }
 
 static struct scheme_interface vtbl ={
-  scheme_define,
+  ts_def,
   sts_cons,
   s_immutablets_cons,
   ts_reserve_cells,
@@ -4985,7 +4985,7 @@ void scheme_load_string(scheme *sc, const char *cmd) {
   }
 }
 
-void scheme_define(scheme *sc, pointer envir, pointer symbol, pointer value) {
+void ts_def(scheme *sc, pointer envir, pointer symbol, pointer value) {
      pointer x;
 
      x=find_slot_in_env(sc,envir,symbol,0);
@@ -4999,7 +4999,7 @@ void scheme_define(scheme *sc, pointer envir, pointer symbol, pointer value) {
 #if !STANDALONE
 void scheme_register_foreign_func(scheme * sc, scheme_registerable * sr)
 {
-  scheme_define(sc,
+  ts_def(sc,
                 sc->global_env,
                 ts_mk_sym(sc,sr->name),
                 ts_mk_foreign_func(sc, sr->f));
@@ -5116,7 +5116,7 @@ int main(int argc, char **argv) {
   scheme_set_input_port_file(&sc, stdin);
   scheme_set_output_port_file(&sc, stdout);
 #if USE_DL
-  scheme_define(&sc,sc.global_env,ts_mk_sym(&sc,"load-extension"),ts_mk_foreign_func(&sc, scm_load_ext));
+  ts_def(&sc,sc.global_env,ts_mk_sym(&sc,"load-extension"),ts_mk_foreign_func(&sc, scm_load_ext));
 #endif
   argv++;
   if(access(file_name,0)!=0) {
@@ -5142,7 +5142,7 @@ int main(int argc, char **argv) {
         args=cons(&sc,value,args);
       }
       args=reverse_in_place(&sc,sc.NIL,args);
-      scheme_define(&sc,sc.global_env,ts_mk_sym(&sc,"*args*"),args);
+      ts_def(&sc,sc.global_env,ts_mk_sym(&sc,"*args*"),args);
 
     } else {
       fin=fopen(file_name,"r");
