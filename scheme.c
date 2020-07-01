@@ -314,7 +314,7 @@ SCHEME_EXPORT int hasprop(pointer p)     { return (typeflag(p)&T_SYMBOL); }
 
 INTERFACE int is_syntax(pointer p)   { return (typeflag(p)&T_SYNTAX); }
 INTERFACE int is_proc(pointer p)     { return (type(p)==T_PROC); }
-INTERFACE int is_foreign(pointer p)  { return (type(p)==T_FOREIGN); }
+INTERFACE int ts_is_foreign(pointer p)  { return (type(p)==T_FOREIGN); }
 INTERFACE char *ts_syntax_name(pointer p) { return strvalue(car(p)); }
 #define procnum(p)       ts_int_val(p)
 static const char *procname(pointer x);
@@ -2120,7 +2120,7 @@ static void atom2str(scheme *sc, pointer l, int f, char **pp, int *plen) {
           p = "#<CLOSURE>";
      } else if (ts_is_promise(l)) {
           p = "#<PROMISE>";
-     } else if (is_foreign(l)) {
+     } else if (ts_is_foreign(l)) {
           p = sc->strbuff;
           snprintf(p,STRBUFFSIZE,"#<FOREIGN PROCEDURE %ld>", procnum(l));
      } else if (is_continuation(l)) {
@@ -2747,7 +2747,7 @@ static pointer opexe_0(scheme *sc, enum scheme_opcodes op) {
 #endif
           if (is_proc(sc->code)) {
                s_goto(sc,procnum(sc->code));   /* PROCEDURE */
-          } else if (is_foreign(sc->code))
+          } else if (ts_is_foreign(sc->code))
             {
               /* Keep nested calls from GC'ing the arglist */
               push_recent_alloc(sc,sc->args,sc->NIL);
@@ -3823,7 +3823,7 @@ static pointer opexe_3(scheme *sc, enum scheme_opcodes op) {
                  * in R^3 report sec. 6.9
               */
           s_retbool(is_proc(car(sc->args)) || ts_is_closure(car(sc->args))
-                 || is_continuation(car(sc->args)) || is_foreign(car(sc->args)));
+                 || is_continuation(car(sc->args)) || ts_is_foreign(car(sc->args)));
      case OP_PAIRP:       /* pair? */
           s_retbool(ts_is_pair(car(sc->args)));
      case OP_LISTP:       /* list? */
@@ -4719,7 +4719,7 @@ static struct scheme_interface vtbl ={
 
   is_syntax,
   is_proc,
-  is_foreign,
+  ts_is_foreign,
   ts_syntax_name,
   ts_is_closure,
   ts_is_macro,
