@@ -47,10 +47,8 @@ typedef struct port {
     struct {
       FILE *file;
       int closeit;
-#if SHOW_ERROR_LINE
       int curr_line;
       char *filename;
-#endif
     } stdio;
     struct {
       char *start;
@@ -207,8 +205,6 @@ void putstr(scheme *sc, const char *s);
 int list_length(scheme *sc, pointer a);
 int eqv(pointer a, pointer b);
 
-
-#if USE_INTERFACE
 struct scheme_interface {
   void (*scheme_define)(scheme *sc, pointer env, pointer symbol, pointer value);
   pointer (*cons)(scheme *sc, pointer a, pointer b);
@@ -271,9 +267,7 @@ struct scheme_interface {
   void (*load_file)(scheme *sc, FILE *fin);
   void (*load_string)(scheme *sc, const char *input);
 };
-#endif
 
-#if !STANDALONE
 typedef struct scheme_registerable
 {
   foreign_func  f;
@@ -284,7 +278,4 @@ scheme_registerable;
 void scheme_register_foreign_func_list(scheme * sc,
                                        scheme_registerable * list,
                                        int n);
-
-#endif /* !STANDALONE */
-
 #endif
