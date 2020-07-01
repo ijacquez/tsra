@@ -305,7 +305,7 @@ INTERFACE pointer pair_cdr(pointer p)   { return cdr(p); }
 INTERFACE pointer set_car(pointer p, pointer q) { return car(p)=q; }
 INTERFACE pointer set_cdr(pointer p, pointer q) { return cdr(p)=q; }
 
-INTERFACE int is_symbol(pointer p)   { return (type(p)==T_SYMBOL); }
+INTERFACE int ts_is_sym(pointer p)   { return (type(p)==T_SYMBOL); }
 INTERFACE char *symname(pointer p)   { return strvalue(car(p)); }
 #if USE_PLIST
 SCHEME_EXPORT int hasprop(pointer p)     { return (typeflag(p)&T_SYMBOL); }
@@ -2109,7 +2109,7 @@ static void atom2str(scheme *sc, pointer l, int f, char **pp, int *plen) {
                     break;
                }
           }
-     } else if (is_symbol(l)) {
+     } else if (ts_is_sym(l)) {
           p = symname(l);
      } else if (is_proc(l)) {
           p = sc->strbuff;
@@ -2679,7 +2679,7 @@ static pointer opexe_0(scheme *sc, enum scheme_opcodes op) {
        /* fall through */
      case OP_REAL_EVAL:
 #endif
-          if (is_symbol(sc->code)) {    /* symbol */
+          if (ts_is_sym(sc->code)) {    /* symbol */
                x=find_slot_in_env(sc,sc->envir,sc->code,1);
                if (x != sc->NIL) {
                     s_return(sc,slot_value_in_env(x));
@@ -2772,7 +2772,7 @@ static pointer opexe_0(scheme *sc, enum scheme_opcodes op) {
                      *   Error_0(sc,"too many arguments");
                      * }
                      */
-               } else if (is_symbol(x))
+               } else if (ts_is_sym(x))
                     new_slot_in_env(sc, x, y);
                else {
                     Error_1(sc,"syntax error in closure: not a symbol:", x);
@@ -2843,7 +2843,7 @@ static pointer opexe_0(scheme *sc, enum scheme_opcodes op) {
                x = car(sc->code);
                sc->code = cadr(sc->code);
           }
-          if (!is_symbol(x)) {
+          if (!ts_is_sym(x)) {
                Error_0(sc,"variable is not a symbol");
           }
           s_save(sc,OP_DEF1, sc->NIL, x);
@@ -2909,7 +2909,7 @@ static pointer opexe_0(scheme *sc, enum scheme_opcodes op) {
      case OP_LET0:       /* let */
           sc->args = sc->NIL;
           sc->value = sc->code;
-          sc->code = is_symbol(car(sc->code)) ? cadr(sc->code) : car(sc->code);
+          sc->code = ts_is_sym(car(sc->code)) ? cadr(sc->code) : car(sc->code);
           s_goto(sc,OP_LET1);
 
      case OP_LET1:       /* let (calculate parameters) */
@@ -2932,11 +2932,11 @@ static pointer opexe_0(scheme *sc, enum scheme_opcodes op) {
 
      case OP_LET2:       /* let */
           new_frame_in_env(sc, sc->envir);
-          for (x = is_symbol(car(sc->code)) ? cadr(sc->code) : car(sc->code), y = sc->args;
+          for (x = ts_is_sym(car(sc->code)) ? cadr(sc->code) : car(sc->code), y = sc->args;
                y != sc->NIL; x = cdr(x), y = cdr(y)) {
                new_slot_in_env(sc, caar(x), car(y));
           }
-          if (is_symbol(car(sc->code))) {    /* named let */
+          if (ts_is_sym(car(sc->code))) {    /* named let */
                for (x = cadr(sc->code), sc->args = sc->NIL; x != sc->NIL; x = cdr(x)) {
                     if (!is_pair(x))
                         Error_1(sc, "Bad syntax of binding in let :", x);
@@ -3122,7 +3122,7 @@ static pointer opexe_1(scheme *sc, enum scheme_opcodes op) {
                x = car(sc->code);
                sc->code = cadr(sc->code);
           }
-          if (!is_symbol(x)) {
+          if (!ts_is_sym(x)) {
                Error_0(sc,"variable is not a symbol");
           }
           s_save(sc,OP_MACRO1, sc->NIL, x);
@@ -3502,7 +3502,7 @@ static pointer opexe_2(scheme *sc, enum scheme_opcodes op) {
           }
           if (pf < 0) {
             Error_1(sc, "atom->string: bad base:", cadr(sc->args));
-          } else if(is_number(x) || is_character(x) || is_string(x) || is_symbol(x)) {
+          } else if(is_number(x) || is_character(x) || is_string(x) || ts_is_sym(x)) {
             char *p;
             int len;
             atom2str(sc,x,(int )pf,&p,&len);
@@ -3787,7 +3787,7 @@ static pointer opexe_3(scheme *sc, enum scheme_opcodes op) {
           }
           s_retbool(1);
      case OP_SYMBOLP:     /* symbol? */
-          s_retbool(is_symbol(car(sc->args)));
+          s_retbool(ts_is_sym(car(sc->args)));
      case OP_NUMBERP:     /* number? */
           s_retbool(is_number(car(sc->args)));
      case OP_STRINGP:     /* string? */
@@ -4474,7 +4474,7 @@ static struct {
   {0,0}, /* unused */
   {is_any, 0},
   {is_string, "string"},
-  {is_symbol, "symbol"},
+  {ts_is_sym, "symbol"},
   {is_port, "port"},
   {is_inport,"input port"},
   {is_outport,"output port"},
@@ -4714,7 +4714,7 @@ static struct scheme_interface vtbl ={
   set_car,
   set_cdr,
 
-  is_symbol,
+  ts_is_sym,
   symname,
 
   is_syntax,

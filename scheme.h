@@ -225,7 +225,7 @@ SCHEME_EXPORT pointer pair_cdr(pointer p);
 SCHEME_EXPORT pointer set_car(pointer p, pointer q);
 SCHEME_EXPORT pointer set_cdr(pointer p, pointer q);
 
-SCHEME_EXPORT int is_symbol(pointer p);
+SCHEME_EXPORT int ts_is_sym(pointer p);
 SCHEME_EXPORT char *symname(pointer p);
 SCHEME_EXPORT int hasprop(pointer p);
 
