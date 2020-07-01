@@ -222,7 +222,7 @@ SCHEME_EXPORT int is_port(pointer p);
 SCHEME_EXPORT int ts_is_pair(pointer p);
 SCHEME_EXPORT pointer pair_car(pointer p);
 SCHEME_EXPORT pointer pair_cdr(pointer p);
-SCHEME_EXPORT pointer set_car(pointer p, pointer q);
+SCHEME_EXPORT pointer ts_set_car(pointer p, pointer q);
 SCHEME_EXPORT pointer ts_set_cdr(pointer p, pointer q);
 
 SCHEME_EXPORT int ts_is_sym(pointer p);
