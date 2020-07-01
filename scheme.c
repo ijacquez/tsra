@@ -1030,7 +1030,7 @@ pointer ts_mk_foreign_func(scheme *sc, foreign_func f) {
   return (x);
 }
 
-INTERFACE pointer mk_character(scheme *sc, int c) {
+INTERFACE pointer ts_mk_char(scheme *sc, int c) {
   pointer x = get_cell(sc,sc->NIL, sc->NIL);
 
   typeflag(x) = (T_CHARACTER | T_ATOM);
@@ -1287,7 +1287,7 @@ static pointer mk_sharp_const(scheme *sc, char *name) {
           } else {
                return sc->NIL;
           }
-          return mk_character(sc,c);
+          return ts_mk_char(sc,c);
      } else
           return (sc->NIL);
 }
@@ -3426,21 +3426,21 @@ static pointer opexe_2(scheme *sc, enum scheme_opcodes op) {
      case OP_INT2CHAR: { /* integer->char */
           unsigned char c;
           c=(unsigned char)ts_int_val(car(sc->args));
-          s_return(sc,mk_character(sc,(char)c));
+          s_return(sc,ts_mk_char(sc,(char)c));
      }
 
      case OP_CHARUPCASE: {
           unsigned char c;
           c=(unsigned char)ts_int_val(car(sc->args));
           c=toupper(c);
-          s_return(sc,mk_character(sc,(char)c));
+          s_return(sc,ts_mk_char(sc,(char)c));
      }
 
      case OP_CHARDNCASE: {
           unsigned char c;
           c=(unsigned char)ts_int_val(car(sc->args));
           c=tolower(c);
-          s_return(sc,mk_character(sc,(char)c));
+          s_return(sc,ts_mk_char(sc,(char)c));
      }
 
      case OP_STR2SYM:  /* string->symbol */
@@ -3544,7 +3544,7 @@ static pointer opexe_2(scheme *sc, enum scheme_opcodes op) {
                Error_1(sc,"string-ref: out of bounds:",x);
           }
 
-          s_return(sc,mk_character(sc,((unsigned char*)str)[index]));
+          s_return(sc,ts_mk_char(sc,((unsigned char*)str)[index]));
      }
 
      case OP_STRSET: { /* string-set! */
@@ -4151,7 +4151,7 @@ static pointer opexe_5(scheme *sc, enum scheme_opcodes op) {
           if(sc->op==OP_PEEK_CHAR) {
                backchar(sc,c);
           }
-          s_return(sc,mk_character(sc,c));
+          s_return(sc,ts_mk_char(sc,c));
      }
 
      case OP_CHAR_READY: /* char-ready? */ {
@@ -4684,7 +4684,7 @@ static struct scheme_interface vtbl ={
   gensym,
   mk_string,
   mk_counted_string,
-  mk_character,
+  ts_mk_char,
   ts_mk_vec,
   ts_mk_foreign_func,
   ts_put_str,

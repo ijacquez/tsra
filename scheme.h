@@ -199,7 +199,7 @@ SCHEME_EXPORT pointer gensym(scheme *sc);
 SCHEME_EXPORT pointer mk_string(scheme *sc, const char *str);
 SCHEME_EXPORT pointer mk_counted_string(scheme *sc, const char *str, int len);
 SCHEME_EXPORT pointer mk_empty_string(scheme *sc, int len, char fill);
-SCHEME_EXPORT pointer mk_character(scheme *sc, int c);
+SCHEME_EXPORT pointer ts_mk_char(scheme *sc, int c);
 SCHEME_EXPORT pointer ts_mk_foreign_func(scheme *sc, foreign_func f);
 SCHEME_EXPORT void ts_put_str(scheme *sc, const char *s);
 SCHEME_EXPORT int ts_list_len(scheme *sc, pointer a);
