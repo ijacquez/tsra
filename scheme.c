@@ -328,7 +328,7 @@ INTERFACE int is_continuation(pointer p)    { return (type(p)==T_CONTINUATION); 
 #define cont_dump(p)     cdr(p)
 
 /* To do: promise should be forced ONCE only */
-INTERFACE int is_promise(pointer p)  { return (type(p)==T_PROMISE); }
+INTERFACE int ts_is_promise(pointer p)  { return (type(p)==T_PROMISE); }
 
 INTERFACE int ts_is_env(pointer p) { return (type(p)==T_ENVIRONMENT); }
 #define setenvironment(p)    typeflag(p) = T_ENVIRONMENT
@@ -2118,7 +2118,7 @@ static void atom2str(scheme *sc, pointer l, int f, char **pp, int *plen) {
           p = "#<MACRO>";
      } else if (is_closure(l)) {
           p = "#<CLOSURE>";
-     } else if (is_promise(l)) {
+     } else if (ts_is_promise(l)) {
           p = "#<PROMISE>";
      } else if (is_foreign(l)) {
           p = sc->strbuff;
@@ -2754,7 +2754,7 @@ static pointer opexe_0(scheme *sc, enum scheme_opcodes op) {
                x=sc->code->_object._ff(sc,sc->args);
                s_return(sc,x);
           } else if (is_closure(sc->code) || ts_is_macro(sc->code)
-             || is_promise(sc->code)) { /* CLOSURE */
+             || ts_is_promise(sc->code)) { /* CLOSURE */
         /* Should not accept promise */
                /* make environment */
                new_frame_in_env(sc, closure_env(sc->code));
@@ -3850,7 +3850,7 @@ static pointer opexe_4(scheme *sc, enum scheme_opcodes op) {
      switch (op) {
      case OP_FORCE:      /* force */
           sc->code = car(sc->args);
-          if (is_promise(sc->code)) {
+          if (ts_is_promise(sc->code)) {
                /* Should change type to closure here */
                s_save(sc, OP_SAVE_FORCED, sc->NIL, sc->code);
                sc->args = sc->NIL;
@@ -4727,7 +4727,7 @@ static struct scheme_interface vtbl ={
   closure_env,
 
   is_continuation,
-  is_promise,
+  ts_is_promise,
   ts_is_env,
   ts_is_immutable,
   ts_set_immutable,
