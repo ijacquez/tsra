@@ -306,7 +306,7 @@ INTERFACE pointer set_car(pointer p, pointer q) { return car(p)=q; }
 INTERFACE pointer set_cdr(pointer p, pointer q) { return cdr(p)=q; }
 
 INTERFACE int ts_is_sym(pointer p)   { return (type(p)==T_SYMBOL); }
-INTERFACE char *symname(pointer p)   { return strvalue(car(p)); }
+INTERFACE char *ts_sym_name(pointer p)   { return strvalue(car(p)); }
 #if USE_PLIST
 SCHEME_EXPORT int hasprop(pointer p)     { return (typeflag(p)&T_SYMBOL); }
 #define symprop(p)       cdr(p)
@@ -951,7 +951,7 @@ static pointer oblist_find_by_name(scheme *sc, const char *name)
 
   location = hash_fn(name, ivalue_unchecked(sc->oblist));
   for (x = ts_vec_elem(sc->oblist, location); x != sc->NIL; x = cdr(x)) {
-    s = symname(car(x));
+    s = ts_sym_name(car(x));
     /* case-insensitive, per R5RS section 2. */
     if(stricmp(name, s) == 0) {
       return car(x);
@@ -987,7 +987,7 @@ static pointer oblist_find_by_name(scheme *sc, const char *name)
      char    *s;
 
      for (x = sc->oblist; x != sc->NIL; x = cdr(x)) {
-        s = symname(car(x));
+        s = ts_sym_name(car(x));
         /* case-insensitive, per R5RS section 2. */
         if(stricmp(name, s) == 0) {
           return car(x);
@@ -2110,7 +2110,7 @@ static void atom2str(scheme *sc, pointer l, int f, char **pp, int *plen) {
                }
           }
      } else if (ts_is_sym(l)) {
-          p = symname(l);
+          p = ts_sym_name(l);
      } else if (ts_is_proc(l)) {
           p = sc->strbuff;
           snprintf(p,STRBUFFSIZE,"#<%s PROCEDURE %ld>", procname(l),procnum(l));
@@ -2298,7 +2298,7 @@ static void new_slot_spec_in_env(scheme *sc, pointer env,
   pointer slot = immutablets_cons(sc, variable, value);
 
   if (is_vector(car(env))) {
-    int location = hash_fn(symname(variable), ivalue_unchecked(car(env)));
+    int location = hash_fn(ts_sym_name(variable), ivalue_unchecked(car(env)));
 
     ts_set_vec_elem(car(env), location,
                     immutablets_cons(sc, slot, ts_vec_elem(car(env), location)));
@@ -2314,7 +2314,7 @@ static pointer find_slot_in_env(scheme *sc, pointer env, pointer hdl, int all)
 
   for (x = env; x != sc->NIL; x = cdr(x)) {
     if (is_vector(car(x))) {
-      location = hash_fn(symname(hdl), ivalue_unchecked(car(x)));
+      location = hash_fn(ts_sym_name(hdl), ivalue_unchecked(car(x)));
       y = ts_vec_elem(car(x), location);
     } else {
       y = car(x);
@@ -3482,7 +3482,7 @@ static pointer opexe_2(scheme *sc, enum scheme_opcodes op) {
         }
 
      case OP_SYM2STR: /* symbol->string */
-          x=mk_string(sc,symname(car(sc->args)));
+          x=mk_string(sc,ts_sym_name(car(sc->args)));
           ts_set_immutable(x);
           s_return(sc,x);
 
@@ -4715,7 +4715,7 @@ static struct scheme_interface vtbl ={
   set_cdr,
 
   ts_is_sym,
-  symname,
+  ts_sym_name,
 
   ts_is_syntax,
   ts_is_proc,
