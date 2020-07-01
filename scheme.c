@@ -1696,7 +1696,7 @@ static void putchars(scheme *sc, const char *s, int len) {
   }
 }
 
-INTERFACE void putcharacter(scheme *sc, int c) {
+INTERFACE void ts_put_char(scheme *sc, int c) {
   port *pt=sc->outport->_object._port;
   if(pt->kind&port_file) {
     fputc(c,pt->rep.stdio.file);
@@ -1958,48 +1958,48 @@ static int token(scheme *sc) {
 static void printslashstring(scheme *sc, char *p, int len) {
   int i;
   unsigned char *s=(unsigned char*)p;
-  putcharacter(sc,'"');
+  ts_put_char(sc,'"');
   for ( i=0; i<len; i++) {
     if(*s==0xff || *s=='"' || *s<' ' || *s=='\\') {
-      putcharacter(sc,'\\');
+      ts_put_char(sc,'\\');
       switch(*s) {
       case '"':
-        putcharacter(sc,'"');
+        ts_put_char(sc,'"');
         break;
       case '\n':
-        putcharacter(sc,'n');
+        ts_put_char(sc,'n');
         break;
       case '\t':
-        putcharacter(sc,'t');
+        ts_put_char(sc,'t');
         break;
       case '\r':
-        putcharacter(sc,'r');
+        ts_put_char(sc,'r');
         break;
       case '\\':
-        putcharacter(sc,'\\');
+        ts_put_char(sc,'\\');
         break;
       default: {
           int d=*s/16;
-          putcharacter(sc,'x');
+          ts_put_char(sc,'x');
           if(d<10) {
-            putcharacter(sc,d+'0');
+            ts_put_char(sc,d+'0');
           } else {
-            putcharacter(sc,d-10+'A');
+            ts_put_char(sc,d-10+'A');
           }
           d=*s%16;
           if(d<10) {
-            putcharacter(sc,d+'0');
+            ts_put_char(sc,d+'0');
           } else {
-            putcharacter(sc,d-10+'A');
+            ts_put_char(sc,d-10+'A');
           }
         }
       }
     } else {
-      putcharacter(sc,*s);
+      ts_put_char(sc,*s);
     }
     s++;
   }
-  putcharacter(sc,'"');
+  ts_put_char(sc,'"');
 }
 
 
@@ -4688,7 +4688,7 @@ static struct scheme_interface vtbl ={
   mk_vector,
   mk_foreign_func,
   putstr,
-  putcharacter,
+  ts_put_char,
 
   ts_is_str,
   ts_str_val,
