@@ -5043,7 +5043,7 @@ void restore_from_C_call(scheme *sc)
 }
 
 /* "func" and "args" are assumed to be already eval'ed. */
-pointer scheme_call(scheme *sc, pointer func, pointer args)
+pointer ts_call(scheme *sc, pointer func, pointer args)
 {
   int old_repl = sc->interactive_repl;
   sc->interactive_repl = 0;
