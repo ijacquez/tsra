@@ -1049,7 +1049,7 @@ INTERFACE pointer mk_integer(scheme *sc, long num) {
   return (x);
 }
 
-INTERFACE pointer mk_real(scheme *sc, double n) {
+INTERFACE pointer ts_mk_real(scheme *sc, double n) {
   pointer x = get_cell(sc,sc->NIL, sc->NIL);
 
   typeflag(x) = (T_NUMBER | T_ATOM);
@@ -1062,7 +1062,7 @@ static pointer mk_number(scheme *sc, num n) {
  if(n.is_fixnum) {
      return mk_integer(sc,n.value.ivalue);
  } else {
-     return mk_real(sc,n.value.rvalue);
+     return ts_mk_real(sc,n.value.rvalue);
  }
 }
 
@@ -1233,7 +1233,7 @@ static pointer mk_atom(scheme *sc, char *q) {
           }
      }
      if(has_dec_point) {
-          return mk_real(sc,atof(q));
+          return ts_mk_real(sc,atof(q));
      }
      return (mk_integer(sc, atol(q)));
 }
@@ -3223,44 +3223,44 @@ static pointer opexe_2(scheme *sc, enum scheme_opcodes op) {
 
      case OP_EXP:
           x=car(sc->args);
-          s_return(sc, mk_real(sc, exp(ts_real_val(x))));
+          s_return(sc, ts_mk_real(sc, exp(ts_real_val(x))));
 
      case OP_LOG:
           x=car(sc->args);
-          s_return(sc, mk_real(sc, log(ts_real_val(x))));
+          s_return(sc, ts_mk_real(sc, log(ts_real_val(x))));
 
      case OP_SIN:
           x=car(sc->args);
-          s_return(sc, mk_real(sc, sin(ts_real_val(x))));
+          s_return(sc, ts_mk_real(sc, sin(ts_real_val(x))));
 
      case OP_COS:
           x=car(sc->args);
-          s_return(sc, mk_real(sc, cos(ts_real_val(x))));
+          s_return(sc, ts_mk_real(sc, cos(ts_real_val(x))));
 
      case OP_TAN:
           x=car(sc->args);
-          s_return(sc, mk_real(sc, tan(ts_real_val(x))));
+          s_return(sc, ts_mk_real(sc, tan(ts_real_val(x))));
 
      case OP_ASIN:
           x=car(sc->args);
-          s_return(sc, mk_real(sc, asin(ts_real_val(x))));
+          s_return(sc, ts_mk_real(sc, asin(ts_real_val(x))));
 
      case OP_ACOS:
           x=car(sc->args);
-          s_return(sc, mk_real(sc, acos(ts_real_val(x))));
+          s_return(sc, ts_mk_real(sc, acos(ts_real_val(x))));
 
      case OP_ATAN:
           x=car(sc->args);
           if(cdr(sc->args)==sc->NIL) {
-               s_return(sc, mk_real(sc, atan(ts_real_val(x))));
+               s_return(sc, ts_mk_real(sc, atan(ts_real_val(x))));
           } else {
                pointer y=cadr(sc->args);
-               s_return(sc, mk_real(sc, atan2(ts_real_val(x),ts_real_val(y))));
+               s_return(sc, ts_mk_real(sc, atan2(ts_real_val(x),ts_real_val(y))));
           }
 
      case OP_SQRT:
           x=car(sc->args);
-          s_return(sc, mk_real(sc, sqrt(ts_real_val(x))));
+          s_return(sc, ts_mk_real(sc, sqrt(ts_real_val(x))));
 
      case OP_EXPT: {
           double result;
@@ -3285,7 +3285,7 @@ static pointer opexe_2(scheme *sc, enum scheme_opcodes op) {
               real_result = 1;
           }
           if (real_result) {
-             s_return(sc, mk_real(sc, result));
+             s_return(sc, ts_mk_real(sc, result));
           } else {
              s_return(sc, mk_integer(sc, result));
           }
@@ -3293,20 +3293,20 @@ static pointer opexe_2(scheme *sc, enum scheme_opcodes op) {
 
      case OP_FLOOR:
           x=car(sc->args);
-          s_return(sc, mk_real(sc, floor(ts_real_val(x))));
+          s_return(sc, ts_mk_real(sc, floor(ts_real_val(x))));
 
      case OP_CEILING:
           x=car(sc->args);
-          s_return(sc, mk_real(sc, ceil(ts_real_val(x))));
+          s_return(sc, ts_mk_real(sc, ceil(ts_real_val(x))));
 
      case OP_TRUNCATE : {
           double rvalue_of_x ;
           x=car(sc->args);
           rvalue_of_x = ts_real_val(x) ;
           if (rvalue_of_x > 0) {
-            s_return(sc, mk_real(sc, floor(rvalue_of_x)));
+            s_return(sc, ts_mk_real(sc, floor(rvalue_of_x)));
           } else {
-            s_return(sc, mk_real(sc, ceil(rvalue_of_x)));
+            s_return(sc, ts_mk_real(sc, ceil(rvalue_of_x)));
           }
      }
 
@@ -3314,7 +3314,7 @@ static pointer opexe_2(scheme *sc, enum scheme_opcodes op) {
         x=car(sc->args);
         if (num_ts_is_int(x))
             s_return(sc, x);
-        s_return(sc, mk_real(sc, round_per_R5RS(ts_real_val(x))));
+        s_return(sc, ts_mk_real(sc, round_per_R5RS(ts_real_val(x))));
 #endif
 
      case OP_ADD:        /* + */
@@ -4679,7 +4679,7 @@ static struct scheme_interface vtbl ={
   s_immutablets_cons,
   ts_reserve_cells,
   mk_integer,
-  mk_real,
+  ts_mk_real,
   ts_mk_sym,
   ts_gen_sym,
   ts_mk_str,

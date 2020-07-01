@@ -193,7 +193,7 @@ SCHEME_EXPORT void scheme_define(scheme *sc, pointer env, pointer symbol, pointe
 
 SCHEME_EXPORT pointer ts_cons(scheme *sc, pointer a, pointer b, int immutable);
 SCHEME_EXPORT pointer mk_integer(scheme *sc, long num);
-SCHEME_EXPORT pointer mk_real(scheme *sc, double num);
+SCHEME_EXPORT pointer ts_mk_real(scheme *sc, double num);
 SCHEME_EXPORT pointer ts_mk_sym(scheme *sc, const char *name);
 SCHEME_EXPORT pointer ts_gen_sym(scheme *sc);
 SCHEME_EXPORT pointer ts_mk_str(scheme *sc, const char *str);
