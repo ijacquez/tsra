@@ -312,7 +312,7 @@ SCHEME_EXPORT int hasprop(pointer p)     { return (typeflag(p)&T_SYMBOL); }
 #define symprop(p)       cdr(p)
 #endif
 
-INTERFACE int is_syntax(pointer p)   { return (typeflag(p)&T_SYNTAX); }
+INTERFACE int ts_is_syntax(pointer p)   { return (typeflag(p)&T_SYNTAX); }
 INTERFACE int ts_is_proc(pointer p)     { return (type(p)==T_PROC); }
 INTERFACE int ts_is_foreign(pointer p)  { return (type(p)==T_FOREIGN); }
 INTERFACE char *ts_syntax_name(pointer p) { return strvalue(car(p)); }
@@ -2687,7 +2687,7 @@ static pointer opexe_0(scheme *sc, enum scheme_opcodes op) {
                     Error_1(sc,"eval: unbound variable:", sc->code);
                }
           } else if (ts_is_pair(sc->code)) {
-               if (is_syntax(x = car(sc->code))) {     /* SYNTAX */
+               if (ts_is_syntax(x = car(sc->code))) {     /* SYNTAX */
                     sc->code = cdr(sc->code);
                     s_goto(sc,syntaxnum(x));
                } else {/* first, eval top element and eval arguments */
@@ -4717,7 +4717,7 @@ static struct scheme_interface vtbl ={
   ts_is_sym,
   symname,
 
-  is_syntax,
+  ts_is_syntax,
   ts_is_proc,
   ts_is_foreign,
   ts_syntax_name,
