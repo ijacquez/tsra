@@ -261,7 +261,7 @@ static num num_one;
 #define type(p)          (typeflag(p)&T_MASKTYPE)
 
 INTERFACE int is_string(pointer p)     { return (type(p)==T_STRING); }
-#define strvalue(p)      ((p)->_object._string._svalue)
+#define stts_real_val(p)      ((p)->_object._string._svalue)
 #define strlength(p)        ((p)->_object._string._length)
 
 INTERFACE static int ts_is_list(scheme *sc, pointer p);
@@ -273,7 +273,7 @@ INTERFACE int is_number(pointer p)    { return (type(p)==T_NUMBER); }
 INTERFACE int ts_is_int(pointer p) {
   if (!is_number(p))
       return 0;
-  if (num_ts_is_int(p) || (double)ts_int_val(p) == rvalue(p))
+  if (num_ts_is_int(p) || (double)ts_int_val(p) == ts_real_val(p))
       return 1;
   return 0;
 }
@@ -283,10 +283,10 @@ INTERFACE int ts_is_real(pointer p) {
 }
 
 INTERFACE int ts_is_char(pointer p) { return (type(p)==T_CHARACTER); }
-INTERFACE char *string_value(pointer p) { return strvalue(p); }
+INTERFACE char *string_value(pointer p) { return stts_real_val(p); }
 num nvalue(pointer p)       { return ((p)->_object._number); }
 INTERFACE long ts_int_val(pointer p)      { return (num_ts_is_int(p)?(p)->_object._number.value.ivalue:(long)(p)->_object._number.value.rvalue); }
-INTERFACE double rvalue(pointer p)    { return (!num_ts_is_int(p)?(p)->_object._number.value.rvalue:(double)(p)->_object._number.value.ivalue); }
+INTERFACE double ts_real_val(pointer p)    { return (!num_ts_is_int(p)?(p)->_object._number.value.rvalue:(double)(p)->_object._number.value.ivalue); }
 #define ivalue_unchecked(p)       ((p)->_object._number.value.ivalue)
 #define rvalue_unchecked(p)       ((p)->_object._number.value.rvalue)
 #define set_num_integer(p)   (p)->_object._number.is_fixnum=1;
@@ -306,7 +306,7 @@ INTERFACE pointer ts_set_car(pointer p, pointer q) { return car(p)=q; }
 INTERFACE pointer ts_set_cdr(pointer p, pointer q) { return cdr(p)=q; }
 
 INTERFACE int ts_is_sym(pointer p)   { return (type(p)==T_SYMBOL); }
-INTERFACE char *ts_sym_name(pointer p)   { return strvalue(car(p)); }
+INTERFACE char *ts_sym_name(pointer p)   { return stts_real_val(car(p)); }
 #if USE_PLIST
 SCHEME_EXPORT int hasprop(pointer p)     { return (typeflag(p)&T_SYMBOL); }
 #define symprop(p)       cdr(p)
@@ -315,7 +315,7 @@ SCHEME_EXPORT int hasprop(pointer p)     { return (typeflag(p)&T_SYMBOL); }
 INTERFACE int ts_is_syntax(pointer p)   { return (typeflag(p)&T_SYNTAX); }
 INTERFACE int ts_is_proc(pointer p)     { return (type(p)==T_PROC); }
 INTERFACE int ts_is_foreign(pointer p)  { return (type(p)==T_FOREIGN); }
-INTERFACE char *ts_syntax_name(pointer p) { return strvalue(car(p)); }
+INTERFACE char *ts_syntax_name(pointer p) { return stts_real_val(car(p)); }
 #define procnum(p)       ts_int_val(p)
 static const char *procname(pointer x);
 
@@ -476,7 +476,7 @@ static int syntaxnum(pointer p);
 static void assign_proc(scheme *sc, enum scheme_opcodes, char *name);
 
 #define num_ts_int_val(n)       (n.is_fixnum?(n).value.ivalue:(long)(n).value.rvalue)
-#define num_rvalue(n)       (!n.is_fixnum?(n).value.rvalue:(double)(n).value.ivalue)
+#define num_ts_real_val(n)       (!n.is_fixnum?(n).value.rvalue:(double)(n).value.ivalue)
 
 static num num_add(num a, num b) {
  num ret;
@@ -484,7 +484,7 @@ static num num_add(num a, num b) {
  if(ret.is_fixnum) {
      ret.value.ivalue= a.value.ivalue+b.value.ivalue;
  } else {
-     ret.value.rvalue=num_rvalue(a)+num_rvalue(b);
+     ret.value.rvalue=num_ts_real_val(a)+num_ts_real_val(b);
  }
  return ret;
 }
@@ -495,7 +495,7 @@ static num num_mul(num a, num b) {
  if(ret.is_fixnum) {
      ret.value.ivalue= a.value.ivalue*b.value.ivalue;
  } else {
-     ret.value.rvalue=num_rvalue(a)*num_rvalue(b);
+     ret.value.rvalue=num_ts_real_val(a)*num_ts_real_val(b);
  }
  return ret;
 }
@@ -506,7 +506,7 @@ static num num_div(num a, num b) {
  if(ret.is_fixnum) {
      ret.value.ivalue= a.value.ivalue/b.value.ivalue;
  } else {
-     ret.value.rvalue=num_rvalue(a)/num_rvalue(b);
+     ret.value.rvalue=num_ts_real_val(a)/num_ts_real_val(b);
  }
  return ret;
 }
@@ -517,7 +517,7 @@ static num num_intdiv(num a, num b) {
  if(ret.is_fixnum) {
      ret.value.ivalue= a.value.ivalue/b.value.ivalue;
  } else {
-     ret.value.rvalue=num_rvalue(a)/num_rvalue(b);
+     ret.value.rvalue=num_ts_real_val(a)/num_ts_real_val(b);
  }
  return ret;
 }
@@ -528,7 +528,7 @@ static num num_sub(num a, num b) {
  if(ret.is_fixnum) {
      ret.value.ivalue= a.value.ivalue-b.value.ivalue;
  } else {
-     ret.value.rvalue=num_rvalue(a)-num_rvalue(b);
+     ret.value.rvalue=num_ts_real_val(a)-num_ts_real_val(b);
  }
  return ret;
 }
@@ -583,7 +583,7 @@ static int num_eq(num a, num b) {
  if(is_fixnum) {
      ret= a.value.ivalue==b.value.ivalue;
  } else {
-     ret=num_rvalue(a)==num_rvalue(b);
+     ret=num_ts_real_val(a)==num_ts_real_val(b);
  }
  return ret;
 }
@@ -595,7 +595,7 @@ static int num_gt(num a, num b) {
  if(is_fixnum) {
      ret= a.value.ivalue>b.value.ivalue;
  } else {
-     ret=num_rvalue(a)>num_rvalue(b);
+     ret=num_ts_real_val(a)>num_ts_real_val(b);
  }
  return ret;
 }
@@ -610,7 +610,7 @@ static int num_lt(num a, num b) {
  if(is_fixnum) {
      ret= a.value.ivalue<b.value.ivalue;
  } else {
-     ret=num_rvalue(a)<num_rvalue(b);
+     ret=num_ts_real_val(a)<num_ts_real_val(b);
  }
  return ret;
 }
@@ -1092,7 +1092,7 @@ INTERFACE pointer mk_string(scheme *sc, const char *str) {
 INTERFACE pointer mk_counted_string(scheme *sc, const char *str, int len) {
      pointer x = get_cell(sc, sc->NIL, sc->NIL);
      typeflag(x) = (T_STRING | T_ATOM);
-     strvalue(x) = store_string(sc,len,str,0);
+     stts_real_val(x) = store_string(sc,len,str,0);
      strlength(x) = len;
      return (x);
 }
@@ -1100,7 +1100,7 @@ INTERFACE pointer mk_counted_string(scheme *sc, const char *str, int len) {
 INTERFACE pointer mk_empty_string(scheme *sc, int len, char fill) {
      pointer x = get_cell(sc, sc->NIL, sc->NIL);
      typeflag(x) = (T_STRING | T_ATOM);
-     strvalue(x) = store_string(sc,len,0,fill);
+     stts_real_val(x) = store_string(sc,len,0,fill);
      strlength(x) = len;
      return (x);
 }
@@ -1419,7 +1419,7 @@ static void gc(scheme *sc, pointer a, pointer b) {
 
 static void finalize_cell(scheme *sc, pointer a) {
   if(is_string(a)) {
-    sc->free(strvalue(a));
+    sc->free(stts_real_val(a));
   } else if(ts_is_port(a)) {
     if(a->_object._port->kind&port_file
        && a->_object._port->rep.stdio.closeit) {
@@ -2063,11 +2063,11 @@ static void atom2str(scheme *sc, pointer l, int f, char **pp, int *plen) {
           }
      } else if (is_string(l)) {
           if (!f) {
-               p = strvalue(l);
+               p = stts_real_val(l);
           } else { /* Hack, uses the fact that printing is needed */
                *pp=sc->strbuff;
                *plen=0;
-               printslashstring(sc, strvalue(l), strlength(l));
+               printslashstring(sc, stts_real_val(l), strlength(l));
                return;
           }
      } else if (ts_is_char(l)) {
@@ -2214,7 +2214,7 @@ static pointer revappend(scheme *sc, pointer a, pointer b) {
 int eqv(pointer a, pointer b) {
      if (is_string(a)) {
           if (is_string(b))
-               return (strvalue(a) == strvalue(b));
+               return (stts_real_val(a) == stts_real_val(b));
           else
                return (0);
      } else if (is_number(a)) {
@@ -2592,9 +2592,9 @@ static pointer opexe_0(scheme *sc, enum scheme_opcodes op) {
      case OP_LOAD:       /* load */
           if(file_interactive(sc)) {
                fprintf(sc->outport->_object._port->rep.stdio.file,
-               "Loading %s\n", strvalue(car(sc->args)));
+               "Loading %s\n", stts_real_val(car(sc->args)));
           }
-          if (!file_push(sc,strvalue(car(sc->args)))) {
+          if (!file_push(sc,stts_real_val(car(sc->args)))) {
                Error_1(sc,"unable to open", car(sc->args));
           }
       else
@@ -3223,44 +3223,44 @@ static pointer opexe_2(scheme *sc, enum scheme_opcodes op) {
 
      case OP_EXP:
           x=car(sc->args);
-          s_return(sc, mk_real(sc, exp(rvalue(x))));
+          s_return(sc, mk_real(sc, exp(ts_real_val(x))));
 
      case OP_LOG:
           x=car(sc->args);
-          s_return(sc, mk_real(sc, log(rvalue(x))));
+          s_return(sc, mk_real(sc, log(ts_real_val(x))));
 
      case OP_SIN:
           x=car(sc->args);
-          s_return(sc, mk_real(sc, sin(rvalue(x))));
+          s_return(sc, mk_real(sc, sin(ts_real_val(x))));
 
      case OP_COS:
           x=car(sc->args);
-          s_return(sc, mk_real(sc, cos(rvalue(x))));
+          s_return(sc, mk_real(sc, cos(ts_real_val(x))));
 
      case OP_TAN:
           x=car(sc->args);
-          s_return(sc, mk_real(sc, tan(rvalue(x))));
+          s_return(sc, mk_real(sc, tan(ts_real_val(x))));
 
      case OP_ASIN:
           x=car(sc->args);
-          s_return(sc, mk_real(sc, asin(rvalue(x))));
+          s_return(sc, mk_real(sc, asin(ts_real_val(x))));
 
      case OP_ACOS:
           x=car(sc->args);
-          s_return(sc, mk_real(sc, acos(rvalue(x))));
+          s_return(sc, mk_real(sc, acos(ts_real_val(x))));
 
      case OP_ATAN:
           x=car(sc->args);
           if(cdr(sc->args)==sc->NIL) {
-               s_return(sc, mk_real(sc, atan(rvalue(x))));
+               s_return(sc, mk_real(sc, atan(ts_real_val(x))));
           } else {
                pointer y=cadr(sc->args);
-               s_return(sc, mk_real(sc, atan2(rvalue(x),rvalue(y))));
+               s_return(sc, mk_real(sc, atan2(ts_real_val(x),ts_real_val(y))));
           }
 
      case OP_SQRT:
           x=car(sc->args);
-          s_return(sc, mk_real(sc, sqrt(rvalue(x))));
+          s_return(sc, mk_real(sc, sqrt(ts_real_val(x))));
 
      case OP_EXPT: {
           double result;
@@ -3271,10 +3271,10 @@ static pointer opexe_2(scheme *sc, enum scheme_opcodes op) {
              real_result=0;
           /* This 'if' is an R5RS compatibility fix. */
           /* NOTE: Remove this 'if' fix for R6RS.    */
-          if (rvalue(x) == 0 && rvalue(y) < 0) {
+          if (ts_real_val(x) == 0 && ts_real_val(y) < 0) {
              result = 0.0;
           } else {
-             result = pow(rvalue(x),rvalue(y));
+             result = pow(ts_real_val(x),ts_real_val(y));
           }
           /* Before returning integer result make sure we can. */
           /* If the test fails, result is too big for integer. */
@@ -3293,16 +3293,16 @@ static pointer opexe_2(scheme *sc, enum scheme_opcodes op) {
 
      case OP_FLOOR:
           x=car(sc->args);
-          s_return(sc, mk_real(sc, floor(rvalue(x))));
+          s_return(sc, mk_real(sc, floor(ts_real_val(x))));
 
      case OP_CEILING:
           x=car(sc->args);
-          s_return(sc, mk_real(sc, ceil(rvalue(x))));
+          s_return(sc, mk_real(sc, ceil(ts_real_val(x))));
 
      case OP_TRUNCATE : {
           double rvalue_of_x ;
           x=car(sc->args);
-          rvalue_of_x = rvalue(x) ;
+          rvalue_of_x = ts_real_val(x) ;
           if (rvalue_of_x > 0) {
             s_return(sc, mk_real(sc, floor(rvalue_of_x)));
           } else {
@@ -3314,7 +3314,7 @@ static pointer opexe_2(scheme *sc, enum scheme_opcodes op) {
         x=car(sc->args);
         if (num_ts_is_int(x))
             s_return(sc, x);
-        s_return(sc, mk_real(sc, round_per_R5RS(rvalue(x))));
+        s_return(sc, mk_real(sc, round_per_R5RS(ts_real_val(x))));
 #endif
 
      case OP_ADD:        /* + */
@@ -3353,7 +3353,7 @@ static pointer opexe_2(scheme *sc, enum scheme_opcodes op) {
          v = nvalue(car(sc->args));
        }
        for (; x != sc->NIL; x = cdr(x)) {
-         if (!is_zero_double(rvalue(car(x))))
+         if (!is_zero_double(ts_real_val(car(x))))
            v=num_div(v,nvalue(car(x)));
          else {
            Error_0(sc,"/: division by zero");
@@ -3444,10 +3444,10 @@ static pointer opexe_2(scheme *sc, enum scheme_opcodes op) {
      }
 
      case OP_STR2SYM:  /* string->symbol */
-          s_return(sc,mk_symbol(sc,strvalue(car(sc->args))));
+          s_return(sc,mk_symbol(sc,stts_real_val(car(sc->args))));
 
      case OP_STR2ATOM: /* string->atom */ {
-          char *s=strvalue(car(sc->args));
+          char *s=stts_real_val(car(sc->args));
           long pf = 0;
           if(cdr(sc->args)!=sc->NIL) {
             /* we know cadr(sc->args) is a natural number */
@@ -3532,7 +3532,7 @@ static pointer opexe_2(scheme *sc, enum scheme_opcodes op) {
           pointer x;
           int index;
 
-          str=strvalue(car(sc->args));
+          str=stts_real_val(car(sc->args));
 
           x=cadr(sc->args);
           if (ts_is_int(x)) {
@@ -3556,7 +3556,7 @@ static pointer opexe_2(scheme *sc, enum scheme_opcodes op) {
           if(ts_is_immutable(car(sc->args))) {
                Error_1(sc,"string-set!: unable to alter immutable string:",car(sc->args));
           }
-          str=strvalue(car(sc->args));
+          str=stts_real_val(car(sc->args));
 
           x=cadr(sc->args);
           if (ts_is_int(x)) {
@@ -3586,9 +3586,9 @@ static pointer opexe_2(scheme *sc, enum scheme_opcodes op) {
        }
        newstr = mk_empty_string(sc, len, ' ');
        /* store the contents of the argument strings into the new string */
-       for (pos = strvalue(newstr), x = sc->args; x != sc->NIL;
+       for (pos = stts_real_val(newstr), x = sc->args; x != sc->NIL;
            pos += strlength(car(x)), x = cdr(x)) {
-           memcpy(pos, strvalue(car(x)), strlength(car(x)));
+           memcpy(pos, stts_real_val(car(x)), strlength(car(x)));
        }
        s_return(sc, newstr);
      }
@@ -3599,7 +3599,7 @@ static pointer opexe_2(scheme *sc, enum scheme_opcodes op) {
           int index1;
           int len;
 
-          str=strvalue(car(sc->args));
+          str=stts_real_val(car(sc->args));
 
           index0=ts_int_val(cadr(sc->args));
 
@@ -3618,8 +3618,8 @@ static pointer opexe_2(scheme *sc, enum scheme_opcodes op) {
 
           len=index1-index0;
           x=mk_empty_string(sc,len,' ');
-          memcpy(strvalue(x),str+index0,len);
-          strvalue(x)[len]=0;
+          memcpy(stts_real_val(x),str+index0,len);
+          stts_real_val(x)[len]=0;
 
           s_return(sc,x);
      }
@@ -3899,7 +3899,7 @@ static pointer opexe_4(scheme *sc, enum scheme_opcodes op) {
                ts_set_immutable(car(sc->args));
           }
           putstr(sc, "Error: ");
-          putstr(sc, strvalue(car(sc->args)));
+          putstr(sc, stts_real_val(car(sc->args)));
           sc->args = cdr(sc->args);
           s_goto(sc,OP_ERR1);
 
@@ -4020,7 +4020,7 @@ static pointer opexe_4(scheme *sc, enum scheme_opcodes op) {
                case OP_OPEN_INOUTFILE:  prop=port_input|port_output; break;
                default:                 break;  /* Quiet the compiler */
           }
-          p=port_from_filename(sc,strvalue(car(sc->args)),prop);
+          p=port_from_filename(sc,stts_real_val(car(sc->args)),prop);
           if(p==sc->NIL) {
                s_return(sc,sc->F);
           }
@@ -4037,8 +4037,8 @@ static pointer opexe_4(scheme *sc, enum scheme_opcodes op) {
                case OP_OPEN_INOUTSTRING:  prop=port_input|port_output; break;
                default:                   break;    /* Quiet the compiler */
           }
-          p=port_from_string(sc, strvalue(car(sc->args)),
-                 strvalue(car(sc->args))+strlength(car(sc->args)), prop);
+          p=port_from_string(sc, stts_real_val(car(sc->args)),
+                 stts_real_val(car(sc->args))+strlength(car(sc->args)), prop);
           if(p==sc->NIL) {
                s_return(sc,sc->F);
           }
@@ -4052,8 +4052,8 @@ static pointer opexe_4(scheme *sc, enum scheme_opcodes op) {
                     s_return(sc,sc->F);
                }
           } else {
-               p=port_from_string(sc, strvalue(car(sc->args)),
-                      strvalue(car(sc->args))+strlength(car(sc->args)),
+               p=port_from_string(sc, stts_real_val(car(sc->args)),
+                      stts_real_val(car(sc->args))+strlength(car(sc->args)),
                           port_output);
                if(p==sc->NIL) {
                     s_return(sc,sc->F);
@@ -4631,7 +4631,7 @@ static pointer mk_proc(scheme *sc, enum scheme_opcodes op) {
 
 /* Hard-coded for the given keywords. Remember to rewrite if more are added! */
 static int syntaxnum(pointer p) {
-     const char *s=strvalue(car(p));
+     const char *s=stts_real_val(car(p));
      switch(strlength(car(p))) {
      case 2:
           if(s[0]=='i') return OP_IF0;        /* if */
@@ -4695,7 +4695,7 @@ static struct scheme_interface vtbl ={
   is_number,
   nvalue,
   ts_int_val,
-  rvalue,
+  ts_real_val,
   ts_is_int,
   ts_is_real,
   ts_is_char,
