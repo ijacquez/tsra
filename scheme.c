@@ -880,7 +880,7 @@ static void ok_to_freely_gc(scheme *sc)
 #if defined TSGRIND
 static void check_cell_alloced(pointer p, int expect_alloced)
 {
-  /* Can't use putstr(sc,str) because callers have no access to
+  /* Can't use ts_put_str(sc,str) because callers have no access to
      sc.  */
   if(typeflag(p) & !expect_alloced)
     {
@@ -1355,7 +1355,7 @@ static void gc(scheme *sc, pointer a, pointer b) {
   int i;
 
   if(sc->gc_verbose) {
-    putstr(sc, "gc...");
+    ts_put_str(sc, "gc...");
   }
 
   /* mark system globals */
@@ -1413,7 +1413,7 @@ static void gc(scheme *sc, pointer a, pointer b) {
   if (sc->gc_verbose) {
     char msg[80];
     snprintf(msg,80,"done: %ld cells were recovered.\n", sc->fcells);
-    putstr(sc,msg);
+    ts_put_str(sc,msg);
   }
 }
 
@@ -1666,7 +1666,7 @@ static int realloc_port_string(scheme *sc, port *p)
   }
 }
 
-INTERFACE void putstr(scheme *sc, const char *s) {
+INTERFACE void ts_put_str(scheme *sc, const char *s) {
   port *pt=sc->outport->_object._port;
   if(pt->kind&port_file) {
     fputs(s,pt->rep.stdio.file);
@@ -2625,8 +2625,8 @@ static pointer opexe_0(scheme *sc, enum scheme_opcodes op) {
      {
        sc->envir = sc->global_env;
        dump_stack_reset(sc);
-       putstr(sc,"\n");
-       putstr(sc,prompt);
+       ts_put_str(sc,"\n");
+       ts_put_str(sc,prompt);
      }
 
        /* Set up another iteration of REPL */
@@ -2657,7 +2657,7 @@ static pointer opexe_0(scheme *sc, enum scheme_opcodes op) {
              non-interactive to interactive mode, it needs to be
              already on the stack */
        if(sc->tracing) {
-         putstr(sc,"\nGives: ");
+         ts_put_str(sc,"\nGives: ");
        }
        if(file_interactive(sc)) {
          sc->print_flag = 1;
@@ -2673,7 +2673,7 @@ static pointer opexe_0(scheme *sc, enum scheme_opcodes op) {
          /*s_save(sc,OP_VALUEPRINT,sc->NIL,sc->NIL);*/
          s_save(sc,OP_REAL_EVAL,sc->args,sc->code);
          sc->args=sc->code;
-         putstr(sc,"\nEval: ");
+         ts_put_str(sc,"\nEval: ");
          s_goto(sc,OP_P0LIST);
        }
        /* fall through */
@@ -2739,7 +2739,7 @@ static pointer opexe_0(scheme *sc, enum scheme_opcodes op) {
          s_save(sc,OP_REAL_APPLY,sc->args,sc->code);
          sc->print_flag = 1;
          /*  sc->args=cons(sc,sc->code,sc->args);*/
-         putstr(sc,"\nApply to: ");
+         ts_put_str(sc,"\nApply to: ");
          s_goto(sc,OP_P0LIST);
        }
        /* fall through */
@@ -3889,7 +3889,7 @@ static pointer opexe_4(scheme *sc, enum scheme_opcodes op) {
                     sc->outport=car(sc->args);
                }
           }
-          putstr(sc, "\n");
+          ts_put_str(sc, "\n");
           s_return(sc,sc->T);
 
      case OP_ERR0:  /* error */
@@ -3898,20 +3898,20 @@ static pointer opexe_4(scheme *sc, enum scheme_opcodes op) {
                sc->args=cons(sc,mk_string(sc," -- "),sc->args);
                ts_set_immutable(car(sc->args));
           }
-          putstr(sc, "Error: ");
-          putstr(sc, stts_real_val(car(sc->args)));
+          ts_put_str(sc, "Error: ");
+          ts_put_str(sc, stts_real_val(car(sc->args)));
           sc->args = cdr(sc->args);
           s_goto(sc,OP_ERR1);
 
      case OP_ERR1:  /* error */
-          putstr(sc, " ");
+          ts_put_str(sc, " ");
           if (sc->args != sc->NIL) {
                s_save(sc,OP_ERR1, cdr(sc->args), sc->NIL);
                sc->args = car(sc->args);
                sc->print_flag = 1;
                s_goto(sc,OP_P0LIST);
           } else {
-               putstr(sc, "\n");
+               ts_put_str(sc, "\n");
                if(sc->interactive_repl) {
                     s_goto(sc,OP_T0LVL);
                } else {
@@ -4327,33 +4327,33 @@ static pointer opexe_5(scheme *sc, enum scheme_opcodes op) {
      /* ========== printing part ========== */
      case OP_P0LIST:
           if(ts_is_vec(sc->args)) {
-               putstr(sc,"#(");
+               ts_put_str(sc,"#(");
                sc->args=cons(sc,sc->args,mk_integer(sc,0));
                s_goto(sc,OP_PVECFROM);
           } else if(ts_is_env(sc->args)) {
-               putstr(sc,"#<ENVIRONMENT>");
+               ts_put_str(sc,"#<ENVIRONMENT>");
                s_return(sc,sc->T);
           } else if (!ts_is_pair(sc->args)) {
                printatom(sc, sc->args, sc->print_flag);
                s_return(sc,sc->T);
           } else if (car(sc->args) == sc->QUOTE && ok_abbrev(cdr(sc->args))) {
-               putstr(sc, "'");
+               ts_put_str(sc, "'");
                sc->args = cadr(sc->args);
                s_goto(sc,OP_P0LIST);
           } else if (car(sc->args) == sc->QQUOTE && ok_abbrev(cdr(sc->args))) {
-               putstr(sc, "`");
+               ts_put_str(sc, "`");
                sc->args = cadr(sc->args);
                s_goto(sc,OP_P0LIST);
           } else if (car(sc->args) == sc->UNQUOTE && ok_abbrev(cdr(sc->args))) {
-               putstr(sc, ",");
+               ts_put_str(sc, ",");
                sc->args = cadr(sc->args);
                s_goto(sc,OP_P0LIST);
           } else if (car(sc->args) == sc->UNQUOTESP && ok_abbrev(cdr(sc->args))) {
-               putstr(sc, ",@");
+               ts_put_str(sc, ",@");
                sc->args = cadr(sc->args);
                s_goto(sc,OP_P0LIST);
           } else {
-               putstr(sc, "(");
+               ts_put_str(sc, "(");
                s_save(sc,OP_P1LIST, cdr(sc->args), sc->NIL);
                sc->args = car(sc->args);
                s_goto(sc,OP_P0LIST);
@@ -4362,19 +4362,19 @@ static pointer opexe_5(scheme *sc, enum scheme_opcodes op) {
      case OP_P1LIST:
           if (ts_is_pair(sc->args)) {
             s_save(sc,OP_P1LIST, cdr(sc->args), sc->NIL);
-            putstr(sc, " ");
+            ts_put_str(sc, " ");
             sc->args = car(sc->args);
             s_goto(sc,OP_P0LIST);
           } else if(ts_is_vec(sc->args)) {
             s_save(sc,OP_P1LIST,sc->NIL,sc->NIL);
-            putstr(sc, " . ");
+            ts_put_str(sc, " . ");
             s_goto(sc,OP_P0LIST);
           } else {
             if (sc->args != sc->NIL) {
-              putstr(sc, " . ");
+              ts_put_str(sc, " . ");
               printatom(sc, sc->args, sc->print_flag);
             }
-            putstr(sc, ")");
+            ts_put_str(sc, ")");
             s_return(sc,sc->T);
           }
      case OP_PVECFROM: {
@@ -4382,7 +4382,7 @@ static pointer opexe_5(scheme *sc, enum scheme_opcodes op) {
           pointer vec=car(sc->args);
           int len=ivalue_unchecked(vec);
           if(i==len) {
-               putstr(sc,")");
+               ts_put_str(sc,")");
                s_return(sc,sc->T);
           } else {
                pointer elem=ts_vec_elem(vec,i);
@@ -4390,7 +4390,7 @@ static pointer opexe_5(scheme *sc, enum scheme_opcodes op) {
                s_save(sc,OP_PVECFROM, sc->args, sc->NIL);
                sc->args=elem;
                if (i > 0)
-                   putstr(sc," ");
+                   ts_put_str(sc," ");
                s_goto(sc,OP_P0LIST);
           }
      }
@@ -4687,7 +4687,7 @@ static struct scheme_interface vtbl ={
   mk_character,
   ts_mk_vec,
   mk_foreign_func,
-  putstr,
+  ts_put_str,
   ts_put_char,
 
   ts_is_str,
