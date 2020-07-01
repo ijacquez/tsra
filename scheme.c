@@ -5016,7 +5016,7 @@ void scheme_register_foreign_func_list(scheme * sc,
     }
 }
 
-pointer scheme_apply0(scheme *sc, const char *procname)
+pointer ts_apply0(scheme *sc, const char *procname)
 { return ts_eval(sc, cons(sc,ts_mk_sym(sc,procname),sc->NIL)); }
 
 void save_from_C_call(scheme *sc)
