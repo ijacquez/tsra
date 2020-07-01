@@ -425,7 +425,7 @@ static int alloc_cellseg(scheme *sc, int n);
 static long binary_decode(const char *s);
 static pointer get_cell(scheme *sc, pointer a, pointer b);
 static pointer _get_cell(scheme *sc, pointer a, pointer b);
-static pointer reserve_cells(scheme *sc, int n);
+static pointer ts_reserve_cells(scheme *sc, int n);
 static pointer get_consecutive_cells(scheme *sc, int n);
 static pointer find_consecutive_cells(scheme *sc, int n);
 static void finalize_cell(scheme *sc, pointer a);
@@ -750,7 +750,7 @@ static pointer _get_cell(scheme *sc, pointer a, pointer b) {
 }
 
 /* make sure that there is a given number of cells free */
-static pointer reserve_cells(scheme *sc, int n) {
+static pointer ts_reserve_cells(scheme *sc, int n) {
     if(sc->no_memory) {
         return sc->NIL;
     }
@@ -4677,7 +4677,7 @@ static struct scheme_interface vtbl ={
   scheme_define,
   sts_cons,
   s_immutablets_cons,
-  reserve_cells,
+  ts_reserve_cells,
   mk_integer,
   mk_real,
   mk_symbol,
