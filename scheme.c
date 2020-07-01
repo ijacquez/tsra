@@ -266,7 +266,7 @@ INTERFACE int is_string(pointer p)     { return (type(p)==T_STRING); }
 
 INTERFACE static int is_list(scheme *sc, pointer p);
 INTERFACE int is_vector(pointer p)    { return (type(p)==T_VECTOR); }
-INTERFACE static void fill_vector(pointer vec, pointer obj);
+INTERFACE static void ts_fill_vec(pointer vec, pointer obj);
 INTERFACE static pointer ts_vec_elem(pointer vec, int ielem);
 INTERFACE static pointer ts_set_vec_elem(pointer vec, int ielem, pointer a);
 INTERFACE int is_number(pointer p)    { return (type(p)==T_NUMBER); }
@@ -866,7 +866,7 @@ static pointer get_vector_object(scheme *sc, int len, pointer init)
   typeflag(cells) = (T_VECTOR | T_ATOM);
   ivalue_unchecked(cells)=len;
   set_num_integer(cells);
-  fill_vector(cells,init);
+  ts_fill_vec(cells,init);
   push_recent_alloc(sc, cells, sc->NIL);
   return cells;
 }
@@ -1108,7 +1108,7 @@ INTERFACE pointer mk_empty_string(scheme *sc, int len, char fill) {
 INTERFACE static pointer mk_vector(scheme *sc, int len)
 { return get_vector_object(sc,len,sc->NIL); }
 
-INTERFACE static void fill_vector(pointer vec, pointer obj) {
+INTERFACE static void ts_fill_vec(pointer vec, pointer obj) {
      int i;
      int num=ivalue(vec)/2+ivalue(vec)%2;
      for(i=0; i<num; i++) {
@@ -3652,7 +3652,7 @@ static pointer opexe_2(scheme *sc, enum scheme_opcodes op) {
           vec=mk_vector(sc,len);
           if(sc->no_memory) { s_return(sc, sc->sink); }
           if(fill!=sc->NIL) {
-               fill_vector(vec,fill);
+               ts_fill_vec(vec,fill);
           }
           s_return(sc,vec);
      }
@@ -4704,7 +4704,7 @@ static struct scheme_interface vtbl ={
   is_vector,
   list_length,
   ivalue,
-  fill_vector,
+  ts_fill_vec,
   ts_vec_elem,
   ts_set_vec_elem,
   is_port,
