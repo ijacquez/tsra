@@ -1097,7 +1097,7 @@ INTERFACE pointer mk_counted_string(scheme *sc, const char *str, int len) {
      return (x);
 }
 
-INTERFACE pointer mk_empty_string(scheme *sc, int len, char fill) {
+INTERFACE pointer ts_mk_empty_str(scheme *sc, int len, char fill) {
      pointer x = get_cell(sc, sc->NIL, sc->NIL);
      typeflag(x) = (T_STRING | T_ATOM);
      stts_real_val(x) = store_string(sc,len,0,fill);
@@ -3521,7 +3521,7 @@ static pointer opexe_2(scheme *sc, enum scheme_opcodes op) {
           if(cdr(sc->args)!=sc->NIL) {
                fill=ts_char_val(cadr(sc->args));
           }
-          s_return(sc,mk_empty_string(sc,len,(char)fill));
+          s_return(sc,ts_mk_empty_str(sc,len,(char)fill));
      }
 
      case OP_STRLEN:  /* string-length */
@@ -3584,7 +3584,7 @@ static pointer opexe_2(scheme *sc, enum scheme_opcodes op) {
        for (x = sc->args; x != sc->NIL; x = cdr(x)) {
           len += strlength(car(x));
        }
-       newstr = mk_empty_string(sc, len, ' ');
+       newstr = ts_mk_empty_str(sc, len, ' ');
        /* store the contents of the argument strings into the new string */
        for (pos = stts_real_val(newstr), x = sc->args; x != sc->NIL;
            pos += strlength(car(x)), x = cdr(x)) {
@@ -3617,7 +3617,7 @@ static pointer opexe_2(scheme *sc, enum scheme_opcodes op) {
           }
 
           len=index1-index0;
-          x=mk_empty_string(sc,len,' ');
+          x=ts_mk_empty_str(sc,len,' ');
           memcpy(stts_real_val(x),str+index0,len);
           stts_real_val(x)[len]=0;
 
