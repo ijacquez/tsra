@@ -1086,10 +1086,10 @@ static char *store_string(scheme *sc, int len_str, const char *str, char fill) {
 
 /* get new string */
 INTERFACE pointer mk_string(scheme *sc, const char *str) {
-     return mk_counted_string(sc,str,strlen(str));
+     return ts_mk_counted_str(sc,str,strlen(str));
 }
 
-INTERFACE pointer mk_counted_string(scheme *sc, const char *str, int len) {
+INTERFACE pointer ts_mk_counted_str(scheme *sc, const char *str, int len) {
      pointer x = get_cell(sc, sc->NIL, sc->NIL);
      typeflag(x) = (T_STRING | T_ATOM);
      stts_real_val(x) = store_string(sc,len,str,0);
@@ -1745,7 +1745,7 @@ static pointer readstrexp(scheme *sc) {
                     break;
                 case '"':
                     *p=0;
-                    return mk_counted_string(sc,sc->strbuff,p-sc->strbuff);
+                    return ts_mk_counted_str(sc,sc->strbuff,p-sc->strbuff);
                 default:
                     *p++=c;
                     break;
@@ -3506,7 +3506,7 @@ static pointer opexe_2(scheme *sc, enum scheme_opcodes op) {
             char *p;
             int len;
             atom2str(sc,x,(int )pf,&p,&len);
-            s_return(sc,mk_counted_string(sc,p,len));
+            s_return(sc,ts_mk_counted_str(sc,p,len));
           } else {
             Error_1(sc, "atom->string: not an atom:", x);
           }
@@ -4683,7 +4683,7 @@ static struct scheme_interface vtbl ={
   mk_symbol,
   gensym,
   mk_string,
-  mk_counted_string,
+  ts_mk_counted_str,
   ts_mk_char,
   ts_mk_vec,
   ts_mk_foreign_func,
