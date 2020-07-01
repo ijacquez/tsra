@@ -202,7 +202,7 @@ SCHEME_EXPORT pointer mk_empty_string(scheme *sc, int len, char fill);
 SCHEME_EXPORT pointer mk_character(scheme *sc, int c);
 SCHEME_EXPORT pointer mk_foreign_func(scheme *sc, foreign_func f);
 SCHEME_EXPORT void putstr(scheme *sc, const char *s);
-SCHEME_EXPORT int list_length(scheme *sc, pointer a);
+SCHEME_EXPORT int ts_list_len(scheme *sc, pointer a);
 SCHEME_EXPORT int ts_eqv(pointer a, pointer b);
 
 SCHEME_EXPORT int ts_is_str(pointer p);

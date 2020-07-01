@@ -3627,7 +3627,7 @@ static pointer opexe_2(scheme *sc, enum scheme_opcodes op) {
      case OP_VECTOR: {   /* vector */
           int i;
           pointer vec;
-          int len=list_length(sc,sc->args);
+          int len=ts_list_len(sc,sc->args);
           if(len<0) {
                Error_1(sc,"vector: not a proper list:",sc->args);
           }
@@ -3707,7 +3707,7 @@ static pointer opexe_2(scheme *sc, enum scheme_opcodes op) {
 }
 
 static int ts_is_list(scheme *sc, pointer a)
-{ return list_length(sc,a) >= 0; }
+{ return ts_list_len(sc,a) >= 0; }
 
 /* Result is:
    proper list: length
@@ -3715,7 +3715,7 @@ static int ts_is_list(scheme *sc, pointer a)
    not even a pair: -2
    dotted list: -2 minus length before dot
 */
-int list_length(scheme *sc, pointer a) {
+int ts_list_len(scheme *sc, pointer a) {
     int i=0;
     pointer slow, fast;
 
@@ -3827,7 +3827,7 @@ static pointer opexe_3(scheme *sc, enum scheme_opcodes op) {
      case OP_PAIRP:       /* pair? */
           s_retbool(ts_is_pair(car(sc->args)));
      case OP_LISTP:       /* list? */
-       s_retbool(list_length(sc,car(sc->args)) >= 0);
+       s_retbool(ts_list_len(sc,car(sc->args)) >= 0);
 
      case OP_ENVP:        /* environment? */
           s_retbool(ts_is_env(car(sc->args)));
@@ -4409,7 +4409,7 @@ static pointer opexe_6(scheme *sc, enum scheme_opcodes op) {
 
      switch (op) {
      case OP_LIST_LENGTH:     /* length */   /* a.k */
-          v=list_length(sc,car(sc->args));
+          v=ts_list_len(sc,car(sc->args));
           if(v<0) {
                Error_1(sc,"length: not a list:",car(sc->args));
           }
@@ -4537,7 +4537,7 @@ static void Eval_Cycle(scheme *sc, enum scheme_opcodes op) {
     if (pcd->name!=0) { /* if built-in function, check arguments */
       char msg[STRBUFFSIZE];
       int ok=1;
-      int n=list_length(sc,sc->args);
+      int n=ts_list_len(sc,sc->args);
 
       /* Check number of arguments */
       if(n<pcd->min_arity) {
@@ -4702,7 +4702,7 @@ static struct scheme_interface vtbl ={
   ts_char_val,
   ts_is_list,
   ts_is_vec,
-  list_length,
+  ts_list_len,
   ts_int_val,
   ts_fill_vec,
   ts_vec_elem,
