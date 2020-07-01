@@ -178,17 +178,17 @@ SCHEME_EXPORT scheme *scheme_init_new_custom_alloc(func_alloc malloc, func_deall
 SCHEME_EXPORT int scheme_init(scheme *sc);
 SCHEME_EXPORT int scheme_init_custom_alloc(scheme *sc, func_alloc, func_dealloc);
 SCHEME_EXPORT void scheme_deinit(scheme *sc);
-void scheme_set_input_port_file(scheme *sc, FILE *fin);
-void scheme_set_input_port_string(scheme *sc, char *start, char *past_the_end);
+SCHEME_EXPORT void scheme_set_input_port_file(scheme *sc, FILE *fin);
+SCHEME_EXPORT void scheme_set_input_port_string(scheme *sc, char *start, char *past_the_end);
 SCHEME_EXPORT void scheme_set_output_port_file(scheme *sc, FILE *fin);
-void scheme_set_output_port_string(scheme *sc, char *start, char *past_the_end);
+SCHEME_EXPORT void scheme_set_output_port_string(scheme *sc, char *start, char *past_the_end);
 SCHEME_EXPORT void scheme_load_file(scheme *sc, FILE *fin);
 SCHEME_EXPORT void scheme_load_named_file(scheme *sc, FILE *fin, const char *filename);
 SCHEME_EXPORT void scheme_load_string(scheme *sc, const char *cmd);
 SCHEME_EXPORT pointer scheme_apply0(scheme *sc, const char *procname);
 SCHEME_EXPORT pointer scheme_call(scheme *sc, pointer func, pointer args);
 SCHEME_EXPORT pointer scheme_eval(scheme *sc, pointer obj);
-void scheme_set_external_data(scheme *sc, void *p);
+SCHEME_EXPORT void scheme_set_external_data(scheme *sc, void *p);
 SCHEME_EXPORT void scheme_define(scheme *sc, pointer env, pointer symbol, pointer value);
 
 SCHEME_EXPORT pointer _cons(scheme *sc, pointer a, pointer b, int immutable);
