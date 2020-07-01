@@ -1138,7 +1138,7 @@ INTERFACE static pointer ts_set_vec_elem(pointer vec, int ielem, pointer a) {
 }
 
 /* get new symbol */
-INTERFACE pointer mk_symbol(scheme *sc, const char *name) {
+INTERFACE pointer ts_mk_sym(scheme *sc, const char *name) {
      pointer x;
 
      /* first check oblist */
@@ -1186,7 +1186,7 @@ static pointer mk_atom(scheme *sc, char *q) {
                               cons(sc,
                                    sc->QUOTE,
                                    cons(sc, mk_atom(sc,p+2), sc->NIL)),
-                              cons(sc, mk_symbol(sc,strlwr(q)), sc->NIL)));
+                              cons(sc, ts_mk_sym(sc,strlwr(q)), sc->NIL)));
      }
 #endif
 
@@ -1199,16 +1199,16 @@ static pointer mk_atom(scheme *sc, char *q) {
          c = *p++;
        }
        if (!isdigit(c)) {
-         return (mk_symbol(sc, strlwr(q)));
+         return (ts_mk_sym(sc, strlwr(q)));
        }
      } else if (c == '.') {
        has_dec_point=1;
        c = *p++;
        if (!isdigit(c)) {
-         return (mk_symbol(sc, strlwr(q)));
+         return (ts_mk_sym(sc, strlwr(q)));
        }
      } else if (!isdigit(c)) {
-       return (mk_symbol(sc, strlwr(q)));
+       return (ts_mk_sym(sc, strlwr(q)));
      }
 
      for ( ; (c = *p) != 0; ++p) {
@@ -1229,7 +1229,7 @@ static pointer mk_atom(scheme *sc, char *q) {
                           }
                        }
                }
-               return (mk_symbol(sc, strlwr(q)));
+               return (ts_mk_sym(sc, strlwr(q)));
           }
      }
      if(has_dec_point) {
@@ -3444,7 +3444,7 @@ static pointer opexe_2(scheme *sc, enum scheme_opcodes op) {
      }
 
      case OP_STR2SYM:  /* string->symbol */
-          s_return(sc,mk_symbol(sc,stts_real_val(car(sc->args))));
+          s_return(sc,ts_mk_sym(sc,stts_real_val(car(sc->args))));
 
      case OP_STR2ATOM: /* string->atom */ {
           char *s=stts_real_val(car(sc->args));
@@ -4301,8 +4301,8 @@ static pointer opexe_5(scheme *sc, enum scheme_opcodes op) {
           s_return(sc,cons(sc, sc->QQUOTE, cons(sc, sc->value, sc->NIL)));
 
      case OP_RDQQUOTEVEC:
-           s_return(sc,cons(sc, mk_symbol(sc,"apply"),
-           cons(sc, mk_symbol(sc,"vector"),
+           s_return(sc,cons(sc, ts_mk_sym(sc,"apply"),
+           cons(sc, ts_mk_sym(sc,"vector"),
                  cons(sc,cons(sc, sc->QQUOTE,
                   cons(sc,sc->value,sc->NIL)),
                   sc->NIL))));
@@ -4614,7 +4614,7 @@ static void assign_syntax(scheme *sc, char *name) {
 static void assign_proc(scheme *sc, enum scheme_opcodes op, char *name) {
      pointer x, y;
 
-     x = mk_symbol(sc, name);
+     x = ts_mk_sym(sc, name);
      y = mk_proc(sc,op);
      new_slot_in_env(sc, x, y);
 }
@@ -4680,7 +4680,7 @@ static struct scheme_interface vtbl ={
   ts_reserve_cells,
   mk_integer,
   mk_real,
-  mk_symbol,
+  ts_mk_sym,
   ts_gen_sym,
   ts_mk_str,
   ts_mk_counted_str,
@@ -4822,7 +4822,7 @@ int scheme_init_custom_alloc(scheme *sc, func_alloc malloc, func_dealloc free) {
   new_frame_in_env(sc, sc->NIL);
   sc->global_env = sc->envir;
   /* init else */
-  x = mk_symbol(sc,"else");
+  x = ts_mk_sym(sc,"else");
   new_slot_in_env(sc, x, sc->T);
 
   assign_syntax(sc, "lambda");
@@ -4849,16 +4849,16 @@ int scheme_init_custom_alloc(scheme *sc, func_alloc malloc, func_dealloc free) {
   }
 
   /* initialization of global pointers to special symbols */
-  sc->LAMBDA = mk_symbol(sc, "lambda");
-  sc->QUOTE = mk_symbol(sc, "quote");
-  sc->QQUOTE = mk_symbol(sc, "quasiquote");
-  sc->UNQUOTE = mk_symbol(sc, "unquote");
-  sc->UNQUOTESP = mk_symbol(sc, "unquote-splicing");
-  sc->FEED_TO = mk_symbol(sc, "=>");
-  sc->COLON_HOOK = mk_symbol(sc,"*colon-hook*");
-  sc->ERROR_HOOK = mk_symbol(sc, "*error-hook*");
-  sc->SHARP_HOOK = mk_symbol(sc, "*sharp-hook*");
-  sc->COMPILE_HOOK = mk_symbol(sc, "*compile-hook*");
+  sc->LAMBDA = ts_mk_sym(sc, "lambda");
+  sc->QUOTE = ts_mk_sym(sc, "quote");
+  sc->QQUOTE = ts_mk_sym(sc, "quasiquote");
+  sc->UNQUOTE = ts_mk_sym(sc, "unquote");
+  sc->UNQUOTESP = ts_mk_sym(sc, "unquote-splicing");
+  sc->FEED_TO = ts_mk_sym(sc, "=>");
+  sc->COLON_HOOK = ts_mk_sym(sc,"*colon-hook*");
+  sc->ERROR_HOOK = ts_mk_sym(sc, "*error-hook*");
+  sc->SHARP_HOOK = ts_mk_sym(sc, "*sharp-hook*");
+  sc->COMPILE_HOOK = ts_mk_sym(sc, "*compile-hook*");
 
   return !sc->no_memory;
 }
@@ -5001,7 +5001,7 @@ void scheme_register_foreign_func(scheme * sc, scheme_registerable * sr)
 {
   scheme_define(sc,
                 sc->global_env,
-                mk_symbol(sc,sr->name),
+                ts_mk_sym(sc,sr->name),
                 ts_mk_foreign_func(sc, sr->f));
 }
 
@@ -5017,7 +5017,7 @@ void scheme_register_foreign_func_list(scheme * sc,
 }
 
 pointer scheme_apply0(scheme *sc, const char *procname)
-{ return scheme_eval(sc, cons(sc,mk_symbol(sc,procname),sc->NIL)); }
+{ return scheme_eval(sc, cons(sc,ts_mk_sym(sc,procname),sc->NIL)); }
 
 void save_from_C_call(scheme *sc)
 {
@@ -5116,7 +5116,7 @@ int main(int argc, char **argv) {
   scheme_set_input_port_file(&sc, stdin);
   scheme_set_output_port_file(&sc, stdout);
 #if USE_DL
-  scheme_define(&sc,sc.global_env,mk_symbol(&sc,"load-extension"),ts_mk_foreign_func(&sc, scm_load_ext));
+  scheme_define(&sc,sc.global_env,ts_mk_sym(&sc,"load-extension"),ts_mk_foreign_func(&sc, scm_load_ext));
 #endif
   argv++;
   if(access(file_name,0)!=0) {
@@ -5142,7 +5142,7 @@ int main(int argc, char **argv) {
         args=cons(&sc,value,args);
       }
       args=reverse_in_place(&sc,sc.NIL,args);
-      scheme_define(&sc,sc.global_env,mk_symbol(&sc,"*args*"),args);
+      scheme_define(&sc,sc.global_env,ts_mk_sym(&sc,"*args*"),args);
 
     } else {
       fin=fopen(file_name,"r");
