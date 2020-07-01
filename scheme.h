@@ -217,7 +217,7 @@ SCHEME_EXPORT int is_character(pointer p);
 SCHEME_EXPORT long charvalue(pointer p);
 SCHEME_EXPORT int is_vector(pointer p);
 
-SCHEME_EXPORT int is_port(pointer p);
+SCHEME_EXPORT int ts_is_port(pointer p);
 
 SCHEME_EXPORT int ts_is_pair(pointer p);
 SCHEME_EXPORT pointer ts_pair_car(pointer p);

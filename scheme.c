@@ -293,9 +293,9 @@ INTERFACE double rvalue(pointer p)    { return (!num_is_integer(p)?(p)->_object.
 #define set_num_real(p)      (p)->_object._number.is_fixnum=0;
 INTERFACE  long charvalue(pointer p)  { return ivalue_unchecked(p); }
 
-INTERFACE int is_port(pointer p)     { return (type(p)==T_PORT); }
-INTERFACE int is_inport(pointer p)  { return is_port(p) && p->_object._port->kind & port_input; }
-INTERFACE int is_outport(pointer p) { return is_port(p) && p->_object._port->kind & port_output; }
+INTERFACE int ts_is_port(pointer p)     { return (type(p)==T_PORT); }
+INTERFACE int is_inport(pointer p)  { return ts_is_port(p) && p->_object._port->kind & port_input; }
+INTERFACE int is_outport(pointer p) { return ts_is_port(p) && p->_object._port->kind & port_output; }
 
 INTERFACE int ts_is_pair(pointer p)     { return (type(p)==T_PAIR); }
 #define car(p)           ((p)->_object._cons._car)
@@ -1420,7 +1420,7 @@ static void gc(scheme *sc, pointer a, pointer b) {
 static void finalize_cell(scheme *sc, pointer a) {
   if(is_string(a)) {
     sc->free(strvalue(a));
-  } else if(is_port(a)) {
+  } else if(ts_is_port(a)) {
     if(a->_object._port->kind&port_file
        && a->_object._port->rep.stdio.closeit) {
       port_close(sc,a,port_input|port_output);
@@ -2024,7 +2024,7 @@ static void atom2str(scheme *sc, pointer l, int f, char **pp, int *plen) {
           p = "#f";
      } else if (l == sc->EOF_OBJ) {
           p = "#<EOF>";
-     } else if (is_port(l)) {
+     } else if (ts_is_port(l)) {
           p = "#<PORT>";
      } else if (is_number(l)) {
           p = sc->strbuff;
@@ -2228,8 +2228,8 @@ int eqv(pointer a, pointer b) {
                return charvalue(a)==charvalue(b);
           else
                return (0);
-     } else if (is_port(a)) {
-          if (is_port(b))
+     } else if (ts_is_port(a)) {
+          if (ts_is_port(b))
                return a==b;
           else
                return (0);
@@ -3811,7 +3811,7 @@ static pointer opexe_3(scheme *sc, enum scheme_opcodes op) {
           s_retbool(Cislower(ts_int_val(car(sc->args))));
 #endif
      case OP_PORTP:     /* port? */
-          s_retbool(is_port(car(sc->args)));
+          s_retbool(ts_is_port(car(sc->args)));
      case OP_INPORTP:     /* input-port? */
           s_retbool(is_inport(car(sc->args)));
      case OP_OUTPORTP:     /* output-port? */
@@ -4475,7 +4475,7 @@ static struct {
   {is_any, 0},
   {is_string, "string"},
   {ts_is_sym, "symbol"},
-  {is_port, "port"},
+  {ts_is_port, "port"},
   {is_inport,"input port"},
   {is_outport,"output port"},
   {ts_is_env, "environment"},
@@ -4707,7 +4707,7 @@ static struct scheme_interface vtbl ={
   ts_fill_vec,
   ts_vec_elem,
   ts_set_vec_elem,
-  is_port,
+  ts_is_port,
   ts_is_pair,
   ts_pair_car,
   ts_pair_cdr,
@@ -4897,16 +4897,16 @@ void scheme_deinit(scheme *sc) {
   sc->code=sc->NIL;
   sc->args=sc->NIL;
   sc->value=sc->NIL;
-  if(is_port(sc->inport)) {
+  if(ts_is_port(sc->inport)) {
     typeflag(sc->inport) = T_ATOM;
   }
   sc->inport=sc->NIL;
   sc->outport=sc->NIL;
-  if(is_port(sc->save_inport)) {
+  if(ts_is_port(sc->save_inport)) {
     typeflag(sc->save_inport) = T_ATOM;
   }
   sc->save_inport=sc->NIL;
-  if(is_port(sc->loadport)) {
+  if(ts_is_port(sc->loadport)) {
     typeflag(sc->loadport) = T_ATOM;
   }
   sc->loadport=sc->NIL;
