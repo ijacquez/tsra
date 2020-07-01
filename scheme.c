@@ -268,7 +268,7 @@ INTERFACE static int is_list(scheme *sc, pointer p);
 INTERFACE int is_vector(pointer p)    { return (type(p)==T_VECTOR); }
 INTERFACE static void fill_vector(pointer vec, pointer obj);
 INTERFACE static pointer vector_elem(pointer vec, int ielem);
-INTERFACE static pointer set_vector_elem(pointer vec, int ielem, pointer a);
+INTERFACE static pointer ts_set_vec_elem(pointer vec, int ielem, pointer a);
 INTERFACE int is_number(pointer p)    { return (type(p)==T_NUMBER); }
 INTERFACE int is_integer(pointer p) {
   if (!is_number(p))
@@ -938,7 +938,7 @@ static pointer oblist_add_by_name(scheme *sc, const char *name)
   setimmutable(car(x));
 
   location = hash_fn(name, ivalue_unchecked(sc->oblist));
-  set_vector_elem(sc->oblist, location,
+  ts_set_vec_elem(sc->oblist, location,
                   immutable_cons(sc, x, vector_elem(sc->oblist, location)));
   return x;
 }
@@ -1128,7 +1128,7 @@ INTERFACE static pointer vector_elem(pointer vec, int ielem) {
      }
 }
 
-INTERFACE static pointer set_vector_elem(pointer vec, int ielem, pointer a) {
+INTERFACE static pointer ts_set_vec_elem(pointer vec, int ielem, pointer a) {
      int n=ielem/2;
      if(ielem%2==0) {
           return car(vec+1+n)=a;
@@ -2300,7 +2300,7 @@ static void new_slot_spec_in_env(scheme *sc, pointer env,
   if (is_vector(car(env))) {
     int location = hash_fn(symname(variable), ivalue_unchecked(car(env)));
 
-    set_vector_elem(car(env), location,
+    ts_set_vec_elem(car(env), location,
                     immutable_cons(sc, slot, vector_elem(car(env), location)));
   } else {
     car(env) = immutable_cons(sc, slot, car(env));
@@ -3634,7 +3634,7 @@ static pointer opexe_2(scheme *sc, enum scheme_opcodes op) {
           vec=mk_vector(sc,len);
           if(sc->no_memory) { s_return(sc, sc->sink); }
           for (x = sc->args, i = 0; is_pair(x); x = cdr(x), i++) {
-               set_vector_elem(vec,i,car(x));
+               ts_set_vec_elem(vec,i,car(x));
           }
           s_return(sc,vec);
      }
@@ -3695,7 +3695,7 @@ static pointer opexe_2(scheme *sc, enum scheme_opcodes op) {
                Error_1(sc,"vector-set!: out of bounds:",x);
           }
 
-          set_vector_elem(car(sc->args),index,caddr(sc->args));
+          ts_set_vec_elem(car(sc->args),index,caddr(sc->args));
           s_return(sc,car(sc->args));
      }
 
@@ -4706,7 +4706,7 @@ static struct scheme_interface vtbl ={
   ivalue,
   fill_vector,
   vector_elem,
-  set_vector_elem,
+  ts_set_vec_elem,
   is_port,
   is_pair,
   pair_car,
