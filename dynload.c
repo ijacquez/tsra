@@ -97,7 +97,7 @@ pointer scm_load_ext(scheme *sc, pointer args)
    void (*module_init)(scheme *sc);
 
    if ((args != sc->NIL) && is_string((first_arg = ts_pair_car(args)))) {
-      name = string_value(first_arg);
+      name = ts_str_val(first_arg);
       make_filename(name,filename);
       make_init_fn(name,init_fn);
       dll_handle = dl_attach(filename);

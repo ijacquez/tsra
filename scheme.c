@@ -283,7 +283,7 @@ INTERFACE int ts_is_real(pointer p) {
 }
 
 INTERFACE int ts_is_char(pointer p) { return (type(p)==T_CHARACTER); }
-INTERFACE char *string_value(pointer p) { return stts_real_val(p); }
+INTERFACE char *ts_str_val(pointer p) { return stts_real_val(p); }
 num ts_num_val(pointer p)       { return ((p)->_object._number); }
 INTERFACE long ts_int_val(pointer p)      { return (num_ts_is_int(p)?(p)->_object._number.value.ivalue:(long)(p)->_object._number.value.rvalue); }
 INTERFACE double ts_real_val(pointer p)    { return (!num_ts_is_int(p)?(p)->_object._number.value.rvalue:(double)(p)->_object._number.value.ivalue); }
@@ -4691,7 +4691,7 @@ static struct scheme_interface vtbl ={
   putcharacter,
 
   is_string,
-  string_value,
+  ts_str_val,
   ts_is_num,
   ts_num_val,
   ts_int_val,
