@@ -242,7 +242,7 @@ SCHEME_EXPORT int is_continuation(pointer p);
 SCHEME_EXPORT int is_promise(pointer p);
 SCHEME_EXPORT int is_environment(pointer p);
 SCHEME_EXPORT int is_immutable(pointer p);
-SCHEME_EXPORT void setimmutable(pointer p);
+SCHEME_EXPORT void ts_set_immutable(pointer p);
 
 struct scheme_interface {
   void (*scheme_define)(scheme *sc, pointer env, pointer symbol, pointer value);

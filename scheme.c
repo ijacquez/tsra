@@ -342,8 +342,8 @@ INTERFACE int is_environment(pointer p) { return (type(p)==T_ENVIRONMENT); }
 #define clrmark(p)       typeflag(p) &= UNMARK
 
 INTERFACE int is_immutable(pointer p) { return (typeflag(p)&T_IMMUTABLE); }
-/*#define setimmutable(p)  typeflag(p) |= T_IMMUTABLE*/
-INTERFACE void setimmutable(pointer p) { typeflag(p) |= T_IMMUTABLE; }
+/*#define ts_set_immutable(p)  typeflag(p) |= T_IMMUTABLE*/
+INTERFACE void ts_set_immutable(pointer p) { typeflag(p) |= T_IMMUTABLE; }
 
 #define caar(p)          car(car(p))
 #define cadr(p)          car(cdr(p))
@@ -909,7 +909,7 @@ pointer ts_cons(scheme *sc, pointer a, pointer b, int immutable) {
 
   typeflag(x) = T_PAIR;
   if(immutable) {
-    setimmutable(x);
+    ts_set_immutable(x);
   }
   car(x) = a;
   cdr(x) = b;
@@ -935,7 +935,7 @@ static pointer oblist_add_by_name(scheme *sc, const char *name)
 
   x = immutablets_cons(sc, mk_string(sc, name), sc->NIL);
   typeflag(x) = T_SYMBOL;
-  setimmutable(car(x));
+  ts_set_immutable(car(x));
 
   location = hash_fn(name, ivalue_unchecked(sc->oblist));
   ts_set_vec_elem(sc->oblist, location,
@@ -1003,7 +1003,7 @@ static pointer oblist_add_by_name(scheme *sc, const char *name)
 
   x = immutablets_cons(sc, mk_string(sc, name), sc->NIL);
   typeflag(x) = T_SYMBOL;
-  setimmutable(car(x));
+  ts_set_immutable(car(x));
   sc->oblist = immutablets_cons(sc, x, sc->oblist);
   return x;
 }
@@ -1113,7 +1113,7 @@ INTERFACE static void ts_fill_vec(pointer vec, pointer obj) {
      int num=ts_int_val(vec)/2+ts_int_val(vec)%2;
      for(i=0; i<num; i++) {
           typeflag(vec+1+i) = T_PAIR;
-          setimmutable(vec+1+i);
+          ts_set_immutable(vec+1+i);
           car(vec+1+i)=obj;
           cdr(vec+1+i)=obj;
      }
@@ -2429,7 +2429,7 @@ static pointer _Error_1(scheme *sc, const char *s, pointer a) {
                sc->code = sc->NIL;
          }
          sc->code = cons(sc, mk_string(sc, str), sc->code);
-         setimmutable(car(sc->code));
+         ts_set_immutable(car(sc->code));
          sc->code = cons(sc, slot_value_in_env(x), sc->code);
          sc->op = (int)OP_EVAL;
          return sc->T;
@@ -2442,7 +2442,7 @@ static pointer _Error_1(scheme *sc, const char *s, pointer a) {
           sc->args = sc->NIL;
     }
     sc->args = cons(sc, mk_string(sc, str), sc->args);
-    setimmutable(car(sc->args));
+    ts_set_immutable(car(sc->args));
     sc->op = (int)OP_ERR0;
     return sc->T;
 }
@@ -3483,7 +3483,7 @@ static pointer opexe_2(scheme *sc, enum scheme_opcodes op) {
 
      case OP_SYM2STR: /* symbol->string */
           x=mk_string(sc,symname(car(sc->args)));
-          setimmutable(x);
+          ts_set_immutable(x);
           s_return(sc,x);
 
      case OP_ATOM2STR: /* atom->string */ {
@@ -3896,7 +3896,7 @@ static pointer opexe_4(scheme *sc, enum scheme_opcodes op) {
           sc->retcode=-1;
           if (!is_string(car(sc->args))) {
                sc->args=cons(sc,mk_string(sc," -- "),sc->args);
-               setimmutable(car(sc->args));
+               ts_set_immutable(car(sc->args));
           }
           putstr(sc, "Error: ");
           putstr(sc, strvalue(car(sc->args)));
@@ -4231,7 +4231,7 @@ static pointer opexe_5(scheme *sc, enum scheme_opcodes op) {
                if(x==sc->F) {
                  Error_0(sc,"Error reading string");
                }
-               setimmutable(x);
+               ts_set_immutable(x);
                s_return(sc,x);
           case TOK_SHARP: {
                pointer f=find_slot_in_env(sc,sc->envir,sc->SHARP_HOOK,1);
@@ -4730,7 +4730,7 @@ static struct scheme_interface vtbl ={
   is_promise,
   is_environment,
   is_immutable,
-  setimmutable,
+  ts_set_immutable,
 
   scheme_load_file,
   scheme_load_string
