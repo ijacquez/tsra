@@ -4733,7 +4733,7 @@ static struct scheme_interface vtbl ={
   ts_set_immutable,
 
   scheme_load_file,
-  scheme_load_string
+  ts_load_str
 };
 #endif
 
@@ -4965,7 +4965,7 @@ void scheme_load_named_file(scheme *sc, FILE *fin, const char *filename) {
   }
 }
 
-void scheme_load_string(scheme *sc, const char *cmd) {
+void ts_load_str(scheme *sc, const char *cmd) {
   dump_stack_reset(sc);
   sc->envir = sc->global_env;
   sc->file_i=0;
@@ -5153,7 +5153,7 @@ int main(int argc, char **argv) {
       if(isfile) {
         scheme_load_named_file(&sc,fin,file_name);
       } else {
-        scheme_load_string(&sc,file_name);
+        ts_load_str(&sc,file_name);
       }
       if(!isfile || fin!=stdin) {
         if(sc.retcode!=0) {
