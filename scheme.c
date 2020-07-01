@@ -301,7 +301,7 @@ INTERFACE int ts_is_pair(pointer p)     { return (type(p)==T_PAIR); }
 #define car(p)           ((p)->_object._cons._car)
 #define cdr(p)           ((p)->_object._cons._cdr)
 INTERFACE pointer pair_car(pointer p)   { return car(p); }
-INTERFACE pointer pair_cdr(pointer p)   { return cdr(p); }
+INTERFACE pointer ts_pair_cdr(pointer p)   { return cdr(p); }
 INTERFACE pointer ts_set_car(pointer p, pointer q) { return car(p)=q; }
 INTERFACE pointer ts_set_cdr(pointer p, pointer q) { return cdr(p)=q; }
 
@@ -4710,7 +4710,7 @@ static struct scheme_interface vtbl ={
   is_port,
   ts_is_pair,
   pair_car,
-  pair_cdr,
+  ts_pair_cdr,
   ts_set_car,
   ts_set_cdr,
 
