@@ -154,10 +154,10 @@ char    no_memory;       /* Whether mem. alloc. has failed */
 #define TS_LINESIZE 1024
 #endif
 char    linebuff[TS_LINESIZE];
-#ifndef STRBUFFSIZE
-#define STRBUFFSIZE 256
+#ifndef TS_STRBUFFSIZE
+#define TS_STRBUFFSIZE 256
 #endif
-char    strbuff[STRBUFFSIZE];
+char    strbuff[TS_STRBUFFSIZE];
 
 FILE *tmpfp;
 int tok;
