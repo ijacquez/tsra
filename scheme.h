@@ -307,14 +307,14 @@ struct ts_interface {
   void (*load_string)(scheme *sc, const char *input);
 };
 
-typedef struct scheme_registerable
+typedef struct ts_registerable
 {
   foreign_func  f;
   const char *  name;
 }
-scheme_registerable;
+ts_registerable;
 
 TS_EXPORT void ts_register_foreign_func_list(scheme * sc,
-                                       scheme_registerable * list,
+                                       ts_registerable * list,
                                        int n);
 #endif

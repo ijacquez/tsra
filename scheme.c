@@ -4997,7 +4997,7 @@ void ts_def(scheme *sc, pointer envir, pointer symbol, pointer value) {
 }
 
 #if !STANDALONE
-void scheme_register_foreign_func(scheme * sc, scheme_registerable * sr)
+void scheme_register_foreign_func(scheme * sc, ts_registerable * sr)
 {
   ts_def(sc,
                 sc->global_env,
@@ -5006,7 +5006,7 @@ void scheme_register_foreign_func(scheme * sc, scheme_registerable * sr)
 }
 
 void ts_register_foreign_func_list(scheme * sc,
-                                       scheme_registerable * list,
+                                       ts_registerable * list,
                                        int count)
 {
   int i;
