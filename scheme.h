@@ -86,8 +86,8 @@ int retcode;
 int tracing;
 
 
-#ifndef CELL_SEGSIZE
-#define CELL_SEGSIZE    5000  /* # of cells in one segment */
+#ifndef TS_CELL_SEGSIZE
+#define TS_CELL_SEGSIZE    5000  /* # of cells in one segment */
 #endif
 #ifndef CELL_NSEGMENT
 #define CELL_NSEGMENT   10    /* # of segments for cells */

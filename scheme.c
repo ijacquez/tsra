@@ -673,7 +673,7 @@ static int alloc_cellseg(scheme *sc, int n) {
      for (k = 0; k < n; k++) {
          if (sc->last_cell_seg >= CELL_NSEGMENT - 1)
               return k;
-         cp = (char*) sc->malloc(CELL_SEGSIZE * sizeof(struct cell)+adj);
+         cp = (char*) sc->malloc(TS_CELL_SEGSIZE * sizeof(struct cell)+adj);
          if (cp == 0)
               return k;
          i = ++sc->last_cell_seg ;
@@ -690,8 +690,8 @@ static int alloc_cellseg(scheme *sc, int n) {
              sc->cell_seg[i] = sc->cell_seg[i - 1];
              sc->cell_seg[--i] = p;
          }
-         sc->fcells += CELL_SEGSIZE;
-         last = newp + CELL_SEGSIZE - 1;
+         sc->fcells += TS_CELL_SEGSIZE;
+         last = newp + TS_CELL_SEGSIZE - 1;
          for (p = newp; p <= last; p++) {
               typeflag(p) = 0;
               cdr(p) = p + 1;
@@ -1392,7 +1392,7 @@ static void gc(scheme *sc, pointer a, pointer b) {
      free-list in sorted order.
   */
   for (i = sc->last_cell_seg; i >= 0; i--) {
-    p = sc->cell_seg[i] + CELL_SEGSIZE;
+    p = sc->cell_seg[i] + TS_CELL_SEGSIZE;
     while (--p >= sc->cell_seg[i]) {
       if (is_mark(p)) {
     clrmark(p);
