@@ -150,10 +150,10 @@ int nesting;
 char    gc_verbose;      /* if gc_verbose is not zero, print gc status */
 char    no_memory;       /* Whether mem. alloc. has failed */
 
-#ifndef LINESIZE
-#define LINESIZE 1024
+#ifndef TS_LINESIZE
+#define TS_LINESIZE 1024
 #endif
-char    linebuff[LINESIZE];
+char    linebuff[TS_LINESIZE];
 #ifndef STRBUFFSIZE
 #define STRBUFFSIZE 256
 #endif
