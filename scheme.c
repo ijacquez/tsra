@@ -308,7 +308,7 @@ INTERFACE pointer ts_set_cdr(pointer p, pointer q) { return cdr(p)=q; }
 INTERFACE int ts_is_sym(pointer p)   { return (type(p)==T_SYMBOL); }
 INTERFACE char *ts_sym_name(pointer p)   { return stts_real_val(car(p)); }
 #if USE_PLIST
-SCHEME_EXPORT int hasprop(pointer p)     { return (typeflag(p)&T_SYMBOL); }
+TS_EXPORT int hasprop(pointer p)     { return (typeflag(p)&T_SYMBOL); }
 #define symprop(p)       cdr(p)
 #endif
 

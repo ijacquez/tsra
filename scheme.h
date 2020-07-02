@@ -6,12 +6,12 @@
 #include <stdio.h>
 
 #ifndef _MSC_VER
-# define SCHEME_EXPORT
+# define TS_EXPORT
 #else
 # ifdef _SCHEME_SOURCE
-#  define SCHEME_EXPORT __declspec(dllexport)
+#  define TS_EXPORT __declspec(dllexport)
 # else
-#  define SCHEME_EXPORT __declspec(dllimport)
+#  define TS_EXPORT __declspec(dllimport)
 # endif
 #endif
 
@@ -173,76 +173,76 @@ void *dump_base;    /* pointer to base of allocated dump stack */
 int dump_size;      /* number of frames allocated for dump stack */
 };
 
-SCHEME_EXPORT scheme *ts_init_new(void);
-SCHEME_EXPORT scheme *ts_init_new_custom_alloc(func_alloc malloc, func_dealloc free);
-SCHEME_EXPORT int ts_init(scheme *sc);
-SCHEME_EXPORT int ts_init_custom_alloc(scheme *sc, func_alloc, func_dealloc);
-SCHEME_EXPORT void ts_deinit(scheme *sc);
-SCHEME_EXPORT void ts_set_in_port_file(scheme *sc, FILE *fin);
-SCHEME_EXPORT void ts_set_in_port_str(scheme *sc, char *start, char *past_the_end);
-SCHEME_EXPORT void ts_set_out_port_file(scheme *sc, FILE *fin);
-SCHEME_EXPORT void ts_set_out_port_str(scheme *sc, char *start, char *past_the_end);
-SCHEME_EXPORT void ts_load_file(scheme *sc, FILE *fin);
-SCHEME_EXPORT void ts_load_named_file(scheme *sc, FILE *fin, const char *filename);
-SCHEME_EXPORT void ts_load_str(scheme *sc, const char *cmd);
-SCHEME_EXPORT pointer ts_apply0(scheme *sc, const char *procname);
-SCHEME_EXPORT pointer ts_call(scheme *sc, pointer func, pointer args);
-SCHEME_EXPORT pointer ts_eval(scheme *sc, pointer obj);
-SCHEME_EXPORT void ts_set_extern_data(scheme *sc, void *p);
-SCHEME_EXPORT void ts_def(scheme *sc, pointer env, pointer symbol, pointer value);
+TS_EXPORT scheme *ts_init_new(void);
+TS_EXPORT scheme *ts_init_new_custom_alloc(func_alloc malloc, func_dealloc free);
+TS_EXPORT int ts_init(scheme *sc);
+TS_EXPORT int ts_init_custom_alloc(scheme *sc, func_alloc, func_dealloc);
+TS_EXPORT void ts_deinit(scheme *sc);
+TS_EXPORT void ts_set_in_port_file(scheme *sc, FILE *fin);
+TS_EXPORT void ts_set_in_port_str(scheme *sc, char *start, char *past_the_end);
+TS_EXPORT void ts_set_out_port_file(scheme *sc, FILE *fin);
+TS_EXPORT void ts_set_out_port_str(scheme *sc, char *start, char *past_the_end);
+TS_EXPORT void ts_load_file(scheme *sc, FILE *fin);
+TS_EXPORT void ts_load_named_file(scheme *sc, FILE *fin, const char *filename);
+TS_EXPORT void ts_load_str(scheme *sc, const char *cmd);
+TS_EXPORT pointer ts_apply0(scheme *sc, const char *procname);
+TS_EXPORT pointer ts_call(scheme *sc, pointer func, pointer args);
+TS_EXPORT pointer ts_eval(scheme *sc, pointer obj);
+TS_EXPORT void ts_set_extern_data(scheme *sc, void *p);
+TS_EXPORT void ts_def(scheme *sc, pointer env, pointer symbol, pointer value);
 
-SCHEME_EXPORT pointer ts_cons(scheme *sc, pointer a, pointer b, int immutable);
-SCHEME_EXPORT pointer ts_mk_int(scheme *sc, long num);
-SCHEME_EXPORT pointer ts_mk_real(scheme *sc, double num);
-SCHEME_EXPORT pointer ts_mk_sym(scheme *sc, const char *name);
-SCHEME_EXPORT pointer ts_gen_sym(scheme *sc);
-SCHEME_EXPORT pointer ts_mk_str(scheme *sc, const char *str);
-SCHEME_EXPORT pointer ts_mk_counted_str(scheme *sc, const char *str, int len);
-SCHEME_EXPORT pointer ts_mk_empty_str(scheme *sc, int len, char fill);
-SCHEME_EXPORT pointer ts_mk_char(scheme *sc, int c);
-SCHEME_EXPORT pointer ts_mk_foreign_func(scheme *sc, foreign_func f);
-SCHEME_EXPORT void ts_put_str(scheme *sc, const char *s);
-SCHEME_EXPORT int ts_list_len(scheme *sc, pointer a);
-SCHEME_EXPORT int ts_eqv(pointer a, pointer b);
+TS_EXPORT pointer ts_cons(scheme *sc, pointer a, pointer b, int immutable);
+TS_EXPORT pointer ts_mk_int(scheme *sc, long num);
+TS_EXPORT pointer ts_mk_real(scheme *sc, double num);
+TS_EXPORT pointer ts_mk_sym(scheme *sc, const char *name);
+TS_EXPORT pointer ts_gen_sym(scheme *sc);
+TS_EXPORT pointer ts_mk_str(scheme *sc, const char *str);
+TS_EXPORT pointer ts_mk_counted_str(scheme *sc, const char *str, int len);
+TS_EXPORT pointer ts_mk_empty_str(scheme *sc, int len, char fill);
+TS_EXPORT pointer ts_mk_char(scheme *sc, int c);
+TS_EXPORT pointer ts_mk_foreign_func(scheme *sc, foreign_func f);
+TS_EXPORT void ts_put_str(scheme *sc, const char *s);
+TS_EXPORT int ts_list_len(scheme *sc, pointer a);
+TS_EXPORT int ts_eqv(pointer a, pointer b);
 
-SCHEME_EXPORT int ts_is_str(pointer p);
-SCHEME_EXPORT char *ts_str_val(pointer p);
-SCHEME_EXPORT int ts_is_num(pointer p);
-SCHEME_EXPORT num ts_num_val(pointer p);
-SCHEME_EXPORT long ts_int_val(pointer p);
-SCHEME_EXPORT double ts_real_val(pointer p);
-SCHEME_EXPORT int ts_is_int(pointer p);
-SCHEME_EXPORT int ts_is_real(pointer p);
-SCHEME_EXPORT int ts_is_char(pointer p);
-SCHEME_EXPORT long ts_char_val(pointer p);
-SCHEME_EXPORT int ts_is_vec(pointer p);
+TS_EXPORT int ts_is_str(pointer p);
+TS_EXPORT char *ts_str_val(pointer p);
+TS_EXPORT int ts_is_num(pointer p);
+TS_EXPORT num ts_num_val(pointer p);
+TS_EXPORT long ts_int_val(pointer p);
+TS_EXPORT double ts_real_val(pointer p);
+TS_EXPORT int ts_is_int(pointer p);
+TS_EXPORT int ts_is_real(pointer p);
+TS_EXPORT int ts_is_char(pointer p);
+TS_EXPORT long ts_char_val(pointer p);
+TS_EXPORT int ts_is_vec(pointer p);
 
-SCHEME_EXPORT int ts_is_port(pointer p);
+TS_EXPORT int ts_is_port(pointer p);
 
-SCHEME_EXPORT int ts_is_pair(pointer p);
-SCHEME_EXPORT pointer ts_pair_car(pointer p);
-SCHEME_EXPORT pointer ts_pair_cdr(pointer p);
-SCHEME_EXPORT pointer ts_set_car(pointer p, pointer q);
-SCHEME_EXPORT pointer ts_set_cdr(pointer p, pointer q);
+TS_EXPORT int ts_is_pair(pointer p);
+TS_EXPORT pointer ts_pair_car(pointer p);
+TS_EXPORT pointer ts_pair_cdr(pointer p);
+TS_EXPORT pointer ts_set_car(pointer p, pointer q);
+TS_EXPORT pointer ts_set_cdr(pointer p, pointer q);
 
-SCHEME_EXPORT int ts_is_sym(pointer p);
-SCHEME_EXPORT char *ts_sym_name(pointer p);
-SCHEME_EXPORT int hasprop(pointer p);
+TS_EXPORT int ts_is_sym(pointer p);
+TS_EXPORT char *ts_sym_name(pointer p);
+TS_EXPORT int hasprop(pointer p);
 
-SCHEME_EXPORT int ts_is_syntax(pointer p);
-SCHEME_EXPORT int ts_is_proc(pointer p);
-SCHEME_EXPORT int ts_is_foreign(pointer p);
-SCHEME_EXPORT char *ts_syntax_name(pointer p);
-SCHEME_EXPORT int ts_is_closure(pointer p);
-SCHEME_EXPORT int ts_is_macro(pointer p);
-SCHEME_EXPORT pointer ts_closure_code(pointer p);
-SCHEME_EXPORT pointer ts_closure_env(pointer p);
+TS_EXPORT int ts_is_syntax(pointer p);
+TS_EXPORT int ts_is_proc(pointer p);
+TS_EXPORT int ts_is_foreign(pointer p);
+TS_EXPORT char *ts_syntax_name(pointer p);
+TS_EXPORT int ts_is_closure(pointer p);
+TS_EXPORT int ts_is_macro(pointer p);
+TS_EXPORT pointer ts_closure_code(pointer p);
+TS_EXPORT pointer ts_closure_env(pointer p);
 
-SCHEME_EXPORT int is_continuation(pointer p);
-SCHEME_EXPORT int ts_is_promise(pointer p);
-SCHEME_EXPORT int ts_is_env(pointer p);
-SCHEME_EXPORT int ts_is_immutable(pointer p);
-SCHEME_EXPORT void ts_set_immutable(pointer p);
+TS_EXPORT int is_continuation(pointer p);
+TS_EXPORT int ts_is_promise(pointer p);
+TS_EXPORT int ts_is_env(pointer p);
+TS_EXPORT int ts_is_immutable(pointer p);
+TS_EXPORT void ts_set_immutable(pointer p);
 
 struct scheme_interface {
   void (*scheme_define)(scheme *sc, pointer env, pointer symbol, pointer value);
@@ -314,7 +314,7 @@ typedef struct scheme_registerable
 }
 scheme_registerable;
 
-SCHEME_EXPORT void ts_register_foreign_func_list(scheme * sc,
+TS_EXPORT void ts_register_foreign_func_list(scheme * sc,
                                        scheme_registerable * list,
                                        int n);
 #endif
