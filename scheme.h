@@ -139,11 +139,11 @@ pointer outport;
 pointer save_inport;
 pointer loadport;
 
-#ifndef MAXFIL
-#define MAXFIL 64
+#ifndef TS_MAXFIL
+#define TS_MAXFIL 64
 #endif
-port load_stack[MAXFIL];     /* Stack of open files for port -1 (LOADing) */
-int nesting_stack[MAXFIL];
+port load_stack[TS_MAXFIL];     /* Stack of open files for port -1 (LOADing) */
+int nesting_stack[TS_MAXFIL];
 int file_i;
 int nesting;
 

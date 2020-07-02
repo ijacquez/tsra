@@ -1434,7 +1434,7 @@ static void finalize_cell(scheme *sc, pointer a) {
 static int file_push(scheme *sc, const char *fname) {
   FILE *fin = NULL;
 
-  if (sc->file_i == MAXFIL-1)
+  if (sc->file_i == TS_MAXFIL-1)
      return 0;
   fin=fopen(fname,"r");
   if(fin!=0) {
