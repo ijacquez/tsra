@@ -671,7 +671,7 @@ static int alloc_cellseg(scheme *sc, int n) {
      }
 
      for (k = 0; k < n; k++) {
-         if (sc->last_cell_seg >= CELL_NSEGMENT - 1)
+         if (sc->last_cell_seg >= TS_CELL_NSEGMENT - 1)
               return k;
          cp = (char*) sc->malloc(TS_CELL_SEGSIZE * sizeof(struct cell)+adj);
          if (cp == 0)

@@ -89,11 +89,11 @@ int tracing;
 #ifndef TS_CELL_SEGSIZE
 #define TS_CELL_SEGSIZE    5000  /* # of cells in one segment */
 #endif
-#ifndef CELL_NSEGMENT
-#define CELL_NSEGMENT   10    /* # of segments for cells */
+#ifndef TS_CELL_NSEGMENT
+#define TS_CELL_NSEGMENT   10    /* # of segments for cells */
 #endif
-char *alloc_seg[CELL_NSEGMENT];
-pointer cell_seg[CELL_NSEGMENT];
+char *alloc_seg[TS_CELL_NSEGMENT];
+pointer cell_seg[TS_CELL_NSEGMENT];
 int     last_cell_seg;
 
 /* We use 4 registers. */
