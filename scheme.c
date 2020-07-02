@@ -4673,7 +4673,7 @@ INTERFACE static pointer s_immutablets_cons(scheme *sc, pointer a, pointer b) {
  return immutablets_cons(sc,a,b);
 }
 
-static struct scheme_interface vtbl ={
+static struct ts_interface vtbl ={
   ts_def,
   sts_cons,
   s_immutablets_cons,

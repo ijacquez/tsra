@@ -168,7 +168,7 @@ int op;
 void *ext_data;     /* For the benefit of foreign functions */
 long gensym_cnt;
 
-struct scheme_interface *vptr;
+struct ts_interface *vptr;
 void *dump_base;    /* pointer to base of allocated dump stack */
 int dump_size;      /* number of frames allocated for dump stack */
 };
@@ -244,7 +244,7 @@ TS_EXPORT int ts_is_env(pointer p);
 TS_EXPORT int ts_is_immutable(pointer p);
 TS_EXPORT void ts_set_immutable(pointer p);
 
-struct scheme_interface {
+struct ts_interface {
   void (*scheme_define)(scheme *sc, pointer env, pointer symbol, pointer value);
   pointer (*cons)(scheme *sc, pointer a, pointer b);
   pointer (*immutable_cons)(scheme *sc, pointer a, pointer b);
