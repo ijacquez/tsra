@@ -4676,7 +4676,7 @@ static int syntaxnum(ts_ptr p) {
 
 /* initialization of TinyScheme */
 #if USE_INTERFACE
-INTERFACE static ts_ptr sts_cons(scheme *sc, ts_ptr a, ts_ptr b) {
+INTERFACE static ts_ptr s_cons(scheme *sc, ts_ptr a, ts_ptr b) {
  return cons(sc,a,b);
 }
 INTERFACE static ts_ptr s_immutable_cons(scheme *sc, ts_ptr a, ts_ptr b) {
@@ -4685,7 +4685,7 @@ INTERFACE static ts_ptr s_immutable_cons(scheme *sc, ts_ptr a, ts_ptr b) {
 
 static struct ts_interface vtbl ={
   ts_def,
-  sts_cons,
+  s_cons,
   s_immutable_cons,
   ts_reserve_cells,
   ts_mk_int,
