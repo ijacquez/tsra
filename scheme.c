@@ -107,6 +107,13 @@
 # define SHOW_ERROR_LINE 1
 #endif
 
+/* operator code */
+enum scheme_opcodes {
+#define _OP_DEF(A,B,C,D,E,OP) OP,
+#include "opdefines.h"
+  OP_MAXDEFINED
+};
+
 #include "scheme-private.h"
 #ifndef WIN32
 # include <unistd.h>
