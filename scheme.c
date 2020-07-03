@@ -4679,14 +4679,14 @@ static int syntaxnum(ts_ptr p) {
 INTERFACE static ts_ptr sts_cons(scheme *sc, ts_ptr a, ts_ptr b) {
  return cons(sc,a,b);
 }
-INTERFACE static ts_ptr s_immutablets_cons(scheme *sc, ts_ptr a, ts_ptr b) {
+INTERFACE static ts_ptr s_immutable_cons(scheme *sc, ts_ptr a, ts_ptr b) {
  return immutablets_cons(sc,a,b);
 }
 
 static struct ts_interface vtbl ={
   ts_def,
   sts_cons,
-  s_immutablets_cons,
+  s_immutable_cons,
   ts_reserve_cells,
   ts_mk_int,
   ts_mk_real,
