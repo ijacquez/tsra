@@ -1032,7 +1032,7 @@ static pointer mk_port(scheme *sc, ts_port *p) {
   return (x);
 }
 
-pointer ts_mk_foreign_func(scheme *sc, foreign_func f) {
+pointer ts_mk_foreign_func(scheme *sc, ts_foreign_func f) {
   pointer x = get_cell(sc, sc->NIL, sc->NIL);
 
   typeflag(x) = (T_FOREIGN | T_ATOM);

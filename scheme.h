@@ -20,7 +20,7 @@ typedef struct ts_cell *pointer;
 
 typedef void * (*ts_func_alloc)(size_t);
 typedef void (*ts_func_dealloc)(void *);
-typedef pointer (*foreign_func)(scheme *, pointer);
+typedef pointer (*ts_foreign_func)(scheme *, pointer);
 
 /* num, for generic arithmetic */
 typedef struct ts_num {
@@ -68,7 +68,7 @@ struct ts_cell {
     } _string;
     ts_num _number;
     ts_port *_port;
-    foreign_func _ff;
+    ts_foreign_func _ff;
     struct {
       struct ts_cell *_car;
       struct ts_cell *_cdr;
@@ -200,7 +200,7 @@ TS_EXPORT pointer ts_mk_str(scheme *sc, const char *str);
 TS_EXPORT pointer ts_mk_counted_str(scheme *sc, const char *str, int len);
 TS_EXPORT pointer ts_mk_empty_str(scheme *sc, int len, char fill);
 TS_EXPORT pointer ts_mk_char(scheme *sc, int c);
-TS_EXPORT pointer ts_mk_foreign_func(scheme *sc, foreign_func f);
+TS_EXPORT pointer ts_mk_foreign_func(scheme *sc, ts_foreign_func f);
 TS_EXPORT void ts_put_str(scheme *sc, const char *s);
 TS_EXPORT int ts_list_len(scheme *sc, pointer a);
 TS_EXPORT int ts_eqv(pointer a, pointer b);
@@ -257,7 +257,7 @@ struct ts_interface {
   pointer (*mk_counted_str)(scheme *sc, const char *str, int len);
   pointer (*mk_char)(scheme *sc, int c);
   pointer (*mk_vec)(scheme *sc, int len);
-  pointer (*mk_foreign_func)(scheme *sc, foreign_func f);
+  pointer (*mk_foreign_func)(scheme *sc, ts_foreign_func f);
   void (*put_str)(scheme *sc, const char *s);
   void (*put_char)(scheme *sc, int c);
 
@@ -309,7 +309,7 @@ struct ts_interface {
 
 typedef struct ts_registerable
 {
-  foreign_func  f;
+  ts_foreign_func  f;
   const char *  name;
 }
 ts_registerable;
