@@ -446,17 +446,17 @@ static char *store_string(scheme *sc, int len, const char *str, char fill);
 static pointer ts_mk_vec(scheme *sc, int len);
 static pointer mk_atom(scheme *sc, char *q);
 static pointer mk_sharp_const(scheme *sc, char *name);
-static pointer mk_port(scheme *sc, port *p);
+static pointer mk_port(scheme *sc, ts_port *p);
 static pointer port_from_filename(scheme *sc, const char *fn, int prop);
 static pointer port_from_file(scheme *sc, FILE *, int prop);
 static pointer port_from_string(scheme *sc, char *start, char *past_the_end, int prop);
-static port *port_rep_from_filename(scheme *sc, const char *fn, int prop);
-static port *port_rep_from_file(scheme *sc, FILE *, int prop);
-static port *port_rep_from_string(scheme *sc, char *start, char *past_the_end, int prop);
+static ts_port *port_rep_from_filename(scheme *sc, const char *fn, int prop);
+static ts_port *port_rep_from_file(scheme *sc, FILE *, int prop);
+static ts_port *port_rep_from_string(scheme *sc, char *start, char *past_the_end, int prop);
 static void port_close(scheme *sc, pointer p, int flag);
 static void mark(pointer a);
 static void gc(scheme *sc, pointer a, pointer b);
-static int basic_inchar(port *pt);
+static int basic_inchar(ts_port *pt);
 static int inchar(scheme *sc);
 static void backchar(scheme *sc, int c);
 static char   *readstr_upto(scheme *sc, char *delim);
@@ -1024,7 +1024,7 @@ static pointer oblist_all_symbols(scheme *sc)
 
 #endif
 
-static pointer mk_port(scheme *sc, port *p) {
+static pointer mk_port(scheme *sc, ts_port *p) {
   pointer x = get_cell(sc, sc->NIL, sc->NIL);
 
   typeflag(x) = T_PORT|T_ATOM;
@@ -1478,10 +1478,10 @@ static int file_interactive(scheme *sc) {
      && sc->inport->_object._port->kind&port_file;
 }
 
-static port *port_rep_from_filename(scheme *sc, const char *fn, int prop) {
+static ts_port *port_rep_from_filename(scheme *sc, const char *fn, int prop) {
   FILE *f;
   char *rw;
-  port *pt;
+  ts_port *pt;
   if(prop==(port_input|port_output)) {
     rw="a+";
   } else if(prop==port_output) {
@@ -1506,7 +1506,7 @@ static port *port_rep_from_filename(scheme *sc, const char *fn, int prop) {
 }
 
 static pointer port_from_filename(scheme *sc, const char *fn, int prop) {
-  port *pt;
+  ts_port *pt;
   pt=port_rep_from_filename(sc,fn,prop);
   if(pt==0) {
     return sc->NIL;
@@ -1514,11 +1514,11 @@ static pointer port_from_filename(scheme *sc, const char *fn, int prop) {
   return mk_port(sc,pt);
 }
 
-static port *port_rep_from_file(scheme *sc, FILE *f, int prop)
+static ts_port *port_rep_from_file(scheme *sc, FILE *f, int prop)
 {
-    port *pt;
+    ts_port *pt;
 
-    pt = (port *)sc->malloc(sizeof *pt);
+    pt = (ts_port *)sc->malloc(sizeof *pt);
     if (pt == NULL) {
         return NULL;
     }
@@ -1529,7 +1529,7 @@ static port *port_rep_from_file(scheme *sc, FILE *f, int prop)
 }
 
 static pointer port_from_file(scheme *sc, FILE *f, int prop) {
-  port *pt;
+  ts_port *pt;
   pt=port_rep_from_file(sc,f,prop);
   if(pt==0) {
     return sc->NIL;
@@ -1537,9 +1537,9 @@ static pointer port_from_file(scheme *sc, FILE *f, int prop) {
   return mk_port(sc,pt);
 }
 
-static port *port_rep_from_string(scheme *sc, char *start, char *past_the_end, int prop) {
-  port *pt;
-  pt=(port*)sc->malloc(sizeof(port));
+static ts_port *port_rep_from_string(scheme *sc, char *start, char *past_the_end, int prop) {
+  ts_port *pt;
+  pt=(ts_port*)sc->malloc(sizeof(ts_port));
   if(pt==0) {
     return 0;
   }
@@ -1551,7 +1551,7 @@ static port *port_rep_from_string(scheme *sc, char *start, char *past_the_end, i
 }
 
 static pointer port_from_string(scheme *sc, char *start, char *past_the_end, int prop) {
-  port *pt;
+  ts_port *pt;
   pt=port_rep_from_string(sc,start,past_the_end,prop);
   if(pt==0) {
     return sc->NIL;
@@ -1561,10 +1561,10 @@ static pointer port_from_string(scheme *sc, char *start, char *past_the_end, int
 
 #define BLOCK_SIZE 256
 
-static port *port_rep_from_scratch(scheme *sc) {
-  port *pt;
+static ts_port *port_rep_from_scratch(scheme *sc) {
+  ts_port *pt;
   char *start;
-  pt=(port*)sc->malloc(sizeof(port));
+  pt=(ts_port*)sc->malloc(sizeof(ts_port));
   if(pt==0) {
     return 0;
   }
@@ -1582,7 +1582,7 @@ static port *port_rep_from_scratch(scheme *sc) {
 }
 
 static pointer port_from_scratch(scheme *sc) {
-  port *pt;
+  ts_port *pt;
   pt=port_rep_from_scratch(sc);
   if(pt==0) {
     return sc->NIL;
@@ -1591,7 +1591,7 @@ static pointer port_from_scratch(scheme *sc) {
 }
 
 static void port_close(scheme *sc, pointer p, int flag) {
-  port *pt=p->_object._port;
+  ts_port *pt=p->_object._port;
   pt->kind&=~flag;
   if((pt->kind & (port_input|port_output))==0) {
     if(pt->kind&port_file) {
@@ -1613,7 +1613,7 @@ static void port_close(scheme *sc, pointer p, int flag) {
 /* get new character from input file */
 static int inchar(scheme *sc) {
   int c;
-  port *pt;
+  ts_port *pt;
 
   pt = sc->inport->_object._port;
   if(pt->kind & port_saw_EOF)
@@ -1630,7 +1630,7 @@ static int inchar(scheme *sc) {
   return c;
 }
 
-static int basic_inchar(port *pt) {
+static int basic_inchar(ts_port *pt) {
   if(pt->kind & port_file) {
     return fgetc(pt->rep.stdio.file);
   } else {
@@ -1645,7 +1645,7 @@ static int basic_inchar(port *pt) {
 
 /* back character to input buffer */
 static void backchar(scheme *sc, int c) {
-  port *pt;
+  ts_port *pt;
   if(c==EOF) return;
   pt=sc->inport->_object._port;
   if(pt->kind&port_file) {
@@ -1657,7 +1657,7 @@ static void backchar(scheme *sc, int c) {
   }
 }
 
-static int realloc_port_string(scheme *sc, port *p)
+static int realloc_port_string(scheme *sc, ts_port *p)
 {
   char *start=p->rep.string.start;
   size_t new_size=p->rep.string.past_the_end-start+1+BLOCK_SIZE;
@@ -1677,7 +1677,7 @@ static int realloc_port_string(scheme *sc, port *p)
 }
 
 INTERFACE void ts_put_str(scheme *sc, const char *s) {
-  port *pt=sc->outport->_object._port;
+  ts_port *pt=sc->outport->_object._port;
   if(pt->kind&port_file) {
     fputs(s,pt->rep.stdio.file);
   } else {
@@ -1692,7 +1692,7 @@ INTERFACE void ts_put_str(scheme *sc, const char *s) {
 }
 
 static void putchars(scheme *sc, const char *s, int len) {
-  port *pt=sc->outport->_object._port;
+  ts_port *pt=sc->outport->_object._port;
   if(pt->kind&port_file) {
     fwrite(s,1,len,pt->rep.stdio.file);
   } else {
@@ -1707,7 +1707,7 @@ static void putchars(scheme *sc, const char *s, int len) {
 }
 
 INTERFACE void ts_put_char(scheme *sc, int c) {
-  port *pt=sc->outport->_object._port;
+  ts_port *pt=sc->outport->_object._port;
   if(pt->kind&port_file) {
     fputc(c,pt->rep.stdio.file);
   } else {
@@ -4072,7 +4072,7 @@ static pointer opexe_4(scheme *sc, enum scheme_opcodes op) {
           s_return(sc,p);
      }
      case OP_GET_OUTSTRING: /* get-output-string */ {
-          port *p;
+          ts_port *p;
 
           if ((p=car(sc->args)->_object._port)->kind&port_string) {
                off_t size;

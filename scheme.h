@@ -41,7 +41,7 @@ enum ts_port_kind {
   port_saw_EOF=64
 };
 
-typedef struct port {
+typedef struct ts_port {
   unsigned char kind;
   union {
     struct {
@@ -56,7 +56,7 @@ typedef struct port {
       char *curr;
     } string;
   } rep;
-} port;
+} ts_port;
 
 /* cell structure */
 struct ts_cell {
@@ -67,7 +67,7 @@ struct ts_cell {
       int   _length;
     } _string;
     ts_num _number;
-    port *_port;
+    ts_port *_port;
     foreign_func _ff;
     struct {
       struct ts_cell *_car;
@@ -142,7 +142,7 @@ pointer loadport;
 #ifndef TS_MAXFIL
 #define TS_MAXFIL 64
 #endif
-port load_stack[TS_MAXFIL];     /* Stack of open files for port -1 (LOADing) */
+ts_port load_stack[TS_MAXFIL];     /* Stack of open files for ts_port -1 (LOADing) */
 int nesting_stack[TS_MAXFIL];
 int file_i;
 int nesting;
