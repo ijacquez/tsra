@@ -23,13 +23,13 @@ typedef void (*func_dealloc)(void *);
 typedef pointer (*foreign_func)(scheme *, pointer);
 
 /* num, for generic arithmetic */
-typedef struct num {
+typedef struct ts_num {
      char is_fixnum;
      union {
           long ivalue;
           double rvalue;
      } value;
-} num;
+} ts_num;
 
 enum ts_port_kind {
   port_free=0,
@@ -66,7 +66,7 @@ struct ts_cell {
       char   *_svalue;
       int   _length;
     } _string;
-    num _number;
+    ts_num _number;
     port *_port;
     foreign_func _ff;
     struct {
@@ -192,8 +192,8 @@ TS_EXPORT void ts_set_extern_data(scheme *sc, void *p);
 TS_EXPORT void ts_def(scheme *sc, pointer env, pointer symbol, pointer value);
 
 TS_EXPORT pointer ts_cons(scheme *sc, pointer a, pointer b, int immutable);
-TS_EXPORT pointer ts_mk_int(scheme *sc, long num);
-TS_EXPORT pointer ts_mk_real(scheme *sc, double num);
+TS_EXPORT pointer ts_mk_int(scheme *sc, long ts_num);
+TS_EXPORT pointer ts_mk_real(scheme *sc, double ts_num);
 TS_EXPORT pointer ts_mk_sym(scheme *sc, const char *name);
 TS_EXPORT pointer ts_gen_sym(scheme *sc);
 TS_EXPORT pointer ts_mk_str(scheme *sc, const char *str);
@@ -208,7 +208,7 @@ TS_EXPORT int ts_eqv(pointer a, pointer b);
 TS_EXPORT int ts_is_str(pointer p);
 TS_EXPORT char *ts_str_val(pointer p);
 TS_EXPORT int ts_is_num(pointer p);
-TS_EXPORT num ts_num_val(pointer p);
+TS_EXPORT ts_num ts_num_val(pointer p);
 TS_EXPORT long ts_int_val(pointer p);
 TS_EXPORT double ts_real_val(pointer p);
 TS_EXPORT int ts_is_int(pointer p);
@@ -249,8 +249,8 @@ struct ts_interface {
   pointer (*cons)(scheme *sc, pointer a, pointer b);
   pointer (*immutable_cons)(scheme *sc, pointer a, pointer b);
   pointer (*reserve_cells)(scheme *sc, int n);
-  pointer (*mk_int)(scheme *sc, long num);
-  pointer (*mk_real)(scheme *sc, double num);
+  pointer (*mk_int)(scheme *sc, long ts_num);
+  pointer (*mk_real)(scheme *sc, double ts_num);
   pointer (*mk_sym)(scheme *sc, const char *name);
   pointer (*gen_sym)(scheme *sc);
   pointer (*mk_str)(scheme *sc, const char *str);
@@ -264,7 +264,7 @@ struct ts_interface {
   int (*is_str)(pointer p);
   char *(*str_val)(pointer p);
   int (*is_num)(pointer p);
-  num (*num_val)(pointer p);
+  ts_num (*num_val)(pointer p);
   long (*int_val)(pointer p);
   double (*real_val)(pointer p);
   int (*is_int)(pointer p);

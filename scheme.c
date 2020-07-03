@@ -242,18 +242,18 @@ enum scheme_types {
 #define UNMARK       32767    /* 0111111111111111 */
 
 
-static num num_add(num a, num b);
-static num num_mul(num a, num b);
-static num num_div(num a, num b);
-static num num_intdiv(num a, num b);
-static num num_sub(num a, num b);
-static num num_rem(num a, num b);
-static num num_mod(num a, num b);
-static int num_eq(num a, num b);
-static int num_gt(num a, num b);
-static int num_ge(num a, num b);
-static int num_lt(num a, num b);
-static int num_le(num a, num b);
+static ts_num num_add(ts_num a, ts_num b);
+static ts_num num_mul(ts_num a, ts_num b);
+static ts_num num_div(ts_num a, ts_num b);
+static ts_num num_intdiv(ts_num a, ts_num b);
+static ts_num num_sub(ts_num a, ts_num b);
+static ts_num num_rem(ts_num a, ts_num b);
+static ts_num num_mod(ts_num a, ts_num b);
+static int num_eq(ts_num a, ts_num b);
+static int num_gt(ts_num a, ts_num b);
+static int num_ge(ts_num a, ts_num b);
+static int num_lt(ts_num a, ts_num b);
+static int num_le(ts_num a, ts_num b);
 
 #if USE_MATH
 static double round_per_R5RS(double x);
@@ -263,8 +263,8 @@ static int num_ts_is_int(pointer p) {
   return ((p)->_object._number.is_fixnum);
 }
 
-static num num_zero;
-static num num_one;
+static ts_num num_zero;
+static ts_num num_one;
 
 /* macros for cell operations */
 #define typeflag(p)      ((p)->_flag)
@@ -294,7 +294,7 @@ INTERFACE int ts_is_real(pointer p) {
 
 INTERFACE int ts_is_char(pointer p) { return (type(p)==T_CHARACTER); }
 INTERFACE char *ts_str_val(pointer p) { return stts_real_val(p); }
-num ts_num_val(pointer p)       { return ((p)->_object._number); }
+ts_num ts_num_val(pointer p)       { return ((p)->_object._number); }
 INTERFACE long ts_int_val(pointer p)      { return (num_ts_is_int(p)?(p)->_object._number.value.ivalue:(long)(p)->_object._number.value.rvalue); }
 INTERFACE double ts_real_val(pointer p)    { return (!num_ts_is_int(p)?(p)->_object._number.value.rvalue:(double)(p)->_object._number.value.ivalue); }
 #define ivalue_unchecked(p)       ((p)->_object._number.value.ivalue)
@@ -441,7 +441,7 @@ static pointer find_consecutive_cells(scheme *sc, int n);
 static void finalize_cell(scheme *sc, pointer a);
 static int count_consecutive_cells(pointer x, int needed);
 static pointer find_slot_in_env(scheme *sc, pointer env, pointer sym, int all);
-static pointer mk_number(scheme *sc, num n);
+static pointer mk_number(scheme *sc, ts_num n);
 static char *store_string(scheme *sc, int len, const char *str, char fill);
 static pointer ts_mk_vec(scheme *sc, int len);
 static pointer mk_atom(scheme *sc, char *q);
@@ -488,8 +488,8 @@ static void assign_proc(scheme *sc, enum scheme_opcodes, char *name);
 #define num_ts_int_val(n)       (n.is_fixnum?(n).value.ivalue:(long)(n).value.rvalue)
 #define num_ts_real_val(n)       (!n.is_fixnum?(n).value.rvalue:(double)(n).value.ivalue)
 
-static num num_add(num a, num b) {
- num ret;
+static ts_num num_add(ts_num a, ts_num b) {
+ ts_num ret;
  ret.is_fixnum=a.is_fixnum && b.is_fixnum;
  if(ret.is_fixnum) {
      ret.value.ivalue= a.value.ivalue+b.value.ivalue;
@@ -499,8 +499,8 @@ static num num_add(num a, num b) {
  return ret;
 }
 
-static num num_mul(num a, num b) {
- num ret;
+static ts_num num_mul(ts_num a, ts_num b) {
+ ts_num ret;
  ret.is_fixnum=a.is_fixnum && b.is_fixnum;
  if(ret.is_fixnum) {
      ret.value.ivalue= a.value.ivalue*b.value.ivalue;
@@ -510,8 +510,8 @@ static num num_mul(num a, num b) {
  return ret;
 }
 
-static num num_div(num a, num b) {
- num ret;
+static ts_num num_div(ts_num a, ts_num b) {
+ ts_num ret;
  ret.is_fixnum=a.is_fixnum && b.is_fixnum && a.value.ivalue%b.value.ivalue==0;
  if(ret.is_fixnum) {
      ret.value.ivalue= a.value.ivalue/b.value.ivalue;
@@ -521,8 +521,8 @@ static num num_div(num a, num b) {
  return ret;
 }
 
-static num num_intdiv(num a, num b) {
- num ret;
+static ts_num num_intdiv(ts_num a, ts_num b) {
+ ts_num ret;
  ret.is_fixnum=a.is_fixnum && b.is_fixnum;
  if(ret.is_fixnum) {
      ret.value.ivalue= a.value.ivalue/b.value.ivalue;
@@ -532,8 +532,8 @@ static num num_intdiv(num a, num b) {
  return ret;
 }
 
-static num num_sub(num a, num b) {
- num ret;
+static ts_num num_sub(ts_num a, ts_num b) {
+ ts_num ret;
  ret.is_fixnum=a.is_fixnum && b.is_fixnum;
  if(ret.is_fixnum) {
      ret.value.ivalue= a.value.ivalue-b.value.ivalue;
@@ -543,8 +543,8 @@ static num num_sub(num a, num b) {
  return ret;
 }
 
-static num num_rem(num a, num b) {
- num ret;
+static ts_num num_rem(ts_num a, ts_num b) {
+ ts_num ret;
  long e1, e2, res;
  ret.is_fixnum=a.is_fixnum && b.is_fixnum;
  e1=num_ts_int_val(a);
@@ -568,8 +568,8 @@ static num num_rem(num a, num b) {
  return ret;
 }
 
-static num num_mod(num a, num b) {
- num ret;
+static ts_num num_mod(ts_num a, ts_num b) {
+ ts_num ret;
  long e1, e2, res;
  ret.is_fixnum=a.is_fixnum && b.is_fixnum;
  e1=num_ts_int_val(a);
@@ -587,7 +587,7 @@ static num num_mod(num a, num b) {
  return ret;
 }
 
-static int num_eq(num a, num b) {
+static int num_eq(ts_num a, ts_num b) {
  int ret;
  int is_fixnum=a.is_fixnum && b.is_fixnum;
  if(is_fixnum) {
@@ -599,7 +599,7 @@ static int num_eq(num a, num b) {
 }
 
 
-static int num_gt(num a, num b) {
+static int num_gt(ts_num a, ts_num b) {
  int ret;
  int is_fixnum=a.is_fixnum && b.is_fixnum;
  if(is_fixnum) {
@@ -610,11 +610,11 @@ static int num_gt(num a, num b) {
  return ret;
 }
 
-static int num_ge(num a, num b) {
+static int num_ge(ts_num a, ts_num b) {
  return !num_lt(a,b);
 }
 
-static int num_lt(num a, num b) {
+static int num_lt(ts_num a, ts_num b) {
  int ret;
  int is_fixnum=a.is_fixnum && b.is_fixnum;
  if(is_fixnum) {
@@ -625,7 +625,7 @@ static int num_lt(num a, num b) {
  return ret;
 }
 
-static int num_le(num a, num b) {
+static int num_le(ts_num a, ts_num b) {
  return !num_gt(a,b);
 }
 
@@ -1050,11 +1050,11 @@ INTERFACE pointer ts_mk_char(scheme *sc, int c) {
 }
 
 /* get number atom (integer) */
-INTERFACE pointer ts_mk_int(scheme *sc, long num) {
+INTERFACE pointer ts_mk_int(scheme *sc, long ts_num) {
   pointer x = get_cell(sc,sc->NIL, sc->NIL);
 
   typeflag(x) = (T_NUMBER | T_ATOM);
-  ivalue_unchecked(x)= num;
+  ivalue_unchecked(x)= ts_num;
   set_num_integer(x);
   return (x);
 }
@@ -1068,7 +1068,7 @@ INTERFACE pointer ts_mk_real(scheme *sc, double n) {
   return (x);
 }
 
-static pointer mk_number(scheme *sc, num n) {
+static pointer mk_number(scheme *sc, ts_num n) {
  if(n.is_fixnum) {
      return ts_mk_int(sc,n.value.ivalue);
  } else {
@@ -3214,7 +3214,7 @@ static pointer opexe_1(scheme *sc, enum scheme_opcodes op) {
 
 static pointer opexe_2(scheme *sc, enum scheme_opcodes op) {
      pointer x;
-     num v;
+     ts_num v;
 #if USE_MATH
      double dd;
 #endif
@@ -3760,8 +3760,8 @@ int ts_list_len(scheme *sc, pointer a) {
 
 static pointer opexe_3(scheme *sc, enum scheme_opcodes op) {
      pointer x;
-     num v;
-     int (*comp_func)(num,num)=0;
+     ts_num v;
+     int (*comp_func)(ts_num,ts_num)=0;
 
      switch (op) {
      case OP_NOT:        /* not */
