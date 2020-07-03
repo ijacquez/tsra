@@ -4757,7 +4757,7 @@ scheme *ts_init_new() {
   }
 }
 
-scheme *ts_init_new_custom_alloc(func_alloc malloc, func_dealloc free) {
+scheme *ts_init_new_custom_alloc(ts_func_alloc malloc, func_dealloc free) {
   scheme *sc=(scheme*)malloc(sizeof(scheme));
   if(!ts_init_custom_alloc(sc,malloc,free)) {
     free(sc);
@@ -4772,7 +4772,7 @@ int ts_init(scheme *sc) {
  return ts_init_custom_alloc(sc,malloc,free);
 }
 
-int ts_init_custom_alloc(scheme *sc, func_alloc malloc, func_dealloc free) {
+int ts_init_custom_alloc(scheme *sc, ts_func_alloc malloc, func_dealloc free) {
   int i, n=sizeof(dispatch_table)/sizeof(dispatch_table[0]);
   pointer x;
 
