@@ -31,7 +31,7 @@ typedef struct num {
      } value;
 } num;
 
-enum scheme_port_kind {
+enum ts_port_kind {
   port_free=0,
   port_file=1,
   port_string=2,
