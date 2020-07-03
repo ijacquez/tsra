@@ -676,14 +676,14 @@ static int alloc_cellseg(scheme *sc, int n) {
      int k;
      int adj=ADJ;
 
-     if(adj<sizeof(struct cell)) {
-       adj=sizeof(struct cell);
+     if(adj<sizeof(struct ts_cell)) {
+       adj=sizeof(struct ts_cell);
      }
 
      for (k = 0; k < n; k++) {
          if (sc->last_cell_seg >= TS_CELL_NSEGMENT - 1)
               return k;
-         cp = (char*) sc->malloc(TS_CELL_SEGSIZE * sizeof(struct cell)+adj);
+         cp = (char*) sc->malloc(TS_CELL_SEGSIZE * sizeof(struct ts_cell)+adj);
          if (cp == 0)
               return k;
          i = ++sc->last_cell_seg ;
@@ -3870,7 +3870,7 @@ static pointer opexe_4(scheme *sc, enum scheme_opcodes op) {
           }
 
      case OP_SAVE_FORCED:     /* Save forced value replacing promise */
-          memcpy(sc->code,sc->value,sizeof(struct cell));
+          memcpy(sc->code,sc->value,sizeof(struct ts_cell));
           s_return(sc,sc->value);
 
      case OP_WRITE:      /* write */

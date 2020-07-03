@@ -16,7 +16,7 @@
 #endif
 
 typedef struct scheme scheme;
-typedef struct cell *pointer;
+typedef struct ts_cell *pointer;
 
 typedef void * (*func_alloc)(size_t);
 typedef void (*func_dealloc)(void *);
@@ -59,7 +59,7 @@ typedef struct port {
 } port;
 
 /* cell structure */
-struct cell {
+struct ts_cell {
   unsigned int _flag;
   union {
     struct {
@@ -70,8 +70,8 @@ struct cell {
     port *_port;
     foreign_func _ff;
     struct {
-      struct cell *_car;
-      struct cell *_cdr;
+      struct ts_cell *_car;
+      struct ts_cell *_cdr;
     } _cons;
   } _object;
 };
@@ -104,15 +104,15 @@ pointer dump;            /* stack register for next evaluation */
 
 int interactive_repl;    /* are we in an interactive REPL? */
 
-struct cell _sink;
+struct ts_cell _sink;
 pointer sink;            /* when mem. alloc. fails */
-struct cell _NIL;
+struct ts_cell _NIL;
 pointer NIL;             /* special cell representing empty cell */
-struct cell _HASHT;
+struct ts_cell _HASHT;
 pointer T;               /* special cell representing #t */
-struct cell _HASHF;
+struct ts_cell _HASHF;
 pointer F;               /* special cell representing #f */
-struct cell _EOF_OBJ;
+struct ts_cell _EOF_OBJ;
 pointer EOF_OBJ;         /* special cell representing end-of-file object */
 pointer oblist;          /* pointer to symbol table */
 pointer global_env;      /* pointer to global environment */
