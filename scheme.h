@@ -19,7 +19,7 @@ typedef struct scheme scheme;
 typedef struct ts_cell *pointer;
 
 typedef void * (*ts_func_alloc)(size_t);
-typedef void (*func_dealloc)(void *);
+typedef void (*ts_func_dealloc)(void *);
 typedef pointer (*foreign_func)(scheme *, pointer);
 
 /* num, for generic arithmetic */
@@ -79,7 +79,7 @@ struct ts_cell {
 struct scheme {
 /* arrays for segments */
 ts_func_alloc malloc;
-func_dealloc free;
+ts_func_dealloc free;
 
 /* return code */
 int retcode;
@@ -174,9 +174,9 @@ int dump_size;      /* number of frames allocated for dump stack */
 };
 
 TS_EXPORT scheme *ts_init_new(void);
-TS_EXPORT scheme *ts_init_new_custom_alloc(ts_func_alloc malloc, func_dealloc free);
+TS_EXPORT scheme *ts_init_new_custom_alloc(ts_func_alloc malloc, ts_func_dealloc free);
 TS_EXPORT int ts_init(scheme *sc);
-TS_EXPORT int ts_init_custom_alloc(scheme *sc, ts_func_alloc, func_dealloc);
+TS_EXPORT int ts_init_custom_alloc(scheme *sc, ts_func_alloc, ts_func_dealloc);
 TS_EXPORT void ts_deinit(scheme *sc);
 TS_EXPORT void ts_set_in_port_file(scheme *sc, FILE *fin);
 TS_EXPORT void ts_set_in_port_str(scheme *sc, char *start, char *past_the_end);
