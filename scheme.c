@@ -114,6 +114,9 @@ enum scheme_opcodes {
   OP_MAXDEFINED
 };
 
+#define cons(sc,a,b) ts_cons(sc,a,b,0)
+#define immutablets_cons(sc,a,b) ts_cons(sc,a,b,1)
+
 #include "scheme-private.h"
 #ifndef WIN32
 # include <unistd.h>
