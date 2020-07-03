@@ -245,39 +245,39 @@ TS_EXPORT int ts_is_immutable(pointer p);
 TS_EXPORT void ts_set_immutable(pointer p);
 
 struct ts_interface {
-  void (*scheme_define)(scheme *sc, pointer env, pointer symbol, pointer value);
+  void (*def)(scheme *sc, pointer env, pointer symbol, pointer value);
   pointer (*cons)(scheme *sc, pointer a, pointer b);
   pointer (*immutable_cons)(scheme *sc, pointer a, pointer b);
   pointer (*reserve_cells)(scheme *sc, int n);
-  pointer (*mk_integer)(scheme *sc, long num);
+  pointer (*mk_int)(scheme *sc, long num);
   pointer (*mk_real)(scheme *sc, double num);
-  pointer (*mk_symbol)(scheme *sc, const char *name);
-  pointer (*gensym)(scheme *sc);
-  pointer (*mk_string)(scheme *sc, const char *str);
-  pointer (*mk_counted_string)(scheme *sc, const char *str, int len);
-  pointer (*mk_character)(scheme *sc, int c);
-  pointer (*mk_vector)(scheme *sc, int len);
+  pointer (*mk_sym)(scheme *sc, const char *name);
+  pointer (*gen_sym)(scheme *sc);
+  pointer (*mk_str)(scheme *sc, const char *str);
+  pointer (*mk_counted_str)(scheme *sc, const char *str, int len);
+  pointer (*mk_char)(scheme *sc, int c);
+  pointer (*mk_vec)(scheme *sc, int len);
   pointer (*mk_foreign_func)(scheme *sc, foreign_func f);
-  void (*putstr)(scheme *sc, const char *s);
-  void (*putcharacter)(scheme *sc, int c);
+  void (*put_str)(scheme *sc, const char *s);
+  void (*put_char)(scheme *sc, int c);
 
-  int (*is_string)(pointer p);
-  char *(*string_value)(pointer p);
-  int (*is_number)(pointer p);
-  num (*nvalue)(pointer p);
-  long (*ivalue)(pointer p);
-  double (*rvalue)(pointer p);
-  int (*is_integer)(pointer p);
+  int (*is_str)(pointer p);
+  char *(*str_val)(pointer p);
+  int (*is_num)(pointer p);
+  num (*num_val)(pointer p);
+  long (*int_val)(pointer p);
+  double (*real_val)(pointer p);
+  int (*is_int)(pointer p);
   int (*is_real)(pointer p);
-  int (*is_character)(pointer p);
-  long (*charvalue)(pointer p);
+  int (*is_char)(pointer p);
+  long (*char_val)(pointer p);
   int (*is_list)(scheme *sc, pointer p);
-  int (*is_vector)(pointer p);
-  int (*list_length)(scheme *sc, pointer vec);
-  long (*vector_length)(pointer vec);
-  void (*fill_vector)(pointer vec, pointer elem);
-  pointer (*vector_elem)(pointer vec, int ielem);
-  pointer (*set_vector_elem)(pointer vec, int ielem, pointer newel);
+  int (*is_vec)(pointer p);
+  int (*list_len)(scheme *sc, pointer vec);
+  long (*vec_len)(pointer vec);
+  void (*fill_vec)(pointer vec, pointer elem);
+  pointer (*vec_elem)(pointer vec, int ielem);
+  pointer (*set_vec_elem)(pointer vec, int ielem, pointer newel);
   int (*is_port)(pointer p);
 
   int (*is_pair)(pointer p);
@@ -286,13 +286,13 @@ struct ts_interface {
   pointer (*set_car)(pointer p, pointer q);
   pointer (*set_cdr)(pointer p, pointer q);
 
-  int (*is_symbol)(pointer p);
-  char *(*symname)(pointer p);
+  int (*is_sym)(pointer p);
+  char *(*sym_name)(pointer p);
 
   int (*is_syntax)(pointer p);
   int (*is_proc)(pointer p);
   int (*is_foreign)(pointer p);
-  char *(*syntaxname)(pointer p);
+  char *(*syntax_name)(pointer p);
   int (*is_closure)(pointer p);
   int (*is_macro)(pointer p);
   pointer (*closure_code)(pointer p);
@@ -300,11 +300,11 @@ struct ts_interface {
 
   int (*is_continuation)(pointer p);
   int (*is_promise)(pointer p);
-  int (*is_environment)(pointer p);
+  int (*is_env)(pointer p);
   int (*is_immutable)(pointer p);
-  void (*setimmutable)(pointer p);
+  void (*set_immutable)(pointer p);
   void (*load_file)(scheme *sc, FILE *fin);
-  void (*load_string)(scheme *sc, const char *input);
+  void (*load_str)(scheme *sc, const char *input);
 };
 
 typedef struct ts_registerable
