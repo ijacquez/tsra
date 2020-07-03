@@ -7,6 +7,6 @@
 
 #include "scheme-private.h"
 
-TS_EXPORT pointer scm_load_ext(scheme *sc, pointer arglist);
+TS_EXPORT ts_ptr scm_load_ext(scheme *sc, ts_ptr arglist);
 
 #endif

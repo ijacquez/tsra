@@ -259,7 +259,7 @@ static int num_le(ts_num a, ts_num b);
 static double round_per_R5RS(double x);
 #endif
 static int is_zero_double(double x);
-static int num_ts_is_int(pointer p) {
+static int num_ts_is_int(ts_ptr p) {
   return ((p)->_object._number.is_fixnum);
 }
 
@@ -270,17 +270,17 @@ static ts_num num_one;
 #define typeflag(p)      ((p)->_flag)
 #define type(p)          (typeflag(p)&T_MASKTYPE)
 
-INTERFACE int ts_is_str(pointer p)     { return (type(p)==T_STRING); }
+INTERFACE int ts_is_str(ts_ptr p)     { return (type(p)==T_STRING); }
 #define stts_real_val(p)      ((p)->_object._string._svalue)
 #define strlength(p)        ((p)->_object._string._length)
 
-INTERFACE static int ts_is_list(scheme *sc, pointer p);
-INTERFACE int ts_is_vec(pointer p)    { return (type(p)==T_VECTOR); }
-INTERFACE static void ts_fill_vec(pointer vec, pointer obj);
-INTERFACE static pointer ts_vec_elem(pointer vec, int ielem);
-INTERFACE static pointer ts_set_vec_elem(pointer vec, int ielem, pointer a);
-INTERFACE int ts_is_num(pointer p)    { return (type(p)==T_NUMBER); }
-INTERFACE int ts_is_int(pointer p) {
+INTERFACE static int ts_is_list(scheme *sc, ts_ptr p);
+INTERFACE int ts_is_vec(ts_ptr p)    { return (type(p)==T_VECTOR); }
+INTERFACE static void ts_fill_vec(ts_ptr vec, ts_ptr obj);
+INTERFACE static ts_ptr ts_vec_elem(ts_ptr vec, int ielem);
+INTERFACE static ts_ptr ts_set_vec_elem(ts_ptr vec, int ielem, ts_ptr a);
+INTERFACE int ts_is_num(ts_ptr p)    { return (type(p)==T_NUMBER); }
+INTERFACE int ts_is_int(ts_ptr p) {
   if (!ts_is_num(p))
       return 0;
   if (num_ts_is_int(p) || (double)ts_int_val(p) == ts_real_val(p))
@@ -288,59 +288,59 @@ INTERFACE int ts_is_int(pointer p) {
   return 0;
 }
 
-INTERFACE int ts_is_real(pointer p) {
+INTERFACE int ts_is_real(ts_ptr p) {
   return ts_is_num(p) && (!(p)->_object._number.is_fixnum);
 }
 
-INTERFACE int ts_is_char(pointer p) { return (type(p)==T_CHARACTER); }
-INTERFACE char *ts_str_val(pointer p) { return stts_real_val(p); }
-ts_num ts_num_val(pointer p)       { return ((p)->_object._number); }
-INTERFACE long ts_int_val(pointer p)      { return (num_ts_is_int(p)?(p)->_object._number.value.ivalue:(long)(p)->_object._number.value.rvalue); }
-INTERFACE double ts_real_val(pointer p)    { return (!num_ts_is_int(p)?(p)->_object._number.value.rvalue:(double)(p)->_object._number.value.ivalue); }
+INTERFACE int ts_is_char(ts_ptr p) { return (type(p)==T_CHARACTER); }
+INTERFACE char *ts_str_val(ts_ptr p) { return stts_real_val(p); }
+ts_num ts_num_val(ts_ptr p)       { return ((p)->_object._number); }
+INTERFACE long ts_int_val(ts_ptr p)      { return (num_ts_is_int(p)?(p)->_object._number.value.ivalue:(long)(p)->_object._number.value.rvalue); }
+INTERFACE double ts_real_val(ts_ptr p)    { return (!num_ts_is_int(p)?(p)->_object._number.value.rvalue:(double)(p)->_object._number.value.ivalue); }
 #define ivalue_unchecked(p)       ((p)->_object._number.value.ivalue)
 #define rvalue_unchecked(p)       ((p)->_object._number.value.rvalue)
 #define set_num_integer(p)   (p)->_object._number.is_fixnum=1;
 #define set_num_real(p)      (p)->_object._number.is_fixnum=0;
-INTERFACE  long ts_char_val(pointer p)  { return ivalue_unchecked(p); }
+INTERFACE  long ts_char_val(ts_ptr p)  { return ivalue_unchecked(p); }
 
-INTERFACE int ts_is_port(pointer p)     { return (type(p)==T_PORT); }
-INTERFACE int is_inport(pointer p)  { return ts_is_port(p) && p->_object._port->kind & port_input; }
-INTERFACE int is_outport(pointer p) { return ts_is_port(p) && p->_object._port->kind & port_output; }
+INTERFACE int ts_is_port(ts_ptr p)     { return (type(p)==T_PORT); }
+INTERFACE int is_inport(ts_ptr p)  { return ts_is_port(p) && p->_object._port->kind & port_input; }
+INTERFACE int is_outport(ts_ptr p) { return ts_is_port(p) && p->_object._port->kind & port_output; }
 
-INTERFACE int ts_is_pair(pointer p)     { return (type(p)==T_PAIR); }
+INTERFACE int ts_is_pair(ts_ptr p)     { return (type(p)==T_PAIR); }
 #define car(p)           ((p)->_object._cons._car)
 #define cdr(p)           ((p)->_object._cons._cdr)
-INTERFACE pointer ts_pair_car(pointer p)   { return car(p); }
-INTERFACE pointer ts_pair_cdr(pointer p)   { return cdr(p); }
-INTERFACE pointer ts_set_car(pointer p, pointer q) { return car(p)=q; }
-INTERFACE pointer ts_set_cdr(pointer p, pointer q) { return cdr(p)=q; }
+INTERFACE ts_ptr ts_pair_car(ts_ptr p)   { return car(p); }
+INTERFACE ts_ptr ts_pair_cdr(ts_ptr p)   { return cdr(p); }
+INTERFACE ts_ptr ts_set_car(ts_ptr p, ts_ptr q) { return car(p)=q; }
+INTERFACE ts_ptr ts_set_cdr(ts_ptr p, ts_ptr q) { return cdr(p)=q; }
 
-INTERFACE int ts_is_sym(pointer p)   { return (type(p)==T_SYMBOL); }
-INTERFACE char *ts_sym_name(pointer p)   { return stts_real_val(car(p)); }
+INTERFACE int ts_is_sym(ts_ptr p)   { return (type(p)==T_SYMBOL); }
+INTERFACE char *ts_sym_name(ts_ptr p)   { return stts_real_val(car(p)); }
 #if USE_PLIST
-TS_EXPORT int hasprop(pointer p)     { return (typeflag(p)&T_SYMBOL); }
+TS_EXPORT int hasprop(ts_ptr p)     { return (typeflag(p)&T_SYMBOL); }
 #define symprop(p)       cdr(p)
 #endif
 
-INTERFACE int ts_is_syntax(pointer p)   { return (typeflag(p)&T_SYNTAX); }
-INTERFACE int ts_is_proc(pointer p)     { return (type(p)==T_PROC); }
-INTERFACE int ts_is_foreign(pointer p)  { return (type(p)==T_FOREIGN); }
-INTERFACE char *ts_syntax_name(pointer p) { return stts_real_val(car(p)); }
+INTERFACE int ts_is_syntax(ts_ptr p)   { return (typeflag(p)&T_SYNTAX); }
+INTERFACE int ts_is_proc(ts_ptr p)     { return (type(p)==T_PROC); }
+INTERFACE int ts_is_foreign(ts_ptr p)  { return (type(p)==T_FOREIGN); }
+INTERFACE char *ts_syntax_name(ts_ptr p) { return stts_real_val(car(p)); }
 #define procnum(p)       ts_int_val(p)
-static const char *procname(pointer x);
+static const char *procname(ts_ptr x);
 
-INTERFACE int ts_is_closure(pointer p)  { return (type(p)==T_CLOSURE); }
-INTERFACE int ts_is_macro(pointer p)    { return (type(p)==T_MACRO); }
-INTERFACE pointer ts_closure_code(pointer p)   { return car(p); }
-INTERFACE pointer ts_closure_env(pointer p)    { return cdr(p); }
+INTERFACE int ts_is_closure(ts_ptr p)  { return (type(p)==T_CLOSURE); }
+INTERFACE int ts_is_macro(ts_ptr p)    { return (type(p)==T_MACRO); }
+INTERFACE ts_ptr ts_closure_code(ts_ptr p)   { return car(p); }
+INTERFACE ts_ptr ts_closure_env(ts_ptr p)    { return cdr(p); }
 
-INTERFACE int is_continuation(pointer p)    { return (type(p)==T_CONTINUATION); }
+INTERFACE int is_continuation(ts_ptr p)    { return (type(p)==T_CONTINUATION); }
 #define cont_dump(p)     cdr(p)
 
 /* To do: promise should be forced ONCE only */
-INTERFACE int ts_is_promise(pointer p)  { return (type(p)==T_PROMISE); }
+INTERFACE int ts_is_promise(ts_ptr p)  { return (type(p)==T_PROMISE); }
 
-INTERFACE int ts_is_env(pointer p) { return (type(p)==T_ENVIRONMENT); }
+INTERFACE int ts_is_env(ts_ptr p) { return (type(p)==T_ENVIRONMENT); }
 #define setenvironment(p)    typeflag(p) = T_ENVIRONMENT
 
 #define is_atom(p)       (typeflag(p)&T_ATOM)
@@ -351,9 +351,9 @@ INTERFACE int ts_is_env(pointer p) { return (type(p)==T_ENVIRONMENT); }
 #define setmark(p)       typeflag(p) |= MARK
 #define clrmark(p)       typeflag(p) &= UNMARK
 
-INTERFACE int ts_is_immutable(pointer p) { return (typeflag(p)&T_IMMUTABLE); }
+INTERFACE int ts_is_immutable(ts_ptr p) { return (typeflag(p)&T_IMMUTABLE); }
 /*#define ts_set_immutable(p)  typeflag(p) |= T_IMMUTABLE*/
-INTERFACE void ts_set_immutable(pointer p) { typeflag(p) |= T_IMMUTABLE; }
+INTERFACE void ts_set_immutable(ts_ptr p) { typeflag(p) |= T_IMMUTABLE; }
 
 #define caar(p)          car(car(p))
 #define cadr(p)          car(cdr(p))
@@ -433,56 +433,56 @@ static int file_interactive(scheme *sc);
 static int is_one_of(char *s, int c);
 static int alloc_cellseg(scheme *sc, int n);
 static long binary_decode(const char *s);
-static pointer get_cell(scheme *sc, pointer a, pointer b);
-static pointer _get_cell(scheme *sc, pointer a, pointer b);
-static pointer ts_reserve_cells(scheme *sc, int n);
-static pointer get_consecutive_cells(scheme *sc, int n);
-static pointer find_consecutive_cells(scheme *sc, int n);
-static void finalize_cell(scheme *sc, pointer a);
-static int count_consecutive_cells(pointer x, int needed);
-static pointer find_slot_in_env(scheme *sc, pointer env, pointer sym, int all);
-static pointer mk_number(scheme *sc, ts_num n);
+static ts_ptr get_cell(scheme *sc, ts_ptr a, ts_ptr b);
+static ts_ptr _get_cell(scheme *sc, ts_ptr a, ts_ptr b);
+static ts_ptr ts_reserve_cells(scheme *sc, int n);
+static ts_ptr get_consecutive_cells(scheme *sc, int n);
+static ts_ptr find_consecutive_cells(scheme *sc, int n);
+static void finalize_cell(scheme *sc, ts_ptr a);
+static int count_consecutive_cells(ts_ptr x, int needed);
+static ts_ptr find_slot_in_env(scheme *sc, ts_ptr env, ts_ptr sym, int all);
+static ts_ptr mk_number(scheme *sc, ts_num n);
 static char *store_string(scheme *sc, int len, const char *str, char fill);
-static pointer ts_mk_vec(scheme *sc, int len);
-static pointer mk_atom(scheme *sc, char *q);
-static pointer mk_sharp_const(scheme *sc, char *name);
-static pointer mk_port(scheme *sc, ts_port *p);
-static pointer port_from_filename(scheme *sc, const char *fn, int prop);
-static pointer port_from_file(scheme *sc, FILE *, int prop);
-static pointer port_from_string(scheme *sc, char *start, char *past_the_end, int prop);
+static ts_ptr ts_mk_vec(scheme *sc, int len);
+static ts_ptr mk_atom(scheme *sc, char *q);
+static ts_ptr mk_sharp_const(scheme *sc, char *name);
+static ts_ptr mk_port(scheme *sc, ts_port *p);
+static ts_ptr port_from_filename(scheme *sc, const char *fn, int prop);
+static ts_ptr port_from_file(scheme *sc, FILE *, int prop);
+static ts_ptr port_from_string(scheme *sc, char *start, char *past_the_end, int prop);
 static ts_port *port_rep_from_filename(scheme *sc, const char *fn, int prop);
 static ts_port *port_rep_from_file(scheme *sc, FILE *, int prop);
 static ts_port *port_rep_from_string(scheme *sc, char *start, char *past_the_end, int prop);
-static void port_close(scheme *sc, pointer p, int flag);
-static void mark(pointer a);
-static void gc(scheme *sc, pointer a, pointer b);
+static void port_close(scheme *sc, ts_ptr p, int flag);
+static void mark(ts_ptr a);
+static void gc(scheme *sc, ts_ptr a, ts_ptr b);
 static int basic_inchar(ts_port *pt);
 static int inchar(scheme *sc);
 static void backchar(scheme *sc, int c);
 static char   *readstr_upto(scheme *sc, char *delim);
-static pointer readstrexp(scheme *sc);
+static ts_ptr readstrexp(scheme *sc);
 static int skipspace(scheme *sc);
 static int token(scheme *sc);
 static void printslashstring(scheme *sc, char *s, int len);
-static void atom2str(scheme *sc, pointer l, int f, char **pp, int *plen);
-static void printatom(scheme *sc, pointer l, int f);
-static pointer mk_proc(scheme *sc, enum scheme_opcodes op);
-static pointer mk_closure(scheme *sc, pointer c, pointer e);
-static pointer mk_continuation(scheme *sc, pointer d);
-static pointer reverse(scheme *sc, pointer a);
-static pointer reverse_in_place(scheme *sc, pointer term, pointer list);
-static pointer revappend(scheme *sc, pointer a, pointer b);
+static void atom2str(scheme *sc, ts_ptr l, int f, char **pp, int *plen);
+static void printatom(scheme *sc, ts_ptr l, int f);
+static ts_ptr mk_proc(scheme *sc, enum scheme_opcodes op);
+static ts_ptr mk_closure(scheme *sc, ts_ptr c, ts_ptr e);
+static ts_ptr mk_continuation(scheme *sc, ts_ptr d);
+static ts_ptr reverse(scheme *sc, ts_ptr a);
+static ts_ptr reverse_in_place(scheme *sc, ts_ptr term, ts_ptr list);
+static ts_ptr revappend(scheme *sc, ts_ptr a, ts_ptr b);
 static void dump_stack_mark(scheme *);
-static pointer opexe_0(scheme *sc, enum scheme_opcodes op);
-static pointer opexe_1(scheme *sc, enum scheme_opcodes op);
-static pointer opexe_2(scheme *sc, enum scheme_opcodes op);
-static pointer opexe_3(scheme *sc, enum scheme_opcodes op);
-static pointer opexe_4(scheme *sc, enum scheme_opcodes op);
-static pointer opexe_5(scheme *sc, enum scheme_opcodes op);
-static pointer opexe_6(scheme *sc, enum scheme_opcodes op);
+static ts_ptr opexe_0(scheme *sc, enum scheme_opcodes op);
+static ts_ptr opexe_1(scheme *sc, enum scheme_opcodes op);
+static ts_ptr opexe_2(scheme *sc, enum scheme_opcodes op);
+static ts_ptr opexe_3(scheme *sc, enum scheme_opcodes op);
+static ts_ptr opexe_4(scheme *sc, enum scheme_opcodes op);
+static ts_ptr opexe_5(scheme *sc, enum scheme_opcodes op);
+static ts_ptr opexe_6(scheme *sc, enum scheme_opcodes op);
 static void Eval_Cycle(scheme *sc, enum scheme_opcodes op);
 static void assign_syntax(scheme *sc, char *name);
-static int syntaxnum(pointer p);
+static int syntaxnum(ts_ptr p);
 static void assign_proc(scheme *sc, enum scheme_opcodes, char *name);
 
 #define num_ts_int_val(n)       (n.is_fixnum?(n).value.ivalue:(long)(n).value.rvalue)
@@ -668,9 +668,9 @@ static long binary_decode(const char *s) {
 
 /* allocate new cell segment */
 static int alloc_cellseg(scheme *sc, int n) {
-     pointer newp;
-     pointer last;
-     pointer p;
+     ts_ptr newp;
+     ts_ptr last;
+     ts_ptr p;
      char *cp;
      long i;
      int k;
@@ -693,7 +693,7 @@ static int alloc_cellseg(scheme *sc, int n) {
            cp=(char*)(adj*((unsigned long)cp/adj+1));
          }
          /* insert new segment in address order */
-         newp=(pointer)cp;
+         newp=(ts_ptr)cp;
          sc->cell_seg[i] = newp;
          while (i > 0 && sc->cell_seg[i - 1] > sc->cell_seg[i]) {
              p = sc->cell_seg[i];
@@ -722,9 +722,9 @@ static int alloc_cellseg(scheme *sc, int n) {
      return n;
 }
 
-static pointer get_cell_x(scheme *sc, pointer a, pointer b) {
+static ts_ptr get_cell_x(scheme *sc, ts_ptr a, ts_ptr b) {
   if (sc->free_cell != sc->NIL) {
-    pointer x = sc->free_cell;
+    ts_ptr x = sc->free_cell;
     sc->free_cell = cdr(x);
     --sc->fcells;
     return (x);
@@ -734,8 +734,8 @@ static pointer get_cell_x(scheme *sc, pointer a, pointer b) {
 
 
 /* get new cell.  parameter a, b is marked by gc. */
-static pointer _get_cell(scheme *sc, pointer a, pointer b) {
-  pointer x;
+static ts_ptr _get_cell(scheme *sc, ts_ptr a, ts_ptr b) {
+  ts_ptr x;
 
   if(sc->no_memory) {
     return sc->sink;
@@ -760,7 +760,7 @@ static pointer _get_cell(scheme *sc, pointer a, pointer b) {
 }
 
 /* make sure that there is a given number of cells free */
-static pointer ts_reserve_cells(scheme *sc, int n) {
+static ts_ptr ts_reserve_cells(scheme *sc, int n) {
     if(sc->no_memory) {
         return sc->NIL;
     }
@@ -785,8 +785,8 @@ static pointer ts_reserve_cells(scheme *sc, int n) {
     return (sc->T);
 }
 
-static pointer get_consecutive_cells(scheme *sc, int n) {
-  pointer x;
+static ts_ptr get_consecutive_cells(scheme *sc, int n) {
+  ts_ptr x;
 
   if(sc->no_memory) { return sc->sink; }
 
@@ -814,7 +814,7 @@ static pointer get_consecutive_cells(scheme *sc, int n) {
   return sc->sink;
 }
 
-static int count_consecutive_cells(pointer x, int needed) {
+static int count_consecutive_cells(ts_ptr x, int needed) {
  int n=1;
  while(cdr(x)==x+1) {
      x=cdr(x);
@@ -824,15 +824,15 @@ static int count_consecutive_cells(pointer x, int needed) {
  return n;
 }
 
-static pointer find_consecutive_cells(scheme *sc, int n) {
-  pointer *pp;
+static ts_ptr find_consecutive_cells(scheme *sc, int n) {
+  ts_ptr *pp;
   int cnt;
 
   pp=&sc->free_cell;
   while(*pp!=sc->NIL) {
     cnt=count_consecutive_cells(*pp,n);
     if(cnt>=n) {
-      pointer x=*pp;
+      ts_ptr x=*pp;
       *pp=cdr(*pp+n-1);
       sc->fcells -= n;
       return x;
@@ -845,9 +845,9 @@ static pointer find_consecutive_cells(scheme *sc, int n) {
 /* To retain recent allocs before interpreter knows about them -
    Tehom */
 
-static void push_recent_alloc(scheme *sc, pointer recent, pointer extra)
+static void push_recent_alloc(scheme *sc, ts_ptr recent, ts_ptr extra)
 {
-  pointer holder = get_cell_x(sc, recent, extra);
+  ts_ptr holder = get_cell_x(sc, recent, extra);
   typeflag(holder) = T_PAIR | T_IMMUTABLE;
   car(holder) = recent;
   cdr(holder) = car(sc->sink);
@@ -855,9 +855,9 @@ static void push_recent_alloc(scheme *sc, pointer recent, pointer extra)
 }
 
 
-static pointer get_cell(scheme *sc, pointer a, pointer b)
+static ts_ptr get_cell(scheme *sc, ts_ptr a, ts_ptr b)
 {
-  pointer cell   = get_cell_x(sc, a, b);
+  ts_ptr cell   = get_cell_x(sc, a, b);
   /* For right now, include "a" and "b" in "cell" so that gc doesn't
      think they are garbage. */
   /* Tentatively record it as a pair so gc understands it. */
@@ -868,9 +868,9 @@ static pointer get_cell(scheme *sc, pointer a, pointer b)
   return cell;
 }
 
-static pointer get_vector_object(scheme *sc, int len, pointer init)
+static ts_ptr get_vector_object(scheme *sc, int len, ts_ptr init)
 {
-  pointer cells = get_consecutive_cells(sc,len/2+len%2+1);
+  ts_ptr cells = get_consecutive_cells(sc,len/2+len%2+1);
   if(sc->no_memory) { return sc->sink; }
   /* Record it as a vector so that gc understands it. */
   typeflag(cells) = (T_VECTOR | T_ATOM);
@@ -888,7 +888,7 @@ static void ok_to_freely_gc(scheme *sc)
 
 
 #if defined TSGRIND
-static void check_cell_alloced(pointer p, int expect_alloced)
+static void check_cell_alloced(ts_ptr p, int expect_alloced)
 {
   /* Can't use ts_put_str(sc,str) because callers have no access to
      sc.  */
@@ -902,7 +902,7 @@ static void check_cell_alloced(pointer p, int expect_alloced)
     }
 
 }
-static void check_range_alloced(pointer p, int n, int expect_alloced)
+static void check_range_alloced(ts_ptr p, int n, int expect_alloced)
 {
   int i;
   for(i = 0;i<n;i++)
@@ -914,8 +914,8 @@ static void check_range_alloced(pointer p, int n, int expect_alloced)
 /* Medium level cell allocation */
 
 /* get new cons cell */
-pointer ts_cons(scheme *sc, pointer a, pointer b, int immutable) {
-  pointer x = get_cell(sc,a, b);
+ts_ptr ts_cons(scheme *sc, ts_ptr a, ts_ptr b, int immutable) {
+  ts_ptr x = get_cell(sc,a, b);
 
   typeflag(x) = T_PAIR;
   if(immutable) {
@@ -932,15 +932,15 @@ pointer ts_cons(scheme *sc, pointer a, pointer b, int immutable) {
 
 static int hash_fn(const char *key, int table_size);
 
-static pointer oblist_initial_value(scheme *sc)
+static ts_ptr oblist_initial_value(scheme *sc)
 {
   return ts_mk_vec(sc, 461); /* probably should be bigger */
 }
 
 /* returns the new symbol */
-static pointer oblist_add_by_name(scheme *sc, const char *name)
+static ts_ptr oblist_add_by_name(scheme *sc, const char *name)
 {
-  pointer x;
+  ts_ptr x;
   int location;
 
   x = immutablets_cons(sc, ts_mk_str(sc, name), sc->NIL);
@@ -953,10 +953,10 @@ static pointer oblist_add_by_name(scheme *sc, const char *name)
   return x;
 }
 
-static pointer oblist_find_by_name(scheme *sc, const char *name)
+static ts_ptr oblist_find_by_name(scheme *sc, const char *name)
 {
   int location;
-  pointer x;
+  ts_ptr x;
   char *s;
 
   location = hash_fn(name, ivalue_unchecked(sc->oblist));
@@ -970,11 +970,11 @@ static pointer oblist_find_by_name(scheme *sc, const char *name)
   return sc->NIL;
 }
 
-static pointer oblist_all_symbols(scheme *sc)
+static ts_ptr oblist_all_symbols(scheme *sc)
 {
   int i;
-  pointer x;
-  pointer ob_list = sc->NIL;
+  ts_ptr x;
+  ts_ptr ob_list = sc->NIL;
 
   for (i = 0; i < ivalue_unchecked(sc->oblist); i++) {
     for (x  = ts_vec_elem(sc->oblist, i); x != sc->NIL; x = cdr(x)) {
@@ -986,14 +986,14 @@ static pointer oblist_all_symbols(scheme *sc)
 
 #else
 
-static pointer oblist_initial_value(scheme *sc)
+static ts_ptr oblist_initial_value(scheme *sc)
 {
   return sc->NIL;
 }
 
-static pointer oblist_find_by_name(scheme *sc, const char *name)
+static ts_ptr oblist_find_by_name(scheme *sc, const char *name)
 {
-     pointer x;
+     ts_ptr x;
      char    *s;
 
      for (x = sc->oblist; x != sc->NIL; x = cdr(x)) {
@@ -1007,9 +1007,9 @@ static pointer oblist_find_by_name(scheme *sc, const char *name)
 }
 
 /* returns the new symbol */
-static pointer oblist_add_by_name(scheme *sc, const char *name)
+static ts_ptr oblist_add_by_name(scheme *sc, const char *name)
 {
-  pointer x;
+  ts_ptr x;
 
   x = immutablets_cons(sc, ts_mk_str(sc, name), sc->NIL);
   typeflag(x) = T_SYMBOL;
@@ -1017,31 +1017,31 @@ static pointer oblist_add_by_name(scheme *sc, const char *name)
   sc->oblist = immutablets_cons(sc, x, sc->oblist);
   return x;
 }
-static pointer oblist_all_symbols(scheme *sc)
+static ts_ptr oblist_all_symbols(scheme *sc)
 {
   return sc->oblist;
 }
 
 #endif
 
-static pointer mk_port(scheme *sc, ts_port *p) {
-  pointer x = get_cell(sc, sc->NIL, sc->NIL);
+static ts_ptr mk_port(scheme *sc, ts_port *p) {
+  ts_ptr x = get_cell(sc, sc->NIL, sc->NIL);
 
   typeflag(x) = T_PORT|T_ATOM;
   x->_object._port=p;
   return (x);
 }
 
-pointer ts_mk_foreign_func(scheme *sc, ts_foreign_func f) {
-  pointer x = get_cell(sc, sc->NIL, sc->NIL);
+ts_ptr ts_mk_foreign_func(scheme *sc, ts_foreign_func f) {
+  ts_ptr x = get_cell(sc, sc->NIL, sc->NIL);
 
   typeflag(x) = (T_FOREIGN | T_ATOM);
   x->_object._ff=f;
   return (x);
 }
 
-INTERFACE pointer ts_mk_char(scheme *sc, int c) {
-  pointer x = get_cell(sc,sc->NIL, sc->NIL);
+INTERFACE ts_ptr ts_mk_char(scheme *sc, int c) {
+  ts_ptr x = get_cell(sc,sc->NIL, sc->NIL);
 
   typeflag(x) = (T_CHARACTER | T_ATOM);
   ivalue_unchecked(x)= c;
@@ -1050,8 +1050,8 @@ INTERFACE pointer ts_mk_char(scheme *sc, int c) {
 }
 
 /* get number atom (integer) */
-INTERFACE pointer ts_mk_int(scheme *sc, long ts_num) {
-  pointer x = get_cell(sc,sc->NIL, sc->NIL);
+INTERFACE ts_ptr ts_mk_int(scheme *sc, long ts_num) {
+  ts_ptr x = get_cell(sc,sc->NIL, sc->NIL);
 
   typeflag(x) = (T_NUMBER | T_ATOM);
   ivalue_unchecked(x)= ts_num;
@@ -1059,8 +1059,8 @@ INTERFACE pointer ts_mk_int(scheme *sc, long ts_num) {
   return (x);
 }
 
-INTERFACE pointer ts_mk_real(scheme *sc, double n) {
-  pointer x = get_cell(sc,sc->NIL, sc->NIL);
+INTERFACE ts_ptr ts_mk_real(scheme *sc, double n) {
+  ts_ptr x = get_cell(sc,sc->NIL, sc->NIL);
 
   typeflag(x) = (T_NUMBER | T_ATOM);
   rvalue_unchecked(x)= n;
@@ -1068,7 +1068,7 @@ INTERFACE pointer ts_mk_real(scheme *sc, double n) {
   return (x);
 }
 
-static pointer mk_number(scheme *sc, ts_num n) {
+static ts_ptr mk_number(scheme *sc, ts_num n) {
  if(n.is_fixnum) {
      return ts_mk_int(sc,n.value.ivalue);
  } else {
@@ -1095,30 +1095,30 @@ static char *store_string(scheme *sc, int len_str, const char *str, char fill) {
 }
 
 /* get new string */
-INTERFACE pointer ts_mk_str(scheme *sc, const char *str) {
+INTERFACE ts_ptr ts_mk_str(scheme *sc, const char *str) {
      return ts_mk_counted_str(sc,str,strlen(str));
 }
 
-INTERFACE pointer ts_mk_counted_str(scheme *sc, const char *str, int len) {
-     pointer x = get_cell(sc, sc->NIL, sc->NIL);
+INTERFACE ts_ptr ts_mk_counted_str(scheme *sc, const char *str, int len) {
+     ts_ptr x = get_cell(sc, sc->NIL, sc->NIL);
      typeflag(x) = (T_STRING | T_ATOM);
      stts_real_val(x) = store_string(sc,len,str,0);
      strlength(x) = len;
      return (x);
 }
 
-INTERFACE pointer ts_mk_empty_str(scheme *sc, int len, char fill) {
-     pointer x = get_cell(sc, sc->NIL, sc->NIL);
+INTERFACE ts_ptr ts_mk_empty_str(scheme *sc, int len, char fill) {
+     ts_ptr x = get_cell(sc, sc->NIL, sc->NIL);
      typeflag(x) = (T_STRING | T_ATOM);
      stts_real_val(x) = store_string(sc,len,0,fill);
      strlength(x) = len;
      return (x);
 }
 
-INTERFACE static pointer ts_mk_vec(scheme *sc, int len)
+INTERFACE static ts_ptr ts_mk_vec(scheme *sc, int len)
 { return get_vector_object(sc,len,sc->NIL); }
 
-INTERFACE static void ts_fill_vec(pointer vec, pointer obj) {
+INTERFACE static void ts_fill_vec(ts_ptr vec, ts_ptr obj) {
      int i;
      int num=ts_int_val(vec)/2+ts_int_val(vec)%2;
      for(i=0; i<num; i++) {
@@ -1129,7 +1129,7 @@ INTERFACE static void ts_fill_vec(pointer vec, pointer obj) {
      }
 }
 
-INTERFACE static pointer ts_vec_elem(pointer vec, int ielem) {
+INTERFACE static ts_ptr ts_vec_elem(ts_ptr vec, int ielem) {
      int n=ielem/2;
      if(ielem%2==0) {
           return car(vec+1+n);
@@ -1138,7 +1138,7 @@ INTERFACE static pointer ts_vec_elem(pointer vec, int ielem) {
      }
 }
 
-INTERFACE static pointer ts_set_vec_elem(pointer vec, int ielem, pointer a) {
+INTERFACE static ts_ptr ts_set_vec_elem(ts_ptr vec, int ielem, ts_ptr a) {
      int n=ielem/2;
      if(ielem%2==0) {
           return car(vec+1+n)=a;
@@ -1148,8 +1148,8 @@ INTERFACE static pointer ts_set_vec_elem(pointer vec, int ielem, pointer a) {
 }
 
 /* get new symbol */
-INTERFACE pointer ts_mk_sym(scheme *sc, const char *name) {
-     pointer x;
+INTERFACE ts_ptr ts_mk_sym(scheme *sc, const char *name) {
+     ts_ptr x;
 
      /* first check oblist */
      x = oblist_find_by_name(sc, name);
@@ -1161,8 +1161,8 @@ INTERFACE pointer ts_mk_sym(scheme *sc, const char *name) {
      }
 }
 
-INTERFACE pointer ts_gen_sym(scheme *sc) {
-     pointer x;
+INTERFACE ts_ptr ts_gen_sym(scheme *sc) {
+     ts_ptr x;
      char name[40];
 
      for(; sc->gensym_cnt<LONG_MAX; sc->gensym_cnt++) {
@@ -1183,7 +1183,7 @@ INTERFACE pointer ts_gen_sym(scheme *sc) {
 }
 
 /* make symbol or number atom from string */
-static pointer mk_atom(scheme *sc, char *q) {
+static ts_ptr mk_atom(scheme *sc, char *q) {
      char    c, *p;
      int has_dec_point=0;
      int has_fp_exp = 0;
@@ -1249,7 +1249,7 @@ static pointer mk_atom(scheme *sc, char *q) {
 }
 
 /* make constant */
-static pointer mk_sharp_const(scheme *sc, char *name) {
+static ts_ptr mk_sharp_const(scheme *sc, char *name) {
      long    x;
      char    tmp[TS_STRBUFFSIZE];
 
@@ -1309,10 +1309,10 @@ static pointer mk_sharp_const(scheme *sc, char *name) {
  *  sec. 2.3.5), the Schorr-Deutsch-Waite link-inversion algorithm,
  *  for marking.
  */
-static void mark(pointer a) {
-     pointer t, q, p;
+static void mark(ts_ptr a) {
+     ts_ptr t, q, p;
 
-     t = (pointer) 0;
+     t = (ts_ptr) 0;
      p = a;
 E2:  setmark(p);
      if(ts_is_vec(p)) {
@@ -1360,8 +1360,8 @@ E6:   /* up.  Undo the link switching from steps E4 and E5. */
 }
 
 /* garbage collection. parameter a, b is marked. */
-static void gc(scheme *sc, pointer a, pointer b) {
-  pointer p;
+static void gc(scheme *sc, ts_ptr a, ts_ptr b) {
+  ts_ptr p;
   int i;
 
   if(sc->gc_verbose) {
@@ -1427,7 +1427,7 @@ static void gc(scheme *sc, pointer a, pointer b) {
   }
 }
 
-static void finalize_cell(scheme *sc, pointer a) {
+static void finalize_cell(scheme *sc, ts_ptr a) {
   if(ts_is_str(a)) {
     sc->free(stts_real_val(a));
   } else if(ts_is_port(a)) {
@@ -1505,7 +1505,7 @@ static ts_port *port_rep_from_filename(scheme *sc, const char *fn, int prop) {
   return pt;
 }
 
-static pointer port_from_filename(scheme *sc, const char *fn, int prop) {
+static ts_ptr port_from_filename(scheme *sc, const char *fn, int prop) {
   ts_port *pt;
   pt=port_rep_from_filename(sc,fn,prop);
   if(pt==0) {
@@ -1528,7 +1528,7 @@ static ts_port *port_rep_from_file(scheme *sc, FILE *f, int prop)
     return pt;
 }
 
-static pointer port_from_file(scheme *sc, FILE *f, int prop) {
+static ts_ptr port_from_file(scheme *sc, FILE *f, int prop) {
   ts_port *pt;
   pt=port_rep_from_file(sc,f,prop);
   if(pt==0) {
@@ -1550,7 +1550,7 @@ static ts_port *port_rep_from_string(scheme *sc, char *start, char *past_the_end
   return pt;
 }
 
-static pointer port_from_string(scheme *sc, char *start, char *past_the_end, int prop) {
+static ts_ptr port_from_string(scheme *sc, char *start, char *past_the_end, int prop) {
   ts_port *pt;
   pt=port_rep_from_string(sc,start,past_the_end,prop);
   if(pt==0) {
@@ -1581,7 +1581,7 @@ static ts_port *port_rep_from_scratch(scheme *sc) {
   return pt;
 }
 
-static pointer port_from_scratch(scheme *sc) {
+static ts_ptr port_from_scratch(scheme *sc) {
   ts_port *pt;
   pt=port_rep_from_scratch(sc);
   if(pt==0) {
@@ -1590,7 +1590,7 @@ static pointer port_from_scratch(scheme *sc) {
   return mk_port(sc,pt);
 }
 
-static void port_close(scheme *sc, pointer p, int flag) {
+static void port_close(scheme *sc, ts_ptr p, int flag) {
   ts_port *pt=p->_object._port;
   pt->kind&=~flag;
   if((pt->kind & (port_input|port_output))==0) {
@@ -1736,7 +1736,7 @@ static char *readstr_upto(scheme *sc, char *delim) {
 }
 
 /* read string expression "xxx...xxx" */
-static pointer readstrexp(scheme *sc) {
+static ts_ptr readstrexp(scheme *sc) {
   char *p = sc->strbuff;
   int c;
   int c1=0;
@@ -2014,7 +2014,7 @@ static void printslashstring(scheme *sc, char *p, int len) {
 
 
 /* print atoms */
-static void printatom(scheme *sc, pointer l, int f) {
+static void printatom(scheme *sc, ts_ptr l, int f) {
   char *p;
   int len;
   atom2str(sc,l,f,&p,&len);
@@ -2023,7 +2023,7 @@ static void printatom(scheme *sc, pointer l, int f) {
 
 
 /* Uses internal buffer unless string pointer is already available */
-static void atom2str(scheme *sc, pointer l, int f, char **pp, int *plen) {
+static void atom2str(scheme *sc, ts_ptr l, int f, char **pp, int *plen) {
      char *p;
 
      if (l == sc->NIL) {
@@ -2144,8 +2144,8 @@ static void atom2str(scheme *sc, pointer l, int f, char **pp, int *plen) {
 /* ========== Routines for Evaluation Cycle ========== */
 
 /* make closure. c is code. e is environment */
-static pointer mk_closure(scheme *sc, pointer c, pointer e) {
-     pointer x = get_cell(sc, c, e);
+static ts_ptr mk_closure(scheme *sc, ts_ptr c, ts_ptr e) {
+     ts_ptr x = get_cell(sc, c, e);
 
      typeflag(x) = T_CLOSURE;
      car(x) = c;
@@ -2154,16 +2154,16 @@ static pointer mk_closure(scheme *sc, pointer c, pointer e) {
 }
 
 /* make continuation. */
-static pointer mk_continuation(scheme *sc, pointer d) {
-     pointer x = get_cell(sc, sc->NIL, d);
+static ts_ptr mk_continuation(scheme *sc, ts_ptr d) {
+     ts_ptr x = get_cell(sc, sc->NIL, d);
 
      typeflag(x) = T_CONTINUATION;
      cont_dump(x) = d;
      return (x);
 }
 
-static pointer list_star(scheme *sc, pointer d) {
-  pointer p, q;
+static ts_ptr list_star(scheme *sc, ts_ptr d) {
+  ts_ptr p, q;
   if(cdr(d)==sc->NIL) {
     return car(d);
   }
@@ -2180,9 +2180,9 @@ static pointer list_star(scheme *sc, pointer d) {
 }
 
 /* reverse list -- produce new list */
-static pointer reverse(scheme *sc, pointer a) {
+static ts_ptr reverse(scheme *sc, ts_ptr a) {
 /* a must be checked by gc */
-     pointer p = sc->NIL;
+     ts_ptr p = sc->NIL;
 
      for ( ; ts_is_pair(a); a = cdr(a)) {
           p = cons(sc, car(a), p);
@@ -2191,8 +2191,8 @@ static pointer reverse(scheme *sc, pointer a) {
 }
 
 /* reverse list --- in-place */
-static pointer reverse_in_place(scheme *sc, pointer term, pointer list) {
-     pointer p = list, result = term, q;
+static ts_ptr reverse_in_place(scheme *sc, ts_ptr term, ts_ptr list) {
+     ts_ptr p = list, result = term, q;
 
      while (p != sc->NIL) {
           q = cdr(p);
@@ -2204,9 +2204,9 @@ static pointer reverse_in_place(scheme *sc, pointer term, pointer list) {
 }
 
 /* append list -- produce new list (in reverse order) */
-static pointer revappend(scheme *sc, pointer a, pointer b) {
-    pointer result = a;
-    pointer p = b;
+static ts_ptr revappend(scheme *sc, ts_ptr a, ts_ptr b) {
+    ts_ptr result = a;
+    ts_ptr p = b;
 
     while (ts_is_pair(p)) {
         result = cons(sc, car(p), result);
@@ -2221,7 +2221,7 @@ static pointer revappend(scheme *sc, pointer a, pointer b) {
 }
 
 /* equivalence of atoms */
-int ts_eqv(pointer a, pointer b) {
+int ts_eqv(ts_ptr a, ts_ptr b) {
      if (ts_is_str(a)) {
           if (ts_is_str(b))
                return (stts_real_val(a) == stts_real_val(b));
@@ -2287,9 +2287,9 @@ static int hash_fn(const char *key, int table_size)
  * speed to out-weigh the cost of making a new vector.
  */
 
-static void new_frame_in_env(scheme *sc, pointer old_env)
+static void new_frame_in_env(scheme *sc, ts_ptr old_env)
 {
-  pointer new_frame;
+  ts_ptr new_frame;
 
   /* The interaction-environment has about 300 variables in it. */
   if (old_env == sc->NIL) {
@@ -2302,10 +2302,10 @@ static void new_frame_in_env(scheme *sc, pointer old_env)
   setenvironment(sc->envir);
 }
 
-static void new_slot_spec_in_env(scheme *sc, pointer env,
-                                        pointer variable, pointer value)
+static void new_slot_spec_in_env(scheme *sc, ts_ptr env,
+                                        ts_ptr variable, ts_ptr value)
 {
-  pointer slot = immutablets_cons(sc, variable, value);
+  ts_ptr slot = immutablets_cons(sc, variable, value);
 
   if (ts_is_vec(car(env))) {
     int location = hash_fn(ts_sym_name(variable), ivalue_unchecked(car(env)));
@@ -2317,9 +2317,9 @@ static void new_slot_spec_in_env(scheme *sc, pointer env,
   }
 }
 
-static pointer find_slot_in_env(scheme *sc, pointer env, pointer hdl, int all)
+static ts_ptr find_slot_in_env(scheme *sc, ts_ptr env, ts_ptr hdl, int all)
 {
-  pointer x,y;
+  ts_ptr x,y;
   int location;
 
   for (x = env; x != sc->NIL; x = cdr(x)) {
@@ -2349,21 +2349,21 @@ static pointer find_slot_in_env(scheme *sc, pointer env, pointer hdl, int all)
 
 #else /* USE_ALIST_ENV */
 
-static void new_frame_in_env(scheme *sc, pointer old_env)
+static void new_frame_in_env(scheme *sc, ts_ptr old_env)
 {
   sc->envir = immutablets_cons(sc, sc->NIL, old_env);
   setenvironment(sc->envir);
 }
 
-static void new_slot_spec_in_env(scheme *sc, pointer env,
-                                        pointer variable, pointer value)
+static void new_slot_spec_in_env(scheme *sc, ts_ptr env,
+                                        ts_ptr variable, ts_ptr value)
 {
   car(env) = immutablets_cons(sc, immutablets_cons(sc, variable, value), car(env));
 }
 
-static pointer find_slot_in_env(scheme *sc, pointer env, pointer hdl, int all)
+static ts_ptr find_slot_in_env(scheme *sc, ts_ptr env, ts_ptr hdl, int all)
 {
-    pointer x,y;
+    ts_ptr x,y;
     for (x = env; x != sc->NIL; x = cdr(x)) {
          for (y = car(x); y != sc->NIL; y = cdr(y)) {
               if (caar(y) == hdl) {
@@ -2385,17 +2385,17 @@ static pointer find_slot_in_env(scheme *sc, pointer env, pointer hdl, int all)
 
 #endif /* USE_ALIST_ENV else */
 
-static void new_slot_in_env(scheme *sc, pointer variable, pointer value)
+static void new_slot_in_env(scheme *sc, ts_ptr variable, ts_ptr value)
 {
   new_slot_spec_in_env(sc, sc->envir, variable, value);
 }
 
-static void set_slot_in_env(scheme *sc, pointer slot, pointer value)
+static void set_slot_in_env(scheme *sc, ts_ptr slot, ts_ptr value)
 {
   cdr(slot) = value;
 }
 
-static pointer slot_value_in_env(pointer slot)
+static ts_ptr slot_value_in_env(ts_ptr slot)
 {
   return cdr(slot);
 }
@@ -2403,11 +2403,11 @@ static pointer slot_value_in_env(pointer slot)
 /* ========== Evaluation Cycle ========== */
 
 
-static pointer _Error_1(scheme *sc, const char *s, pointer a) {
+static ts_ptr _Error_1(scheme *sc, const char *s, ts_ptr a) {
      const char *str = s;
 #if USE_ERROR_HOOK
-     pointer x;
-     pointer hdl=sc->ERROR_HOOK;
+     ts_ptr x;
+     ts_ptr hdl=sc->ERROR_HOOK;
 #endif
 
 #if SHOW_ERROR_LINE
@@ -2473,14 +2473,14 @@ static pointer _Error_1(scheme *sc, const char *s, pointer a) {
 /* this structure holds all the interpreter's registers */
 struct dump_stack_frame {
   enum scheme_opcodes op;
-  pointer args;
-  pointer envir;
-  pointer code;
+  ts_ptr args;
+  ts_ptr envir;
+  ts_ptr code;
 };
 
 #define STACK_GROWTH 3
 
-static void s_save(scheme *sc, enum scheme_opcodes op, pointer args, pointer code)
+static void s_save(scheme *sc, enum scheme_opcodes op, ts_ptr args, ts_ptr code)
 {
   int nframes = (int)sc->dump;
   struct dump_stack_frame *next_frame;
@@ -2497,10 +2497,10 @@ static void s_save(scheme *sc, enum scheme_opcodes op, pointer args, pointer cod
   next_frame->args = args;
   next_frame->envir = sc->envir;
   next_frame->code = code;
-  sc->dump = (pointer)(nframes+1);
+  sc->dump = (ts_ptr)(nframes+1);
 }
 
-static pointer _s_return(scheme *sc, pointer a)
+static ts_ptr _s_return(scheme *sc, ts_ptr a)
 {
   int nframes = (int)sc->dump;
   struct dump_stack_frame *frame;
@@ -2515,14 +2515,14 @@ static pointer _s_return(scheme *sc, pointer a)
   sc->args = frame->args;
   sc->envir = frame->envir;
   sc->code = frame->code;
-  sc->dump = (pointer)nframes;
+  sc->dump = (ts_ptr)nframes;
   return sc->T;
 }
 
 static void dump_stack_reset(scheme *sc)
 {
   /* in this implementation, sc->dump is the number of frames on the stack */
-  sc->dump = (pointer)0;
+  sc->dump = (ts_ptr)0;
 }
 
 static void dump_stack_initialize(scheme *sc)
@@ -2536,7 +2536,7 @@ static void dump_stack_free(scheme *sc)
 {
   free(sc->dump_base);
   sc->dump_base = NULL;
-  sc->dump = (pointer)0;
+  sc->dump = (ts_ptr)0;
   sc->dump_size = 0;
 }
 
@@ -2570,7 +2570,7 @@ static void dump_stack_free(scheme *sc)
   sc->dump = sc->NIL;
 }
 
-static pointer _s_return(scheme *sc, pointer a) {
+static ts_ptr _s_return(scheme *sc, ts_ptr a) {
     sc->value = (a);
     if(sc->dump==sc->NIL) return sc->NIL;
     sc->op = ts_int_val(car(sc->dump));
@@ -2581,7 +2581,7 @@ static pointer _s_return(scheme *sc, pointer a) {
     return sc->T;
 }
 
-static void s_save(scheme *sc, enum scheme_opcodes op, pointer args, pointer code) {
+static void s_save(scheme *sc, enum scheme_opcodes op, ts_ptr args, ts_ptr code) {
     sc->dump = cons(sc, sc->envir, cons(sc, (code), sc->dump));
     sc->dump = cons(sc, (args), sc->dump);
     sc->dump = cons(sc, ts_mk_int(sc, (long)(op)), sc->dump);
@@ -2595,8 +2595,8 @@ static void dump_stack_mark(scheme *sc)
 
 #define s_retbool(tf)    s_return(sc,(tf) ? sc->T : sc->F)
 
-static pointer opexe_0(scheme *sc, enum scheme_opcodes op) {
-     pointer x, y;
+static ts_ptr opexe_0(scheme *sc, enum scheme_opcodes op) {
+     ts_ptr x, y;
 
      switch (op) {
      case OP_LOAD:       /* load */
@@ -2806,7 +2806,7 @@ static pointer opexe_0(scheme *sc, enum scheme_opcodes op) {
           /* If the hook is defined, apply it to sc->code, otherwise
              set sc->value fall thru */
           {
-               pointer f=find_slot_in_env(sc,sc->envir,sc->COMPILE_HOOK,1);
+               ts_ptr f=find_slot_in_env(sc,sc->envir,sc->COMPILE_HOOK,1);
                if(f==sc->NIL) {
                     sc->value = sc->code;
                     /* Fallthru */
@@ -3001,8 +3001,8 @@ static pointer opexe_0(scheme *sc, enum scheme_opcodes op) {
      return sc->T;
 }
 
-static pointer opexe_1(scheme *sc, enum scheme_opcodes op) {
-     pointer x, y;
+static ts_ptr opexe_1(scheme *sc, enum scheme_opcodes op) {
+     ts_ptr x, y;
 
      switch (op) {
      case OP_LET0REC:    /* letrec */
@@ -3212,8 +3212,8 @@ static pointer opexe_1(scheme *sc, enum scheme_opcodes op) {
      return sc->T;
 }
 
-static pointer opexe_2(scheme *sc, enum scheme_opcodes op) {
-     pointer x;
+static ts_ptr opexe_2(scheme *sc, enum scheme_opcodes op) {
+     ts_ptr x;
      ts_num v;
 #if USE_MATH
      double dd;
@@ -3264,7 +3264,7 @@ static pointer opexe_2(scheme *sc, enum scheme_opcodes op) {
           if(cdr(sc->args)==sc->NIL) {
                s_return(sc, ts_mk_real(sc, atan(ts_real_val(x))));
           } else {
-               pointer y=cadr(sc->args);
+               ts_ptr y=cadr(sc->args);
                s_return(sc, ts_mk_real(sc, atan2(ts_real_val(x),ts_real_val(y))));
           }
 
@@ -3275,7 +3275,7 @@ static pointer opexe_2(scheme *sc, enum scheme_opcodes op) {
      case OP_EXPT: {
           double result;
           int real_result=1;
-          pointer y=cadr(sc->args);
+          ts_ptr y=cadr(sc->args);
           x=car(sc->args);
           if (num_ts_is_int(x) && num_ts_is_int(y))
              real_result=0;
@@ -3539,7 +3539,7 @@ static pointer opexe_2(scheme *sc, enum scheme_opcodes op) {
 
      case OP_STRREF: { /* string-ref */
           char *str;
-          pointer x;
+          ts_ptr x;
           int index;
 
           str=stts_real_val(car(sc->args));
@@ -3559,7 +3559,7 @@ static pointer opexe_2(scheme *sc, enum scheme_opcodes op) {
 
      case OP_STRSET: { /* string-set! */
           char *str;
-          pointer x;
+          ts_ptr x;
           int index;
           int c;
 
@@ -3587,7 +3587,7 @@ static pointer opexe_2(scheme *sc, enum scheme_opcodes op) {
      case OP_STRAPPEND: { /* string-append */
        /* in 1.29 string-append was in Scheme in init.scm but was too slow */
        int len = 0;
-       pointer newstr;
+       ts_ptr newstr;
        char *pos;
 
        /* compute needed length for new string */
@@ -3636,7 +3636,7 @@ static pointer opexe_2(scheme *sc, enum scheme_opcodes op) {
 
      case OP_VECTOR: {   /* vector */
           int i;
-          pointer vec;
+          ts_ptr vec;
           int len=ts_list_len(sc,sc->args);
           if(len<0) {
                Error_1(sc,"vector: not a proper list:",sc->args);
@@ -3650,9 +3650,9 @@ static pointer opexe_2(scheme *sc, enum scheme_opcodes op) {
      }
 
      case OP_MKVECTOR: { /* make-vector */
-          pointer fill=sc->NIL;
+          ts_ptr fill=sc->NIL;
           int len;
-          pointer vec;
+          ts_ptr vec;
 
           len=ts_int_val(car(sc->args));
 
@@ -3671,7 +3671,7 @@ static pointer opexe_2(scheme *sc, enum scheme_opcodes op) {
           s_return(sc,ts_mk_int(sc,ts_int_val(car(sc->args))));
 
      case OP_VECREF: { /* vector-ref */
-          pointer x;
+          ts_ptr x;
           int index;
 
           x=cadr(sc->args);
@@ -3688,7 +3688,7 @@ static pointer opexe_2(scheme *sc, enum scheme_opcodes op) {
      }
 
      case OP_VECSET: {   /* vector-set! */
-          pointer x;
+          ts_ptr x;
           int index;
 
           if(ts_is_immutable(car(sc->args))) {
@@ -3716,7 +3716,7 @@ static pointer opexe_2(scheme *sc, enum scheme_opcodes op) {
      return sc->T;
 }
 
-static int ts_is_list(scheme *sc, pointer a)
+static int ts_is_list(scheme *sc, ts_ptr a)
 { return ts_list_len(sc,a) >= 0; }
 
 /* Result is:
@@ -3725,9 +3725,9 @@ static int ts_is_list(scheme *sc, pointer a)
    not even a pair: -2
    dotted list: -2 minus length before dot
 */
-int ts_list_len(scheme *sc, pointer a) {
+int ts_list_len(scheme *sc, ts_ptr a) {
     int i=0;
-    pointer slow, fast;
+    ts_ptr slow, fast;
 
     slow = fast = a;
     while (1)
@@ -3750,16 +3750,16 @@ int ts_list_len(scheme *sc, pointer a) {
         slow = cdr(slow);
         if (fast == slow)
         {
-            /* the fast pointer has looped back around and caught up
-               with the slow pointer, hence the structure is circular,
+            /* the fast ts_ptr has looped back around and caught up
+               with the slow ts_ptr, hence the structure is circular,
                not of finite length, and therefore not a list */
             return -1;
         }
     }
 }
 
-static pointer opexe_3(scheme *sc, enum scheme_opcodes op) {
-     pointer x;
+static ts_ptr opexe_3(scheme *sc, enum scheme_opcodes op) {
+     ts_ptr x;
      ts_num v;
      int (*comp_func)(ts_num,ts_num)=0;
 
@@ -3854,8 +3854,8 @@ static pointer opexe_3(scheme *sc, enum scheme_opcodes op) {
      return sc->T;
 }
 
-static pointer opexe_4(scheme *sc, enum scheme_opcodes op) {
-     pointer x, y;
+static ts_ptr opexe_4(scheme *sc, enum scheme_opcodes op) {
+     ts_ptr x, y;
 
      switch (op) {
      case OP_FORCE:      /* force */
@@ -4023,7 +4023,7 @@ static pointer opexe_4(scheme *sc, enum scheme_opcodes op) {
      case OP_OPEN_OUTFILE: /* open-output-file */
      case OP_OPEN_INOUTFILE: /* open-input-output-file */ {
           int prop=0;
-          pointer p;
+          ts_ptr p;
           switch(op) {
                case OP_OPEN_INFILE:     prop=port_input; break;
                case OP_OPEN_OUTFILE:    prop=port_output; break;
@@ -4041,7 +4041,7 @@ static pointer opexe_4(scheme *sc, enum scheme_opcodes op) {
      case OP_OPEN_INSTRING: /* open-input-string */
      case OP_OPEN_INOUTSTRING: /* open-input-output-string */ {
           int prop=0;
-          pointer p;
+          ts_ptr p;
           switch(op) {
                case OP_OPEN_INSTRING:     prop=port_input; break;
                case OP_OPEN_INOUTSTRING:  prop=port_input|port_output; break;
@@ -4055,7 +4055,7 @@ static pointer opexe_4(scheme *sc, enum scheme_opcodes op) {
           s_return(sc,p);
      }
      case OP_OPEN_OUTSTRING: /* open-output-string */ {
-          pointer p;
+          ts_ptr p;
           if(car(sc->args)==sc->NIL) {
                p=port_from_scratch(sc);
                if(p==sc->NIL) {
@@ -4081,7 +4081,7 @@ static pointer opexe_4(scheme *sc, enum scheme_opcodes op) {
                size=p->rep.string.curr-p->rep.string.start+1;
                str=sc->malloc(size);
                if(str != NULL) {
-                    pointer s;
+                    ts_ptr s;
 
                     memcpy(str,p->rep.string.start,size-1);
                     str[size-1]='\0';
@@ -4115,8 +4115,8 @@ static pointer opexe_4(scheme *sc, enum scheme_opcodes op) {
      return sc->T;
 }
 
-static pointer opexe_5(scheme *sc, enum scheme_opcodes op) {
-     pointer x;
+static ts_ptr opexe_5(scheme *sc, enum scheme_opcodes op) {
+     ts_ptr x;
 
      if(sc->nesting!=0) {
           int n=sc->nesting;
@@ -4165,7 +4165,7 @@ static pointer opexe_5(scheme *sc, enum scheme_opcodes op) {
      }
 
      case OP_CHAR_READY: /* char-ready? */ {
-          pointer p=sc->inport;
+          ts_ptr p=sc->inport;
           int res;
           if(ts_is_pair(sc->args)) {
                p=car(sc->args);
@@ -4244,7 +4244,7 @@ static pointer opexe_5(scheme *sc, enum scheme_opcodes op) {
                ts_set_immutable(x);
                s_return(sc,x);
           case TOK_SHARP: {
-               pointer f=find_slot_in_env(sc,sc->envir,sc->SHARP_HOOK,1);
+               ts_ptr f=find_slot_in_env(sc,sc->envir,sc->SHARP_HOOK,1);
                if(f==sc->NIL) {
                     Error_0(sc,"undefined sharp expression");
                } else {
@@ -4389,13 +4389,13 @@ static pointer opexe_5(scheme *sc, enum scheme_opcodes op) {
           }
      case OP_PVECFROM: {
           int i=ivalue_unchecked(cdr(sc->args));
-          pointer vec=car(sc->args);
+          ts_ptr vec=car(sc->args);
           int len=ivalue_unchecked(vec);
           if(i==len) {
                ts_put_str(sc,")");
                s_return(sc,sc->T);
           } else {
-               pointer elem=ts_vec_elem(vec,i);
+               ts_ptr elem=ts_vec_elem(vec,i);
                ivalue_unchecked(cdr(sc->args))=i+1;
                s_save(sc,OP_PVECFROM, sc->args, sc->NIL);
                sc->args=elem;
@@ -4413,8 +4413,8 @@ static pointer opexe_5(scheme *sc, enum scheme_opcodes op) {
      return sc->T;
 }
 
-static pointer opexe_6(scheme *sc, enum scheme_opcodes op) {
-     pointer x, y;
+static ts_ptr opexe_6(scheme *sc, enum scheme_opcodes op) {
+     ts_ptr x, y;
      long v;
 
      switch (op) {
@@ -4467,12 +4467,12 @@ static pointer opexe_6(scheme *sc, enum scheme_opcodes op) {
      return sc->T; /* NOTREACHED */
 }
 
-typedef pointer (*dispatch_func)(scheme *, enum scheme_opcodes);
+typedef ts_ptr (*dispatch_func)(scheme *, enum scheme_opcodes);
 
-typedef int (*test_predicate)(pointer);
-static int is_any(pointer p) { return 1;}
+typedef int (*test_predicate)(ts_ptr);
+static int is_any(ts_ptr p) { return 1;}
 
-static int is_nonneg(pointer p) {
+static int is_nonneg(ts_ptr p) {
   return ts_int_val(p)>=0 && ts_is_int(p);
 }
 
@@ -4530,7 +4530,7 @@ static op_code_info dispatch_table[]= {
   { 0 }
 };
 
-static const char *procname(pointer x) {
+static const char *procname(ts_ptr x) {
  int n=procnum(x);
  const char *name=dispatch_table[n].name;
  if(name==0) {
@@ -4569,9 +4569,9 @@ static void Eval_Cycle(scheme *sc, enum scheme_opcodes op) {
           int i=0;
           int j;
           const char *t=pcd->arg_tests_encoding;
-          pointer arglist=sc->args;
+          ts_ptr arglist=sc->args;
           do {
-            pointer arg=car(arglist);
+            ts_ptr arg=car(arglist);
             j=(int)t[0];
             if(j==TST_LIST[0]) {
                   if(arg!=sc->NIL && !ts_is_pair(arg)) break;
@@ -4615,22 +4615,22 @@ static void Eval_Cycle(scheme *sc, enum scheme_opcodes op) {
 /* ========== Initialization of internal keywords ========== */
 
 static void assign_syntax(scheme *sc, char *name) {
-     pointer x;
+     ts_ptr x;
 
      x = oblist_add_by_name(sc, name);
      typeflag(x) |= T_SYNTAX;
 }
 
 static void assign_proc(scheme *sc, enum scheme_opcodes op, char *name) {
-     pointer x, y;
+     ts_ptr x, y;
 
      x = ts_mk_sym(sc, name);
      y = mk_proc(sc,op);
      new_slot_in_env(sc, x, y);
 }
 
-static pointer mk_proc(scheme *sc, enum scheme_opcodes op) {
-     pointer y;
+static ts_ptr mk_proc(scheme *sc, enum scheme_opcodes op) {
+     ts_ptr y;
 
      y = get_cell(sc, sc->NIL, sc->NIL);
      typeflag(y) = (T_PROC | T_ATOM);
@@ -4640,7 +4640,7 @@ static pointer mk_proc(scheme *sc, enum scheme_opcodes op) {
 }
 
 /* Hard-coded for the given keywords. Remember to rewrite if more are added! */
-static int syntaxnum(pointer p) {
+static int syntaxnum(ts_ptr p) {
      const char *s=stts_real_val(car(p));
      switch(strlength(car(p))) {
      case 2:
@@ -4676,10 +4676,10 @@ static int syntaxnum(pointer p) {
 
 /* initialization of TinyScheme */
 #if USE_INTERFACE
-INTERFACE static pointer sts_cons(scheme *sc, pointer a, pointer b) {
+INTERFACE static ts_ptr sts_cons(scheme *sc, ts_ptr a, ts_ptr b) {
  return cons(sc,a,b);
 }
-INTERFACE static pointer s_immutablets_cons(scheme *sc, pointer a, pointer b) {
+INTERFACE static ts_ptr s_immutablets_cons(scheme *sc, ts_ptr a, ts_ptr b) {
  return immutablets_cons(sc,a,b);
 }
 
@@ -4774,7 +4774,7 @@ int ts_init(scheme *sc) {
 
 int ts_init_custom_alloc(scheme *sc, ts_func_alloc malloc, ts_func_dealloc free) {
   int i, n=sizeof(dispatch_table)/sizeof(dispatch_table[0]);
-  pointer x;
+  ts_ptr x;
 
   num_zero.is_fixnum=1;
   num_zero.value.ivalue=0;
@@ -4995,8 +4995,8 @@ void ts_load_str(scheme *sc, const char *cmd) {
   }
 }
 
-void ts_def(scheme *sc, pointer envir, pointer symbol, pointer value) {
-     pointer x;
+void ts_def(scheme *sc, ts_ptr envir, ts_ptr symbol, ts_ptr value) {
+     ts_ptr x;
 
      x=find_slot_in_env(sc,envir,symbol,0);
      if (x != sc->NIL) {
@@ -5026,12 +5026,12 @@ void ts_register_foreign_func_list(scheme * sc,
     }
 }
 
-pointer ts_apply0(scheme *sc, const char *procname)
+ts_ptr ts_apply0(scheme *sc, const char *procname)
 { return ts_eval(sc, cons(sc,ts_mk_sym(sc,procname),sc->NIL)); }
 
 void save_from_C_call(scheme *sc)
 {
-  pointer saved_data =
+  ts_ptr saved_data =
     cons(sc,
          car(sc->sink),
          cons(sc,
@@ -5053,7 +5053,7 @@ void restore_from_C_call(scheme *sc)
 }
 
 /* "func" and "args" are assumed to be already eval'ed. */
-pointer ts_call(scheme *sc, pointer func, pointer args)
+ts_ptr ts_call(scheme *sc, ts_ptr func, ts_ptr args)
 {
   int old_repl = sc->interactive_repl;
   sc->interactive_repl = 0;
@@ -5068,7 +5068,7 @@ pointer ts_call(scheme *sc, pointer func, pointer args)
   return sc->value;
 }
 
-pointer ts_eval(scheme *sc, pointer obj)
+ts_ptr ts_eval(scheme *sc, ts_ptr obj)
 {
   int old_repl = sc->interactive_repl;
   sc->interactive_repl = 0;
@@ -5139,7 +5139,7 @@ int main(int argc, char **argv) {
     if(strcmp(file_name,"-")==0) {
       fin=stdin;
     } else if(strcmp(file_name,"-1")==0 || strcmp(file_name,"-c")==0) {
-      pointer args=sc.NIL;
+      ts_ptr args=sc.NIL;
       isfile=file_name[1]=='1';
       file_name=*argv++;
       if(strcmp(file_name,"-")==0) {
@@ -5148,7 +5148,7 @@ int main(int argc, char **argv) {
         fin=fopen(file_name,"r");
       }
       for(;*argv;argv++) {
-        pointer value=ts_mk_str(&sc,*argv);
+        ts_ptr value=ts_mk_str(&sc,*argv);
         args=cons(&sc,value,args);
       }
       args=reverse_in_place(&sc,sc.NIL,args);

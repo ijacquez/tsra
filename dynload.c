@@ -87,10 +87,10 @@ static void dl_detach(HMODULE mo) {
 }
 #endif
 
-pointer scm_load_ext(scheme *sc, pointer args)
+ts_ptr scm_load_ext(scheme *sc, ts_ptr args)
 {
-   pointer first_arg;
-   pointer retval;
+   ts_ptr first_arg;
+   ts_ptr retval;
    char filename[MAXPATHLEN], init_fn[MAXPATHLEN+6];
    char *name;
    HMODULE dll_handle;
