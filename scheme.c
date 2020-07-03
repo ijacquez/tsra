@@ -5126,7 +5126,7 @@ int main(int argc, char **argv) {
   ts_set_in_port_file(&sc, stdin);
   ts_set_out_port_file(&sc, stdout);
 #if USE_DL
-  ts_def(&sc,sc.global_env,ts_mk_sym(&sc,"load-extension"),ts_mk_foreign_func(&sc, scm_load_ext));
+  ts_def(&sc,sc.global_env,ts_mk_sym(&sc,"load-extension"),ts_mk_foreign_func(&sc, ts_load_ext));
 #endif
   argv++;
   if(access(file_name,0)!=0) {

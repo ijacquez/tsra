@@ -1,6 +1,6 @@
 /* dynload.c Dynamic Loader for TinyScheme */
 /* Original Copyright (c) 1999 Alexander Shendi     */
-/* Modifications for NT and dl_* interface, scm_load_ext: D. Souflis */
+/* Modifications for NT and dl_* interface, ts_load_ext: D. Souflis */
 /* Refurbished by Stephen Gildea */
 
 #define _SCHEME_SOURCE
@@ -87,7 +87,7 @@ static void dl_detach(HMODULE mo) {
 }
 #endif
 
-ts_ptr scm_load_ext(scheme *sc, ts_ptr args)
+ts_ptr ts_load_ext(scheme *sc, ts_ptr args)
 {
    ts_ptr first_arg;
    ts_ptr retval;
