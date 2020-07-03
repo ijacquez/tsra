@@ -31,7 +31,7 @@ typedef struct ts_num {
      } value;
 } ts_num;
 
-enum ts_port_kind {
+typedef enum ts_port_kind {
   port_free=0,
   port_file=1,
   port_string=2,
@@ -39,10 +39,10 @@ enum ts_port_kind {
   port_input=16,
   port_output=32,
   port_saw_EOF=64
-};
+} ts_port_kind;
 
 typedef struct ts_port {
-  unsigned char kind;
+  ts_port_kind kind;
   union {
     struct {
       FILE *file;
