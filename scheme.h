@@ -32,13 +32,13 @@ typedef struct ts_num {
 } ts_num;
 
 typedef enum ts_port_kind {
-  port_free=0,
-  port_file=1,
-  port_string=2,
-  port_srfi6=4,
-  port_input=16,
-  port_output=32,
-  port_saw_EOF=64
+  ts_port_free=0,
+  ts_port_file=1,
+  ts_port_string=2,
+  ts_port_srfi6=4,
+  ts_port_input=16,
+  ts_port_output=32,
+  ts_port_saw_EOF=64
 } ts_port_kind;
 
 typedef struct ts_port {
