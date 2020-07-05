@@ -108,7 +108,7 @@
 #endif
 
 #ifndef INLINE
-# define INLINE
+# define INLINE inline
 #endif
 
 /* operator code */
