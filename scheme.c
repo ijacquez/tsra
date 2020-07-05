@@ -107,6 +107,10 @@
 # define SHOW_ERROR_LINE 1
 #endif
 
+#ifndef INLINE
+# define INLINE
+#endif
+
 /* operator code */
 enum scheme_opcodes {
 #define _OP_DEF(A,B,C,D,E,OP) OP,
@@ -259,7 +263,7 @@ static int num_le(ts_num a, ts_num b);
 static double round_per_R5RS(double x);
 #endif
 static int is_zero_double(double x);
-static int num_ts_is_int(ts_ptr p) {
+INLINE static int num_ts_is_int(ts_ptr p) {
   return ((p)->_object._number.is_fixnum);
 }
 
@@ -270,16 +274,16 @@ static ts_num num_one;
 #define typeflag(p)      ((p)->_flag)
 #define type(p)          (typeflag(p)&T_MASKTYPE)
 
-INTERFACE int ts_is_str(ts_ptr p)     { return (type(p)==T_STRING); }
+INLINE INTERFACE int ts_is_str(ts_ptr p)     { return (type(p)==T_STRING); }
 #define stts_real_val(p)      ((p)->_object._string._svalue)
 #define strlength(p)        ((p)->_object._string._length)
 
 INTERFACE static int ts_is_list(scheme *sc, ts_ptr p);
-INTERFACE int ts_is_vec(ts_ptr p)    { return (type(p)==T_VECTOR); }
+INLINE INTERFACE int ts_is_vec(ts_ptr p)    { return (type(p)==T_VECTOR); }
 INTERFACE static void ts_fill_vec(ts_ptr vec, ts_ptr obj);
 INTERFACE static ts_ptr ts_vec_elem(ts_ptr vec, int ielem);
 INTERFACE static ts_ptr ts_set_vec_elem(ts_ptr vec, int ielem, ts_ptr a);
-INTERFACE int ts_is_num(ts_ptr p)    { return (type(p)==T_NUMBER); }
+INLINE INTERFACE int ts_is_num(ts_ptr p)    { return (type(p)==T_NUMBER); }
 INTERFACE int ts_is_int(ts_ptr p) {
   if (!ts_is_num(p))
       return 0;
@@ -288,11 +292,11 @@ INTERFACE int ts_is_int(ts_ptr p) {
   return 0;
 }
 
-INTERFACE int ts_is_real(ts_ptr p) {
+INLINE INTERFACE int ts_is_real(ts_ptr p) {
   return ts_is_num(p) && (!(p)->_object._number.is_fixnum);
 }
 
-INTERFACE int ts_is_char(ts_ptr p) { return (type(p)==T_CHARACTER); }
+INLINE INTERFACE int ts_is_char(ts_ptr p) { return (type(p)==T_CHARACTER); }
 INTERFACE char *ts_str_val(ts_ptr p) { return stts_real_val(p); }
 ts_num ts_num_val(ts_ptr p)       { return ((p)->_object._number); }
 INTERFACE long ts_int_val(ts_ptr p)      { return (num_ts_is_int(p)?(p)->_object._number.value.ivalue:(long)(p)->_object._number.value.rvalue); }
@@ -303,11 +307,11 @@ INTERFACE double ts_real_val(ts_ptr p)    { return (!num_ts_is_int(p)?(p)->_obje
 #define set_num_real(p)      (p)->_object._number.is_fixnum=0;
 INTERFACE  long ts_char_val(ts_ptr p)  { return ivalue_unchecked(p); }
 
-INTERFACE int ts_is_port(ts_ptr p)     { return (type(p)==T_PORT); }
+INLINE INTERFACE int ts_is_port(ts_ptr p)     { return (type(p)==T_PORT); }
 INTERFACE int is_inport(ts_ptr p)  { return ts_is_port(p) && p->_object._port->kind & ts_port_input; }
 INTERFACE int is_outport(ts_ptr p) { return ts_is_port(p) && p->_object._port->kind & ts_port_output; }
 
-INTERFACE int ts_is_pair(ts_ptr p)     { return (type(p)==T_PAIR); }
+INLINE INTERFACE int ts_is_pair(ts_ptr p)     { return (type(p)==T_PAIR); }
 #define car(p)           ((p)->_object._cons._car)
 #define cdr(p)           ((p)->_object._cons._cdr)
 INTERFACE ts_ptr ts_pair_car(ts_ptr p)   { return car(p); }
@@ -315,32 +319,32 @@ INTERFACE ts_ptr ts_pair_cdr(ts_ptr p)   { return cdr(p); }
 INTERFACE ts_ptr ts_set_car(ts_ptr p, ts_ptr q) { return car(p)=q; }
 INTERFACE ts_ptr ts_set_cdr(ts_ptr p, ts_ptr q) { return cdr(p)=q; }
 
-INTERFACE int ts_is_sym(ts_ptr p)   { return (type(p)==T_SYMBOL); }
+INLINE INTERFACE int ts_is_sym(ts_ptr p)   { return (type(p)==T_SYMBOL); }
 INTERFACE char *ts_sym_name(ts_ptr p)   { return stts_real_val(car(p)); }
 #if USE_PLIST
-TS_EXPORT int hasprop(ts_ptr p)     { return (typeflag(p)&T_SYMBOL); }
+INLINE TS_EXPORT int hasprop(ts_ptr p)     { return (typeflag(p)&T_SYMBOL); }
 #define symprop(p)       cdr(p)
 #endif
 
-INTERFACE int ts_is_syntax(ts_ptr p)   { return (typeflag(p)&T_SYNTAX); }
+INLINE INTERFACE int ts_is_syntax(ts_ptr p)   { return (typeflag(p)&T_SYNTAX); }
 INTERFACE int ts_is_proc(ts_ptr p)     { return (type(p)==T_PROC); }
 INTERFACE int ts_is_foreign(ts_ptr p)  { return (type(p)==T_FOREIGN); }
 INTERFACE char *ts_syntax_name(ts_ptr p) { return stts_real_val(car(p)); }
 #define procnum(p)       ts_int_val(p)
 static const char *procname(ts_ptr x);
 
-INTERFACE int ts_is_closure(ts_ptr p)  { return (type(p)==T_CLOSURE); }
+INLINE INTERFACE int ts_is_closure(ts_ptr p)  { return (type(p)==T_CLOSURE); }
 INTERFACE int ts_is_macro(ts_ptr p)    { return (type(p)==T_MACRO); }
 INTERFACE ts_ptr ts_closure_code(ts_ptr p)   { return car(p); }
 INTERFACE ts_ptr ts_closure_env(ts_ptr p)    { return cdr(p); }
 
-INTERFACE int is_continuation(ts_ptr p)    { return (type(p)==T_CONTINUATION); }
+INLINE INTERFACE int is_continuation(ts_ptr p)    { return (type(p)==T_CONTINUATION); }
 #define cont_dump(p)     cdr(p)
 
 /* To do: promise should be forced ONCE only */
-INTERFACE int ts_is_promise(ts_ptr p)  { return (type(p)==T_PROMISE); }
+INLINE INTERFACE int ts_is_promise(ts_ptr p)  { return (type(p)==T_PROMISE); }
 
-INTERFACE int ts_is_env(ts_ptr p) { return (type(p)==T_ENVIRONMENT); }
+INLINE INTERFACE int ts_is_env(ts_ptr p) { return (type(p)==T_ENVIRONMENT); }
 #define setenvironment(p)    typeflag(p) = T_ENVIRONMENT
 
 #define is_atom(p)       (typeflag(p)&T_ATOM)
@@ -351,9 +355,9 @@ INTERFACE int ts_is_env(ts_ptr p) { return (type(p)==T_ENVIRONMENT); }
 #define setmark(p)       typeflag(p) |= MARK
 #define clrmark(p)       typeflag(p) &= UNMARK
 
-INTERFACE int ts_is_immutable(ts_ptr p) { return (typeflag(p)&T_IMMUTABLE); }
+INLINE INTERFACE int ts_is_immutable(ts_ptr p) { return (typeflag(p)&T_IMMUTABLE); }
 /*#define ts_set_immutable(p)  typeflag(p) |= T_IMMUTABLE*/
-INTERFACE void ts_set_immutable(ts_ptr p) { typeflag(p) |= T_IMMUTABLE; }
+INLINE INTERFACE void ts_set_immutable(ts_ptr p) { typeflag(p) |= T_IMMUTABLE; }
 
 #define caar(p)          car(car(p))
 #define cadr(p)          car(cdr(p))
@@ -367,7 +371,7 @@ INTERFACE void ts_set_immutable(ts_ptr p) { typeflag(p) |= T_IMMUTABLE; }
 #define cddddr(p)        cdr(cdr(cdr(cdr(p))))
 
 #if USE_CHAR_CLASSIFIERS
-static int Cisalpha(int c) { return isascii(c) && isalpha(c); }
+INLINE static int Cisalpha(int c) { return isascii(c) && isalpha(c); }
 static int Cisdigit(int c) { return isascii(c) && isdigit(c); }
 static int Cisspace(int c) { return isascii(c) && isspace(c); }
 static int Cisupper(int c) { return isascii(c) && isupper(c); }
@@ -430,10 +434,10 @@ static int is_ascii_name(const char *name, int *pc) {
 static int file_push(scheme *sc, const char *fname);
 static void file_pop(scheme *sc);
 static int file_interactive(scheme *sc);
-static int is_one_of(char *s, int c);
+INLINE static int is_one_of(char *s, int c);
 static int alloc_cellseg(scheme *sc, int n);
 static long binary_decode(const char *s);
-static ts_ptr get_cell(scheme *sc, ts_ptr a, ts_ptr b);
+INLINE static ts_ptr get_cell(scheme *sc, ts_ptr a, ts_ptr b);
 static ts_ptr _get_cell(scheme *sc, ts_ptr a, ts_ptr b);
 static ts_ptr ts_reserve_cells(scheme *sc, int n);
 static ts_ptr get_consecutive_cells(scheme *sc, int n);
@@ -461,7 +465,7 @@ static int inchar(scheme *sc);
 static void backchar(scheme *sc, int c);
 static char   *readstr_upto(scheme *sc, char *delim);
 static ts_ptr readstrexp(scheme *sc);
-static int skipspace(scheme *sc);
+INLINE static int skipspace(scheme *sc);
 static int token(scheme *sc);
 static void printslashstring(scheme *sc, char *s, int len);
 static void atom2str(scheme *sc, ts_ptr l, int f, char **pp, int *plen);
@@ -722,7 +726,7 @@ static int alloc_cellseg(scheme *sc, int n) {
      return n;
 }
 
-static ts_ptr get_cell_x(scheme *sc, ts_ptr a, ts_ptr b) {
+INLINE static ts_ptr get_cell_x(scheme *sc, ts_ptr a, ts_ptr b) {
   if (sc->free_cell != sc->NIL) {
     ts_ptr x = sc->free_cell;
     sc->free_cell = cdr(x);
@@ -881,7 +885,7 @@ static ts_ptr get_vector_object(scheme *sc, int len, ts_ptr init)
   return cells;
 }
 
-static void ok_to_freely_gc(scheme *sc)
+INLINE static void ok_to_freely_gc(scheme *sc)
 {
   car(sc->sink) = sc->NIL;
 }
@@ -953,7 +957,7 @@ static ts_ptr oblist_add_by_name(scheme *sc, const char *name)
   return x;
 }
 
-static ts_ptr oblist_find_by_name(scheme *sc, const char *name)
+INLINE static ts_ptr oblist_find_by_name(scheme *sc, const char *name)
 {
   int location;
   ts_ptr x;
@@ -991,7 +995,7 @@ static ts_ptr oblist_initial_value(scheme *sc)
   return sc->NIL;
 }
 
-static ts_ptr oblist_find_by_name(scheme *sc, const char *name)
+INLINE static ts_ptr oblist_find_by_name(scheme *sc, const char *name)
 {
      ts_ptr x;
      char    *s;
@@ -1850,7 +1854,7 @@ static ts_ptr readstrexp(scheme *sc) {
 }
 
 /* check c is in chars */
-static int is_one_of(char *s, int c) {
+INLINE static int is_one_of(char *s, int c) {
      if(c==EOF) return 1;
      while (*s)
           if (*s++ == c)
@@ -1859,7 +1863,7 @@ static int is_one_of(char *s, int c) {
 }
 
 /* skip white characters */
-static int skipspace(scheme *sc) {
+INLINE static int skipspace(scheme *sc) {
      int c = 0, curr_line = 0;
 
      do {
@@ -2302,7 +2306,7 @@ static void new_frame_in_env(scheme *sc, ts_ptr old_env)
   setenvironment(sc->envir);
 }
 
-static void new_slot_spec_in_env(scheme *sc, ts_ptr env,
+INLINE static void new_slot_spec_in_env(scheme *sc, ts_ptr env,
                                         ts_ptr variable, ts_ptr value)
 {
   ts_ptr slot = immutable_cons(sc, variable, value);
@@ -2349,13 +2353,13 @@ static ts_ptr find_slot_in_env(scheme *sc, ts_ptr env, ts_ptr hdl, int all)
 
 #else /* USE_ALIST_ENV */
 
-static void new_frame_in_env(scheme *sc, ts_ptr old_env)
+INLINE static void new_frame_in_env(scheme *sc, ts_ptr old_env)
 {
   sc->envir = immutable_cons(sc, sc->NIL, old_env);
   setenvironment(sc->envir);
 }
 
-static void new_slot_spec_in_env(scheme *sc, ts_ptr env,
+INLINE static void new_slot_spec_in_env(scheme *sc, ts_ptr env,
                                         ts_ptr variable, ts_ptr value)
 {
   car(env) = immutable_cons(sc, immutable_cons(sc, variable, value), car(env));
@@ -2385,17 +2389,17 @@ static ts_ptr find_slot_in_env(scheme *sc, ts_ptr env, ts_ptr hdl, int all)
 
 #endif /* USE_ALIST_ENV else */
 
-static void new_slot_in_env(scheme *sc, ts_ptr variable, ts_ptr value)
+INLINE static void new_slot_in_env(scheme *sc, ts_ptr variable, ts_ptr value)
 {
   new_slot_spec_in_env(sc, sc->envir, variable, value);
 }
 
-static void set_slot_in_env(scheme *sc, ts_ptr slot, ts_ptr value)
+INLINE static void set_slot_in_env(scheme *sc, ts_ptr slot, ts_ptr value)
 {
   cdr(slot) = value;
 }
 
-static ts_ptr slot_value_in_env(ts_ptr slot)
+INLINE static ts_ptr slot_value_in_env(ts_ptr slot)
 {
   return cdr(slot);
 }
@@ -2519,13 +2523,13 @@ static ts_ptr _s_return(scheme *sc, ts_ptr a)
   return sc->T;
 }
 
-static void dump_stack_reset(scheme *sc)
+INLINE static void dump_stack_reset(scheme *sc)
 {
   /* in this implementation, sc->dump is the number of frames on the stack */
   sc->dump = (ts_ptr)0;
 }
 
-static void dump_stack_initialize(scheme *sc)
+INLINE static void dump_stack_initialize(scheme *sc)
 {
   sc->dump_size = 0;
   sc->dump_base = NULL;
@@ -2540,7 +2544,7 @@ static void dump_stack_free(scheme *sc)
   sc->dump_size = 0;
 }
 
-static void dump_stack_mark(scheme *sc)
+INLINE static void dump_stack_mark(scheme *sc)
 {
   int nframes = (int)sc->dump;
   int i;
@@ -2555,12 +2559,12 @@ static void dump_stack_mark(scheme *sc)
 
 #else
 
-static void dump_stack_reset(scheme *sc)
+INLINE static void dump_stack_reset(scheme *sc)
 {
   sc->dump = sc->NIL;
 }
 
-static void dump_stack_initialize(scheme *sc)
+INLINE static void dump_stack_initialize(scheme *sc)
 {
   dump_stack_reset(sc);
 }
@@ -2587,7 +2591,7 @@ static void s_save(scheme *sc, enum scheme_opcodes op, ts_ptr args, ts_ptr code)
     sc->dump = cons(sc, ts_mk_int(sc, (long)(op)), sc->dump);
 }
 
-static void dump_stack_mark(scheme *sc)
+INLINE static void dump_stack_mark(scheme *sc)
 {
   mark(sc->dump);
 }
