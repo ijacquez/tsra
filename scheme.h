@@ -227,7 +227,7 @@ TS_EXPORT ts_ptr ts_set_cdr(ts_ptr p, ts_ptr q);
 
 TS_EXPORT int ts_is_sym(ts_ptr p);
 TS_EXPORT char *ts_sym_name(ts_ptr p);
-TS_EXPORT int hasprop(ts_ptr p);
+TS_EXPORT int ts_has_prop(ts_ptr p);
 
 TS_EXPORT int ts_is_syntax(ts_ptr p);
 TS_EXPORT int ts_is_proc(ts_ptr p);

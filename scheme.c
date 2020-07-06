@@ -322,7 +322,7 @@ INTERFACE ts_ptr ts_set_cdr(ts_ptr p, ts_ptr q) { return cdr(p)=q; }
 INLINE INTERFACE int ts_is_sym(ts_ptr p)   { return (type(p)==T_SYMBOL); }
 INTERFACE char *ts_sym_name(ts_ptr p)   { return stts_real_val(car(p)); }
 #if USE_PLIST
-INLINE TS_EXPORT int hasprop(ts_ptr p)     { return (typeflag(p)&T_SYMBOL); }
+INLINE TS_EXPORT int ts_has_prop(ts_ptr p)     { return (typeflag(p)&T_SYMBOL); }
 #define symprop(p)       cdr(p)
 #endif
 
@@ -3960,7 +3960,7 @@ static ts_ptr opexe_4(scheme *sc, enum scheme_opcodes op) {
 
 #if USE_PLIST
      case OP_PUT:        /* put */
-          if (!hasprop(car(sc->args)) || !hasprop(cadr(sc->args))) {
+          if (!ts_has_prop(car(sc->args)) || !ts_has_prop(cadr(sc->args))) {
                Error_0(sc,"illegal use of put");
           }
           for (x = symprop(car(sc->args)), y = cadr(sc->args); x != sc->NIL; x = cdr(x)) {
@@ -3976,7 +3976,7 @@ static ts_ptr opexe_4(scheme *sc, enum scheme_opcodes op) {
           s_return(sc,sc->T);
 
      case OP_GET:        /* get */
-          if (!hasprop(car(sc->args)) || !hasprop(cadr(sc->args))) {
+          if (!ts_has_prop(car(sc->args)) || !ts_has_prop(cadr(sc->args))) {
                Error_0(sc,"illegal use of get");
           }
           for (x = symprop(car(sc->args)), y = cadr(sc->args); x != sc->NIL; x = cdr(x)) {
