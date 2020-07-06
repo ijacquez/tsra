@@ -47,7 +47,7 @@
  * Leave it defined if you want continuations, and also for the Sharp Zaurus.
  * Undefine it if you only care about faster speed and not strict Scheme compatibility.
  */
-#define USE_SCHEME_STACK
+#define USE_STACK
 
 #if USE_DL
 # define USE_INTERFACE 1
@@ -2472,7 +2472,7 @@ static ts_ptr _Error_1(scheme *sc, const char *s, ts_ptr a) {
 
 #define s_return(sc,a) return _s_return(sc,a)
 
-#ifndef USE_SCHEME_STACK
+#ifndef USE_STACK
 
 /* this structure holds all the interpreter's registers */
 struct dump_stack_frame {
