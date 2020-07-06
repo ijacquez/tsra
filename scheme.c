@@ -112,7 +112,7 @@
 #endif
 
 /* operator code */
-enum scheme_opcodes {
+enum opcodes {
 #define _OP_DEF(A,B,C,D,E,OP) OP,
 #include "opdefines.h"
   OP_MAXDEFINED
@@ -470,24 +470,24 @@ static int token(scheme *sc);
 static void printslashstring(scheme *sc, char *s, int len);
 static void atom2str(scheme *sc, ts_ptr l, int f, char **pp, int *plen);
 static void printatom(scheme *sc, ts_ptr l, int f);
-static ts_ptr mk_proc(scheme *sc, enum scheme_opcodes op);
+static ts_ptr mk_proc(scheme *sc, enum opcodes op);
 static ts_ptr mk_closure(scheme *sc, ts_ptr c, ts_ptr e);
 static ts_ptr mk_continuation(scheme *sc, ts_ptr d);
 static ts_ptr reverse(scheme *sc, ts_ptr a);
 static ts_ptr reverse_in_place(scheme *sc, ts_ptr term, ts_ptr list);
 static ts_ptr revappend(scheme *sc, ts_ptr a, ts_ptr b);
 static void dump_stack_mark(scheme *);
-static ts_ptr opexe_0(scheme *sc, enum scheme_opcodes op);
-static ts_ptr opexe_1(scheme *sc, enum scheme_opcodes op);
-static ts_ptr opexe_2(scheme *sc, enum scheme_opcodes op);
-static ts_ptr opexe_3(scheme *sc, enum scheme_opcodes op);
-static ts_ptr opexe_4(scheme *sc, enum scheme_opcodes op);
-static ts_ptr opexe_5(scheme *sc, enum scheme_opcodes op);
-static ts_ptr opexe_6(scheme *sc, enum scheme_opcodes op);
-static void Eval_Cycle(scheme *sc, enum scheme_opcodes op);
+static ts_ptr opexe_0(scheme *sc, enum opcodes op);
+static ts_ptr opexe_1(scheme *sc, enum opcodes op);
+static ts_ptr opexe_2(scheme *sc, enum opcodes op);
+static ts_ptr opexe_3(scheme *sc, enum opcodes op);
+static ts_ptr opexe_4(scheme *sc, enum opcodes op);
+static ts_ptr opexe_5(scheme *sc, enum opcodes op);
+static ts_ptr opexe_6(scheme *sc, enum opcodes op);
+static void Eval_Cycle(scheme *sc, enum opcodes op);
 static void assign_syntax(scheme *sc, char *name);
 static int syntaxnum(ts_ptr p);
-static void assign_proc(scheme *sc, enum scheme_opcodes, char *name);
+static void assign_proc(scheme *sc, enum opcodes, char *name);
 
 #define num_ts_int_val(n)       (n.is_fixnum?(n).value.ivalue:(long)(n).value.rvalue)
 #define num_ts_real_val(n)       (!n.is_fixnum?(n).value.rvalue:(double)(n).value.ivalue)
@@ -2476,7 +2476,7 @@ static ts_ptr _Error_1(scheme *sc, const char *s, ts_ptr a) {
 
 /* this structure holds all the interpreter's registers */
 struct dump_stack_frame {
-  enum scheme_opcodes op;
+  enum opcodes op;
   ts_ptr args;
   ts_ptr envir;
   ts_ptr code;
@@ -2484,7 +2484,7 @@ struct dump_stack_frame {
 
 #define STACK_GROWTH 3
 
-static void s_save(scheme *sc, enum scheme_opcodes op, ts_ptr args, ts_ptr code)
+static void s_save(scheme *sc, enum opcodes op, ts_ptr args, ts_ptr code)
 {
   int nframes = (int)sc->dump;
   struct dump_stack_frame *next_frame;
@@ -2585,7 +2585,7 @@ static ts_ptr _s_return(scheme *sc, ts_ptr a) {
     return sc->T;
 }
 
-static void s_save(scheme *sc, enum scheme_opcodes op, ts_ptr args, ts_ptr code) {
+static void s_save(scheme *sc, enum opcodes op, ts_ptr args, ts_ptr code) {
     sc->dump = cons(sc, sc->envir, cons(sc, (code), sc->dump));
     sc->dump = cons(sc, (args), sc->dump);
     sc->dump = cons(sc, ts_mk_int(sc, (long)(op)), sc->dump);
@@ -2599,7 +2599,7 @@ INLINE static void dump_stack_mark(scheme *sc)
 
 #define s_retbool(tf)    s_return(sc,(tf) ? sc->T : sc->F)
 
-static ts_ptr opexe_0(scheme *sc, enum scheme_opcodes op) {
+static ts_ptr opexe_0(scheme *sc, enum opcodes op) {
      ts_ptr x, y;
 
      switch (op) {
@@ -3005,7 +3005,7 @@ static ts_ptr opexe_0(scheme *sc, enum scheme_opcodes op) {
      return sc->T;
 }
 
-static ts_ptr opexe_1(scheme *sc, enum scheme_opcodes op) {
+static ts_ptr opexe_1(scheme *sc, enum opcodes op) {
      ts_ptr x, y;
 
      switch (op) {
@@ -3216,7 +3216,7 @@ static ts_ptr opexe_1(scheme *sc, enum scheme_opcodes op) {
      return sc->T;
 }
 
-static ts_ptr opexe_2(scheme *sc, enum scheme_opcodes op) {
+static ts_ptr opexe_2(scheme *sc, enum opcodes op) {
      ts_ptr x;
      ts_num v;
 #if USE_MATH
@@ -3762,7 +3762,7 @@ int ts_list_len(scheme *sc, ts_ptr a) {
     }
 }
 
-static ts_ptr opexe_3(scheme *sc, enum scheme_opcodes op) {
+static ts_ptr opexe_3(scheme *sc, enum opcodes op) {
      ts_ptr x;
      ts_num v;
      int (*comp_func)(ts_num,ts_num)=0;
@@ -3858,7 +3858,7 @@ static ts_ptr opexe_3(scheme *sc, enum scheme_opcodes op) {
      return sc->T;
 }
 
-static ts_ptr opexe_4(scheme *sc, enum scheme_opcodes op) {
+static ts_ptr opexe_4(scheme *sc, enum opcodes op) {
      ts_ptr x, y;
 
      switch (op) {
@@ -4119,7 +4119,7 @@ static ts_ptr opexe_4(scheme *sc, enum scheme_opcodes op) {
      return sc->T;
 }
 
-static ts_ptr opexe_5(scheme *sc, enum scheme_opcodes op) {
+static ts_ptr opexe_5(scheme *sc, enum opcodes op) {
      ts_ptr x;
 
      if(sc->nesting!=0) {
@@ -4417,7 +4417,7 @@ static ts_ptr opexe_5(scheme *sc, enum scheme_opcodes op) {
      return sc->T;
 }
 
-static ts_ptr opexe_6(scheme *sc, enum scheme_opcodes op) {
+static ts_ptr opexe_6(scheme *sc, enum opcodes op) {
      ts_ptr x, y;
      long v;
 
@@ -4471,7 +4471,7 @@ static ts_ptr opexe_6(scheme *sc, enum scheme_opcodes op) {
      return sc->T; /* NOTREACHED */
 }
 
-typedef ts_ptr (*dispatch_func)(scheme *, enum scheme_opcodes);
+typedef ts_ptr (*dispatch_func)(scheme *, enum opcodes);
 
 typedef int (*test_predicate)(ts_ptr);
 static int is_any(ts_ptr p) { return 1;}
@@ -4544,7 +4544,7 @@ static const char *procname(ts_ptr x) {
 }
 
 /* kernel of this interpreter */
-static void Eval_Cycle(scheme *sc, enum scheme_opcodes op) {
+static void Eval_Cycle(scheme *sc, enum opcodes op) {
   sc->op = op;
   for (;;) {
     op_code_info *pcd=dispatch_table+sc->op;
@@ -4606,7 +4606,7 @@ static void Eval_Cycle(scheme *sc, enum scheme_opcodes op) {
       }
     }
     ok_to_freely_gc(sc);
-    if (pcd->func(sc, (enum scheme_opcodes)sc->op) == sc->NIL) {
+    if (pcd->func(sc, (enum opcodes)sc->op) == sc->NIL) {
       return;
     }
     if(sc->no_memory) {
@@ -4625,7 +4625,7 @@ static void assign_syntax(scheme *sc, char *name) {
      typeflag(x) |= T_SYNTAX;
 }
 
-static void assign_proc(scheme *sc, enum scheme_opcodes op, char *name) {
+static void assign_proc(scheme *sc, enum opcodes op, char *name) {
      ts_ptr x, y;
 
      x = ts_mk_sym(sc, name);
@@ -4633,7 +4633,7 @@ static void assign_proc(scheme *sc, enum scheme_opcodes op, char *name) {
      new_slot_in_env(sc, x, y);
 }
 
-static ts_ptr mk_proc(scheme *sc, enum scheme_opcodes op) {
+static ts_ptr mk_proc(scheme *sc, enum opcodes op) {
      ts_ptr y;
 
      y = get_cell(sc, sc->NIL, sc->NIL);
@@ -4858,7 +4858,7 @@ int ts_init_custom_alloc(scheme *sc, ts_func_alloc malloc, ts_func_dealloc free)
 
   for(i=0; i<n; i++) {
     if(dispatch_table[i].name!=0) {
-      assign_proc(sc, (enum scheme_opcodes)i, dispatch_table[i].name);
+      assign_proc(sc, (enum opcodes)i, dispatch_table[i].name);
     }
   }
 
