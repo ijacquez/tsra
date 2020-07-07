@@ -4746,12 +4746,13 @@ static struct ts_interface vtbl ={
   ts_is_immutable,
   ts_set_immutable,
 
-  ts_load_file,
   ts_load_str,
 
 #if !STANDALONE
+  ts_load_file,
   ts_vec_len,
 #else
+  NULL,
   NULL,
 #endif
 };
@@ -4985,24 +4986,6 @@ static void load_named_file(scheme *sc, FILE *fin, const char *filename) {
   }
 }
 
-ts_err ts_load_file(scheme *sc, const char *name) {
-  int status;       
-  FILE *file = fopen(name, "r");
-    
-  if (file == NULL) {
-    return ts_fopen_err;
-  }                
-    
-  load_file(sc, file);
-  status = fclose(file);
-       
-  if (status == EOF) {
-    return ts_fclose_err;
-  }
-
-  return 0;
-}
-
 void ts_load_str(scheme *sc, const char *cmd) {
   dump_stack_reset(sc);
   sc->envir = sc->global_env;
@@ -5108,6 +5091,24 @@ ts_ptr ts_eval(scheme *sc, ts_ptr obj)
   sc->interactive_repl = old_repl;
   restore_from_C_call(sc);
   return sc->value;
+}
+
+ts_err ts_load_file(scheme *sc, const char *name) {
+  int status;       
+  FILE *file = fopen(name, "r");
+
+  if (file == NULL) {
+    return ts_fopen_err;
+  }
+
+  load_file(sc, file);
+  status = fclose(file);
+ 
+  if (status == EOF) {
+    return ts_fclose_err;
+  }
+
+  return 0;
 }
 
 int ts_vec_len(ts_ptr vec) {

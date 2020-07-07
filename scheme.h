@@ -308,8 +308,8 @@ struct ts_interface {
   int (*is_env)(ts_ptr p);
   int (*is_immutable)(ts_ptr p);
   void (*set_immutable)(ts_ptr p);
-  ts_err (*load_file)(scheme *sc, const char *name);
   void (*load_str)(scheme *sc, const char *input);
+  ts_err (*load_file)(scheme *sc, const char *name);
   int (*vec_len)(ts_ptr vec);
 };
 
