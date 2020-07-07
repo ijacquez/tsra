@@ -4751,7 +4751,9 @@ static struct ts_interface vtbl ={
 #if !STANDALONE
   ts_load_file,
   ts_vec_len,
+  ts_get_global,
 #else
+  NULL,
   NULL,
   NULL,
 #endif
@@ -5117,6 +5119,13 @@ int ts_vec_len(ts_ptr vec) {
   }
 
   return ts_type_err;   
+}
+
+ts_ptr ts_get_global(scheme *sc, ts_ptr env, const char *name) {
+  ts_ptr sym = ts_mk_sym(sc, name);
+  ts_ptr slot = find_slot_in_env(sc, env, sym, 0);
+ 
+  return slot_value_in_env(slot);
 }
 
 #endif

@@ -249,6 +249,7 @@ TS_EXPORT int ts_is_env(ts_ptr p);
 TS_EXPORT int ts_is_immutable(ts_ptr p);
 TS_EXPORT void ts_set_immutable(ts_ptr p);
 TS_EXPORT int ts_vec_len(ts_ptr vec);
+TS_EXPORT ts_ptr ts_get_global(scheme *sc, ts_ptr env, const char *name);
 
 struct ts_interface {
   void (*def)(scheme *sc, ts_ptr env, ts_ptr symbol, ts_ptr value);
@@ -311,6 +312,7 @@ struct ts_interface {
   void (*load_str)(scheme *sc, const char *input);
   ts_err (*load_file)(scheme *sc, const char *name);
   int (*vec_len)(ts_ptr vec);
+  ts_ptr (*get_global)(scheme *sc, ts_ptr env, const char *name);
 };
 
 typedef struct ts_registerable
