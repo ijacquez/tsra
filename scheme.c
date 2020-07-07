@@ -4943,9 +4943,9 @@ void ts_deinit(scheme *sc) {
 }
 
 void ts_load_file(scheme *sc, FILE *fin)
-{ ts_load_named_file(sc,fin,0); }
+{ load_named_file(sc,fin,0); }
 
-void ts_load_named_file(scheme *sc, FILE *fin, const char *filename) {
+void load_named_file(scheme *sc, FILE *fin, const char *filename) {
   if (fin == NULL)
   {
     fprintf(stderr,"File pointer can not be NULL when loading a file\n");
@@ -5165,7 +5165,7 @@ int main(int argc, char **argv) {
       fprintf(stderr,"Could not open file %s\n",file_name);
     } else {
       if(isfile) {
-        ts_load_named_file(&sc,fin,file_name);
+        load_named_file(&sc,fin,file_name);
       } else {
         ts_load_str(&sc,file_name);
       }
@@ -5181,7 +5181,7 @@ int main(int argc, char **argv) {
     file_name=*argv++;
   } while(file_name!=0);
   if(argc==1) {
-    ts_load_named_file(&sc,stdin,0);
+    load_named_file(&sc,stdin,0);
   }
   retcode=sc.retcode;
   ts_deinit(&sc);
