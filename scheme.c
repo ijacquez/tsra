@@ -4718,7 +4718,6 @@ static struct ts_interface vtbl ={
   ts_is_list,
   ts_is_vec,
   ts_list_len,
-  ts_int_val,
   ts_fill_vec,
   ts_vec_elem,
   ts_set_vec_elem,
@@ -4748,7 +4747,13 @@ static struct ts_interface vtbl ={
   ts_set_immutable,
 
   ts_load_file,
-  ts_load_str
+  ts_load_str,
+
+#if !STANDALONE
+  ts_vec_len,
+#else
+  NULL,
+#endif
 };
 #endif
 
@@ -5104,6 +5109,15 @@ ts_ptr ts_eval(scheme *sc, ts_ptr obj)
   restore_from_C_call(sc);
   return sc->value;
 }
+
+int ts_vec_len(ts_ptr vec) {
+  if (ts_is_vec(vec)) {
+    return ts_int_val(vec);
+  }
+
+  return ts_type_err;   
+}
+
 #endif
 
 /* ========== Main ========== */

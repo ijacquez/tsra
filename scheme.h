@@ -176,6 +176,7 @@ int dump_size;      /* number of frames allocated for dump stack */
 typedef enum ts_err {
   ts_fopen_err = -1,
   ts_fclose_err = -2,
+  ts_type_err  = -3,
 } ts_err;
 
 TS_EXPORT scheme *ts_init_new(void);
@@ -247,6 +248,7 @@ TS_EXPORT int ts_is_promise(ts_ptr p);
 TS_EXPORT int ts_is_env(ts_ptr p);
 TS_EXPORT int ts_is_immutable(ts_ptr p);
 TS_EXPORT void ts_set_immutable(ts_ptr p);
+TS_EXPORT int ts_vec_len(ts_ptr vec);
 
 struct ts_interface {
   void (*def)(scheme *sc, ts_ptr env, ts_ptr symbol, ts_ptr value);
@@ -278,7 +280,6 @@ struct ts_interface {
   int (*is_list)(scheme *sc, ts_ptr p);
   int (*is_vec)(ts_ptr p);
   int (*list_len)(scheme *sc, ts_ptr vec);
-  long (*vec_len)(ts_ptr vec);
   void (*fill_vec)(ts_ptr vec, ts_ptr elem);
   ts_ptr (*vec_elem)(ts_ptr vec, int ielem);
   ts_ptr (*set_vec_elem)(ts_ptr vec, int ielem, ts_ptr newel);
@@ -309,6 +310,7 @@ struct ts_interface {
   void (*set_immutable)(ts_ptr p);
   ts_err (*load_file)(scheme *sc, const char *name);
   void (*load_str)(scheme *sc, const char *input);
+  int (*vec_len)(ts_ptr vec);
 };
 
 typedef struct ts_registerable
