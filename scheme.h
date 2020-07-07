@@ -173,6 +173,11 @@ void *dump_base;    /* pointer to base of allocated dump stack */
 int dump_size;      /* number of frames allocated for dump stack */
 };
 
+typedef enum ts_err {
+  ts_fopen_err = -1,
+  ts_fclose_err = -2,
+} ts_err;
+
 TS_EXPORT scheme *ts_init_new(void);
 TS_EXPORT scheme *ts_init_new_custom_alloc(ts_func_alloc malloc, ts_func_dealloc free);
 TS_EXPORT int ts_init(scheme *sc);
