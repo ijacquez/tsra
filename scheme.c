@@ -488,6 +488,7 @@ static void Eval_Cycle(scheme *sc, enum opcodes op);
 static void assign_syntax(scheme *sc, char *name);
 static int syntaxnum(ts_ptr p);
 static void assign_proc(scheme *sc, enum opcodes, char *name);
+static void load_named_file(scheme *sc, FILE *fin, const char *filename);
 
 #define num_ts_int_val(n)       (n.is_fixnum?(n).value.ivalue:(long)(n).value.rvalue)
 #define num_ts_real_val(n)       (!n.is_fixnum?(n).value.rvalue:(double)(n).value.ivalue)
@@ -4942,10 +4943,10 @@ void ts_deinit(scheme *sc) {
 #endif
 }
 
-void load_file(scheme *sc, FILE *fin)
+static void load_file(scheme *sc, FILE *fin)
 { load_named_file(sc,fin,0); }
 
-void load_named_file(scheme *sc, FILE *fin, const char *filename) {
+static void load_named_file(scheme *sc, FILE *fin, const char *filename) {
   if (fin == NULL)
   {
     fprintf(stderr,"File pointer can not be NULL when loading a file\n");
