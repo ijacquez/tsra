@@ -187,7 +187,7 @@ TS_EXPORT void ts_set_in_port_file(scheme *sc, FILE *fin);
 TS_EXPORT void ts_set_in_port_str(scheme *sc, char *start, char *past_the_end);
 TS_EXPORT void ts_set_out_port_file(scheme *sc, FILE *fin);
 TS_EXPORT void ts_set_out_port_str(scheme *sc, char *start, char *past_the_end);
-TS_EXPORT void ts_load_file(scheme *sc, FILE *fin);
+TS_EXPORT void load_file(scheme *sc, FILE *fin);
 TS_EXPORT void load_named_file(scheme *sc, FILE *fin, const char *filename);
 TS_EXPORT void ts_load_str(scheme *sc, const char *cmd);
 TS_EXPORT ts_ptr ts_apply0(scheme *sc, const char *procname);
