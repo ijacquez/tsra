@@ -187,7 +187,7 @@ TS_EXPORT void ts_set_in_port_file(scheme *sc, FILE *fin);
 TS_EXPORT void ts_set_in_port_str(scheme *sc, char *start, char *past_the_end);
 TS_EXPORT void ts_set_out_port_file(scheme *sc, FILE *fin);
 TS_EXPORT void ts_set_out_port_str(scheme *sc, char *start, char *past_the_end);
-TS_EXPORT void load_file(scheme *sc, FILE *fin);
+TS_EXPORT ts_err ts_load_file(scheme *sc, const char *name);
 TS_EXPORT void load_named_file(scheme *sc, FILE *fin, const char *filename);
 TS_EXPORT void ts_load_str(scheme *sc, const char *cmd);
 TS_EXPORT ts_ptr ts_apply0(scheme *sc, const char *procname);
@@ -308,7 +308,7 @@ struct ts_interface {
   int (*is_env)(ts_ptr p);
   int (*is_immutable)(ts_ptr p);
   void (*set_immutable)(ts_ptr p);
-  void (*load_file)(scheme *sc, FILE *fin);
+  ts_err (*load_file)(scheme *sc, const char *name);
   void (*load_str)(scheme *sc, const char *input);
 };
 

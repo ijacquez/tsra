@@ -4746,7 +4746,7 @@ static struct ts_interface vtbl ={
   ts_is_immutable,
   ts_set_immutable,
 
-  load_file,
+  ts_load_file,
   ts_load_str
 };
 #endif
@@ -4977,6 +4977,24 @@ void load_named_file(scheme *sc, FILE *fin, const char *filename) {
   if(sc->retcode==0) {
     sc->retcode=sc->nesting!=0;
   }
+}
+
+ts_err ts_load_file(scheme *sc, const char *name) {
+  int status;       
+  FILE *file = fopen(name, "r");
+    
+  if (file == NULL) {
+    return ts_fopen_err;
+  }                
+    
+  load_file(sc, file);
+  status = fclose(file);
+       
+  if (status == EOF) {
+    return ts_fclose_err;
+  }
+
+  return 0;
 }
 
 void ts_load_str(scheme *sc, const char *cmd) {
