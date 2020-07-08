@@ -149,20 +149,22 @@ enum opcodes {
 /* Used for documentation purposes, to signal functions in 'interface' */
 #define INTERFACE
 
-#define TOK_EOF     (-1)
-#define TOK_LPAREN  0
-#define TOK_RPAREN  1
-#define TOK_DOT     2
-#define TOK_ATOM    3
-#define TOK_QUOTE   4
-#define TOK_COMMENT 5
-#define TOK_DQUOTE  6
-#define TOK_BQUOTE  7
-#define TOK_COMMA   8
-#define TOK_ATMARK  9
-#define TOK_SHARP   10
-#define TOK_SHARP_CONST 11
-#define TOK_VEC     12
+enum {
+TOK_EOF = -1,
+TOK_LPAREN = 0,
+TOK_RPAREN = 1,
+TOK_DOT = 2,
+TOK_ATOM = 3,
+TOK_QUOTE = 4,
+TOK_COMMENT = 5,
+TOK_DQUOTE = 6,
+TOK_BQUOTE = 7,
+TOK_COMMA = 8,
+TOK_ATMARK = 9,
+TOK_SHARP = 10,
+TOK_SHARP_CONST = 11,
+TOK_VEC = 12,
+};
 
 #define BACKQUOTE '`'
 #define DELIMITERS  "()\";\f\t\v\n\r "
