@@ -75,7 +75,7 @@
 `port` stuct declaration moved to scheme.h  
 `scheme` stuct declaration moved to scheme.h  
   
-`port_kind` struct renamed to `ts_port_kind`  
+`port_kind` enum renamed to `ts_port_kind`  
 `num` struct renamed to `ts_num`  
 `port` struct renamed to `ts_port`  
 `cell` struct renamed to `ts_cell`  

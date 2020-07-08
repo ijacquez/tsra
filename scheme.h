@@ -142,7 +142,7 @@ ts_ptr loadport;
 #ifndef TS_MAXFIL
 #define TS_MAXFIL 64
 #endif
-ts_port load_stack[TS_MAXFIL];     /* Stack of open files for ts_port -1 (LOADing) */
+ts_port load_stack[TS_MAXFIL];     /* Stack of open files for port -1 (LOADing) */
 int nesting_stack[TS_MAXFIL];
 int file_i;
 int nesting;
