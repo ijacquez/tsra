@@ -311,6 +311,9 @@ struct ts_interface {
   void (*set_immutable)(ts_ptr p);
   void (*load_str)(scheme *sc, const char *input);
   ts_err (*load_file)(scheme *sc, const char *name);
+  ts_ptr (*apply0)(scheme *sc, const char *procname);
+  ts_ptr (*call)(scheme *sc, ts_ptr func, ts_ptr args);
+  ts_ptr (*eval)(scheme *sc, ts_ptr obj);
   int (*vec_len)(ts_ptr vec);
   ts_ptr (*get_global)(scheme *sc, ts_ptr env, const char *name);
 };

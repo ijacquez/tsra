@@ -4750,9 +4750,15 @@ static struct ts_interface vtbl ={
 
 #if !STANDALONE
   ts_load_file,
+  ts_apply0,
+  ts_call,
+  ts_eval,
   ts_vec_len,
   ts_get_global,
 #else
+  NULL,
+  NULL,
+  NULL,
   NULL,
   NULL,
   NULL,
