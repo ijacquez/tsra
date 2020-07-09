@@ -479,7 +479,7 @@ static void assign_proc(scheme *sc, enum opcodes, char *name);
 static void load_named_file(scheme *sc, FILE *fin, const char *filename);
 
 #define num_ts_int_val(n)       (n.is_fixnum?(n).value.ivalue:(long)(n).value.rvalue)
-#define num_ts_real_val(n)       (!n.is_fixnum?(n).value.rvalue:(double)(n).value.ivalue)
+#define num_rvalue(n)       (!n.is_fixnum?(n).value.rvalue:(double)(n).value.ivalue)
 
 static ts_num num_add(ts_num a, ts_num b) {
  ts_num ret;
@@ -487,7 +487,7 @@ static ts_num num_add(ts_num a, ts_num b) {
  if(ret.is_fixnum) {
      ret.value.ivalue= a.value.ivalue+b.value.ivalue;
  } else {
-     ret.value.rvalue=num_ts_real_val(a)+num_ts_real_val(b);
+     ret.value.rvalue=num_rvalue(a)+num_rvalue(b);
  }
  return ret;
 }
@@ -498,7 +498,7 @@ static ts_num num_mul(ts_num a, ts_num b) {
  if(ret.is_fixnum) {
      ret.value.ivalue= a.value.ivalue*b.value.ivalue;
  } else {
-     ret.value.rvalue=num_ts_real_val(a)*num_ts_real_val(b);
+     ret.value.rvalue=num_rvalue(a)*num_rvalue(b);
  }
  return ret;
 }
@@ -509,7 +509,7 @@ static ts_num num_div(ts_num a, ts_num b) {
  if(ret.is_fixnum) {
      ret.value.ivalue= a.value.ivalue/b.value.ivalue;
  } else {
-     ret.value.rvalue=num_ts_real_val(a)/num_ts_real_val(b);
+     ret.value.rvalue=num_rvalue(a)/num_rvalue(b);
  }
  return ret;
 }
@@ -520,7 +520,7 @@ static ts_num num_intdiv(ts_num a, ts_num b) {
  if(ret.is_fixnum) {
      ret.value.ivalue= a.value.ivalue/b.value.ivalue;
  } else {
-     ret.value.rvalue=num_ts_real_val(a)/num_ts_real_val(b);
+     ret.value.rvalue=num_rvalue(a)/num_rvalue(b);
  }
  return ret;
 }
@@ -531,7 +531,7 @@ static ts_num num_sub(ts_num a, ts_num b) {
  if(ret.is_fixnum) {
      ret.value.ivalue= a.value.ivalue-b.value.ivalue;
  } else {
-     ret.value.rvalue=num_ts_real_val(a)-num_ts_real_val(b);
+     ret.value.rvalue=num_rvalue(a)-num_rvalue(b);
  }
  return ret;
 }
@@ -586,7 +586,7 @@ static int num_eq(ts_num a, ts_num b) {
  if(is_fixnum) {
      ret= a.value.ivalue==b.value.ivalue;
  } else {
-     ret=num_ts_real_val(a)==num_ts_real_val(b);
+     ret=num_rvalue(a)==num_rvalue(b);
  }
  return ret;
 }
@@ -598,7 +598,7 @@ static int num_gt(ts_num a, ts_num b) {
  if(is_fixnum) {
      ret= a.value.ivalue>b.value.ivalue;
  } else {
-     ret=num_ts_real_val(a)>num_ts_real_val(b);
+     ret=num_rvalue(a)>num_rvalue(b);
  }
  return ret;
 }
@@ -613,7 +613,7 @@ static int num_lt(ts_num a, ts_num b) {
  if(is_fixnum) {
      ret= a.value.ivalue<b.value.ivalue;
  } else {
-     ret=num_ts_real_val(a)<num_ts_real_val(b);
+     ret=num_rvalue(a)<num_rvalue(b);
  }
  return ret;
 }
