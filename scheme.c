@@ -138,9 +138,7 @@ enum opcodes {
 
 #if USE_STRCASECMP
 #include <strings.h>
-# ifndef __APPLE__
 #  define stricmp strcasecmp
-# endif
 #endif
 
 /* Used for documentation purposes, to signal functions in 'interface' */
@@ -174,23 +172,6 @@ TOK_VEC = 12,
 
 #include <string.h>
 #include <stdlib.h>
-
-#ifdef __APPLE__
-static int stricmp(const char *s1, const char *s2)
-{
-  unsigned char c1, c2;
-  do {
-    c1 = tolower(*s1);
-    c2 = tolower(*s2);
-    if (c1 < c2)
-      return -1;
-    else if (c1 > c2)
-      return 1;
-    s1++, s2++;
-  } while (c1 != 0);
-  return 0;
-}
-#endif /* __APPLE__ */
 
 #if USE_STRLWR
 static const char *strlwr(char *s) {
@@ -5140,19 +5121,7 @@ ts_ptr ts_get_global(scheme *sc, ts_ptr env, const char *name) {
 
 #if STANDALONE
 
-#if defined(__APPLE__) && !defined (OSX)
-int main()
-{
-     extern MacTS_main(int argc, char **argv);
-     char**    argv;
-     int argc = ccommand(&argv);
-     MacTS_main(argc,argv);
-     return 0;
-}
-int MacTS_main(int argc, char **argv) {
-#else
 int main(int argc, char **argv) {
-#endif
   scheme sc;
   FILE *fin = NULL;
   char *file_name=InitFile;
