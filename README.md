@@ -55,9 +55,7 @@ int main(void) {
   sc = ts_init_new();
 
   // load init.scm
-  FILE *finit = fopen("init.scm", "r");
-  ts_load_file(sc, finit);
-  fclose(finit);
+  ts_load_file(sc, "init.scm");
 
   // define square
   ts_def(sc, sc->global_env, ts_mk_sym(sc, "square"),
