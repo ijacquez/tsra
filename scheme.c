@@ -118,9 +118,6 @@ enum opcodes {
   OP_MAXDEFINED
 };
 
-#define cons(sc,a,b) ts_cons(sc,a,b,0)
-#define immutable_cons(sc,a,b) ts_cons(sc,a,b,1)
-
 #include "scheme-private.h"
 #ifndef WIN32
 # include <unistd.h>
@@ -275,6 +272,14 @@ static ts_num num_one;
 /* macros for cell operations */
 #define typeflag(p)      ((p)->_flag)
 #define type(p)          (typeflag(p)&T_MASKTYPE)
+
+INTERFACE static ts_ptr cons(scheme *sc, ts_ptr a, ts_ptr b) {
+ return ts_cons(sc, a, b, 0);
+}
+
+INTERFACE static ts_ptr immutable_cons(scheme *sc, ts_ptr a, ts_ptr b) {
+ return ts_cons(sc, a, b, 1);
+}
 
 INLINE INTERFACE int ts_is_str(ts_ptr p)     { return (type(p)==T_STRING); }
 #define stts_real_val(p)      ((p)->_object._string._svalue)
@@ -4683,17 +4688,10 @@ static int syntaxnum(ts_ptr p) {
 
 /* initialization of TinyScheme */
 #if USE_INTERFACE
-INTERFACE static ts_ptr s_cons(scheme *sc, ts_ptr a, ts_ptr b) {
- return cons(sc,a,b);
-}
-INTERFACE static ts_ptr s_immutable_cons(scheme *sc, ts_ptr a, ts_ptr b) {
- return immutable_cons(sc,a,b);
-}
-
 static struct ts_interface vtbl ={
   ts_def,
-  s_cons,
-  s_immutable_cons,
+  cons,
+  immutable_cons,
   ts_reserve_cells,
   ts_mk_int,
   ts_mk_real,
