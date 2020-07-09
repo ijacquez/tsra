@@ -478,7 +478,7 @@ static int syntaxnum(ts_ptr p);
 static void assign_proc(scheme *sc, enum opcodes, char *name);
 static void load_named_file(scheme *sc, FILE *fin, const char *filename);
 
-#define num_ts_int_val(n)       (n.is_fixnum?(n).value.ivalue:(long)(n).value.rvalue)
+#define num_ivalue(n)       (n.is_fixnum?(n).value.ivalue:(long)(n).value.rvalue)
 #define num_rvalue(n)       (!n.is_fixnum?(n).value.rvalue:(double)(n).value.ivalue)
 
 static ts_num num_add(ts_num a, ts_num b) {
@@ -540,8 +540,8 @@ static ts_num num_rem(ts_num a, ts_num b) {
  ts_num ret;
  long e1, e2, res;
  ret.is_fixnum=a.is_fixnum && b.is_fixnum;
- e1=num_ts_int_val(a);
- e2=num_ts_int_val(b);
+ e1=num_ivalue(a);
+ e2=num_ivalue(b);
  res=e1%e2;
  /* remainder should have same sign as second operand */
  if (res > 0) {
@@ -565,8 +565,8 @@ static ts_num num_mod(ts_num a, ts_num b) {
  ts_num ret;
  long e1, e2, res;
  ret.is_fixnum=a.is_fixnum && b.is_fixnum;
- e1=num_ts_int_val(a);
- e2=num_ts_int_val(b);
+ e1=num_ivalue(a);
+ e2=num_ivalue(b);
  res=e1%e2;
  /* modulo should have same sign as second operand */
  if (res * e2 < 0) {
