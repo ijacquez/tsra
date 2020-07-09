@@ -263,7 +263,7 @@ INTERFACE static ts_ptr immutable_cons(scheme *sc, ts_ptr a, ts_ptr b) {
 }
 
 INLINE INTERFACE int ts_is_str(ts_ptr p)     { return (type(p)==T_STRING); }
-#define stts_real_val(p)      ((p)->_object._string._svalue)
+#define strvalue(p)      ((p)->_object._string._svalue)
 #define strlength(p)        ((p)->_object._string._length)
 
 INTERFACE static int ts_is_list(scheme *sc, ts_ptr p);
@@ -285,7 +285,7 @@ INLINE INTERFACE int ts_is_real(ts_ptr p) {
 }
 
 INLINE INTERFACE int ts_is_char(ts_ptr p) { return (type(p)==T_CHARACTER); }
-INTERFACE char *ts_str_val(ts_ptr p) { return stts_real_val(p); }
+INTERFACE char *ts_str_val(ts_ptr p) { return strvalue(p); }
 ts_num ts_num_val(ts_ptr p)       { return ((p)->_object._number); }
 INTERFACE long ts_int_val(ts_ptr p)      { return (num_ts_is_int(p)?(p)->_object._number.value.ivalue:(long)(p)->_object._number.value.rvalue); }
 INTERFACE double ts_real_val(ts_ptr p)    { return (!num_ts_is_int(p)?(p)->_object._number.value.rvalue:(double)(p)->_object._number.value.ivalue); }
@@ -308,7 +308,7 @@ INTERFACE ts_ptr ts_set_car(ts_ptr p, ts_ptr q) { return car(p)=q; }
 INTERFACE ts_ptr ts_set_cdr(ts_ptr p, ts_ptr q) { return cdr(p)=q; }
 
 INLINE INTERFACE int ts_is_sym(ts_ptr p)   { return (type(p)==T_SYMBOL); }
-INTERFACE char *ts_sym_name(ts_ptr p)   { return stts_real_val(car(p)); }
+INTERFACE char *ts_sym_name(ts_ptr p)   { return strvalue(car(p)); }
 #if USE_PLIST
 INLINE TS_EXPORT int ts_has_prop(ts_ptr p)     { return (typeflag(p)&T_SYMBOL); }
 #define symprop(p)       cdr(p)
@@ -317,7 +317,7 @@ INLINE TS_EXPORT int ts_has_prop(ts_ptr p)     { return (typeflag(p)&T_SYMBOL); 
 INLINE INTERFACE int ts_is_syntax(ts_ptr p)   { return (typeflag(p)&T_SYNTAX); }
 INTERFACE int ts_is_proc(ts_ptr p)     { return (type(p)==T_PROC); }
 INTERFACE int ts_is_foreign(ts_ptr p)  { return (type(p)==T_FOREIGN); }
-INTERFACE char *ts_syntax_name(ts_ptr p) { return stts_real_val(car(p)); }
+INTERFACE char *ts_syntax_name(ts_ptr p) { return strvalue(car(p)); }
 #define procnum(p)       ts_int_val(p)
 static const char *procname(ts_ptr x);
 
@@ -1095,7 +1095,7 @@ INTERFACE ts_ptr ts_mk_str(scheme *sc, const char *str) {
 INTERFACE ts_ptr ts_mk_counted_str(scheme *sc, const char *str, int len) {
      ts_ptr x = get_cell(sc, sc->NIL, sc->NIL);
      typeflag(x) = (T_STRING | T_ATOM);
-     stts_real_val(x) = store_string(sc,len,str,0);
+     strvalue(x) = store_string(sc,len,str,0);
      strlength(x) = len;
      return (x);
 }
@@ -1103,7 +1103,7 @@ INTERFACE ts_ptr ts_mk_counted_str(scheme *sc, const char *str, int len) {
 INTERFACE ts_ptr ts_mk_empty_str(scheme *sc, int len, char fill) {
      ts_ptr x = get_cell(sc, sc->NIL, sc->NIL);
      typeflag(x) = (T_STRING | T_ATOM);
-     stts_real_val(x) = store_string(sc,len,0,fill);
+     strvalue(x) = store_string(sc,len,0,fill);
      strlength(x) = len;
      return (x);
 }
@@ -1422,7 +1422,7 @@ static void gc(scheme *sc, ts_ptr a, ts_ptr b) {
 
 static void finalize_cell(scheme *sc, ts_ptr a) {
   if(ts_is_str(a)) {
-    sc->free(stts_real_val(a));
+    sc->free(strvalue(a));
   } else if(ts_is_port(a)) {
     if(a->_object._port->kind&ts_port_file
        && a->_object._port->rep.stdio.closeit) {
@@ -2066,11 +2066,11 @@ static void atom2str(scheme *sc, ts_ptr l, int f, char **pp, int *plen) {
           }
      } else if (ts_is_str(l)) {
           if (!f) {
-               p = stts_real_val(l);
+               p = strvalue(l);
           } else { /* Hack, uses the fact that printing is needed */
                *pp=sc->strbuff;
                *plen=0;
-               printslashstring(sc, stts_real_val(l), strlength(l));
+               printslashstring(sc, strvalue(l), strlength(l));
                return;
           }
      } else if (ts_is_char(l)) {
@@ -2217,7 +2217,7 @@ static ts_ptr revappend(scheme *sc, ts_ptr a, ts_ptr b) {
 int ts_eqv(ts_ptr a, ts_ptr b) {
      if (ts_is_str(a)) {
           if (ts_is_str(b))
-               return (stts_real_val(a) == stts_real_val(b));
+               return (strvalue(a) == strvalue(b));
           else
                return (0);
      } else if (ts_is_num(a)) {
@@ -2595,9 +2595,9 @@ static ts_ptr opexe_0(scheme *sc, enum opcodes op) {
      case OP_LOAD:       /* load */
           if(file_interactive(sc)) {
                fprintf(sc->outport->_object._port->rep.stdio.file,
-               "Loading %s\n", stts_real_val(car(sc->args)));
+               "Loading %s\n", strvalue(car(sc->args)));
           }
-          if (!file_push(sc,stts_real_val(car(sc->args)))) {
+          if (!file_push(sc,strvalue(car(sc->args)))) {
                Error_1(sc,"unable to open", car(sc->args));
           }
       else
@@ -3447,10 +3447,10 @@ static ts_ptr opexe_2(scheme *sc, enum opcodes op) {
      }
 
      case OP_STR2SYM:  /* string->symbol */
-          s_return(sc,ts_mk_sym(sc,stts_real_val(car(sc->args))));
+          s_return(sc,ts_mk_sym(sc,strvalue(car(sc->args))));
 
      case OP_STR2ATOM: /* string->atom */ {
-          char *s=stts_real_val(car(sc->args));
+          char *s=strvalue(car(sc->args));
           long pf = 0;
           if(cdr(sc->args)!=sc->NIL) {
             /* we know cadr(sc->args) is a natural number */
@@ -3535,7 +3535,7 @@ static ts_ptr opexe_2(scheme *sc, enum opcodes op) {
           ts_ptr x;
           int index;
 
-          str=stts_real_val(car(sc->args));
+          str=strvalue(car(sc->args));
 
           x=cadr(sc->args);
           if (ts_is_int(x)) {
@@ -3559,7 +3559,7 @@ static ts_ptr opexe_2(scheme *sc, enum opcodes op) {
           if(ts_is_immutable(car(sc->args))) {
                Error_1(sc,"string-set!: unable to alter immutable string:",car(sc->args));
           }
-          str=stts_real_val(car(sc->args));
+          str=strvalue(car(sc->args));
 
           x=cadr(sc->args);
           if (ts_is_int(x)) {
@@ -3589,9 +3589,9 @@ static ts_ptr opexe_2(scheme *sc, enum opcodes op) {
        }
        newstr = ts_mk_empty_str(sc, len, ' ');
        /* store the contents of the argument strings into the new string */
-       for (pos = stts_real_val(newstr), x = sc->args; x != sc->NIL;
+       for (pos = strvalue(newstr), x = sc->args; x != sc->NIL;
            pos += strlength(car(x)), x = cdr(x)) {
-           memcpy(pos, stts_real_val(car(x)), strlength(car(x)));
+           memcpy(pos, strvalue(car(x)), strlength(car(x)));
        }
        s_return(sc, newstr);
      }
@@ -3602,7 +3602,7 @@ static ts_ptr opexe_2(scheme *sc, enum opcodes op) {
           int index1;
           int len;
 
-          str=stts_real_val(car(sc->args));
+          str=strvalue(car(sc->args));
 
           index0=ts_int_val(cadr(sc->args));
 
@@ -3621,8 +3621,8 @@ static ts_ptr opexe_2(scheme *sc, enum opcodes op) {
 
           len=index1-index0;
           x=ts_mk_empty_str(sc,len,' ');
-          memcpy(stts_real_val(x),str+index0,len);
-          stts_real_val(x)[len]=0;
+          memcpy(strvalue(x),str+index0,len);
+          strvalue(x)[len]=0;
 
           s_return(sc,x);
      }
@@ -3902,7 +3902,7 @@ static ts_ptr opexe_4(scheme *sc, enum opcodes op) {
                ts_set_immutable(car(sc->args));
           }
           ts_put_str(sc, "Error: ");
-          ts_put_str(sc, stts_real_val(car(sc->args)));
+          ts_put_str(sc, strvalue(car(sc->args)));
           sc->args = cdr(sc->args);
           s_goto(sc,OP_ERR1);
 
@@ -4023,7 +4023,7 @@ static ts_ptr opexe_4(scheme *sc, enum opcodes op) {
                case OP_OPEN_INOUTFILE:  prop=ts_port_input|ts_port_output; break;
                default:                 break;  /* Quiet the compiler */
           }
-          p=port_from_filename(sc,stts_real_val(car(sc->args)),prop);
+          p=port_from_filename(sc,strvalue(car(sc->args)),prop);
           if(p==sc->NIL) {
                s_return(sc,sc->F);
           }
@@ -4040,8 +4040,8 @@ static ts_ptr opexe_4(scheme *sc, enum opcodes op) {
                case OP_OPEN_INOUTSTRING:  prop=ts_port_input|ts_port_output; break;
                default:                   break;    /* Quiet the compiler */
           }
-          p=port_from_string(sc, stts_real_val(car(sc->args)),
-                 stts_real_val(car(sc->args))+strlength(car(sc->args)), prop);
+          p=port_from_string(sc, strvalue(car(sc->args)),
+                 strvalue(car(sc->args))+strlength(car(sc->args)), prop);
           if(p==sc->NIL) {
                s_return(sc,sc->F);
           }
@@ -4055,8 +4055,8 @@ static ts_ptr opexe_4(scheme *sc, enum opcodes op) {
                     s_return(sc,sc->F);
                }
           } else {
-               p=port_from_string(sc, stts_real_val(car(sc->args)),
-                      stts_real_val(car(sc->args))+strlength(car(sc->args)),
+               p=port_from_string(sc, strvalue(car(sc->args)),
+                      strvalue(car(sc->args))+strlength(car(sc->args)),
                           ts_port_output);
                if(p==sc->NIL) {
                     s_return(sc,sc->F);
@@ -4634,7 +4634,7 @@ static ts_ptr mk_proc(scheme *sc, enum opcodes op) {
 
 /* Hard-coded for the given keywords. Remember to rewrite if more are added! */
 static int syntaxnum(ts_ptr p) {
-     const char *s=stts_real_val(car(p));
+     const char *s=strvalue(car(p));
      switch(strlength(car(p))) {
      case 2:
           if(s[0]=='i') return OP_IF0;        /* if */
