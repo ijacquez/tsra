@@ -161,14 +161,14 @@ TOK_SHARP_CONST = 11,
 TOK_VEC = 12,
 };
 
-#define BACKQUOTE '`'
-#define DELIMITERS  "()\";\f\t\v\n\r "
+const char BACKQUOTE = '`';
+const char* DELIMITERS = "()\";\f\t\v\n\r ";
 
 /*
  *  Basic memory allocation units
  */
 
-#define banner "TinyScheme 1.42"
+const char* banner = "TinyScheme 1.42";
 
 #include <string.h>
 #include <stdlib.h>
@@ -184,17 +184,11 @@ static const char *strlwr(char *s) {
 }
 #endif
 
-#ifndef prompt
-# define prompt "ts> "
-#endif
+const char* prompt = "ts> ";
 
-#ifndef InitFile
-# define InitFile "init.scm"
-#endif
+const char* InitFile = "init.scm";
 
-#ifndef FIRST_CELLSEGS
-# define FIRST_CELLSEGS 3
-#endif
+const unsigned int FIRST_CELLSEGS = 3;
 
 enum scheme_types {
   T_STRING=1,
@@ -215,15 +209,15 @@ enum scheme_types {
 };
 
 /* ADJ is enough slack to align cells in a TYPE_BITS-bit boundary */
-#define ADJ 32
-#define TYPE_BITS 5
-#define T_MASKTYPE      31    /* 0000000000011111 */
-#define T_SYNTAX      4096    /* 0001000000000000 */
-#define T_IMMUTABLE   8192    /* 0010000000000000 */
-#define T_ATOM       16384    /* 0100000000000000 */   /* only for gc */
-#define CLRATOM      49151    /* 1011111111111111 */   /* only for gc */
-#define MARK         32768    /* 1000000000000000 */
-#define UNMARK       32767    /* 0111111111111111 */
+const unsigned int ADJ = 32;
+const unsigned int TYPE_BITS = 5;
+const unsigned int T_MASKTYPE = 31;    /* 0000000000011111 */
+const unsigned int T_SYNTAX = 4096;   /* 0001000000000000 */
+const unsigned int T_IMMUTABLE = 8192;    /* 0010000000000000 */
+const unsigned int T_ATOM = 16384;    /* 0100000000000000 */   /* only for gc */
+const unsigned int CLRATOM = 49151;    /* 1011111111111111 */   /* only for gc */
+const unsigned int MARK = 32768;    /* 1000000000000000 */
+const unsigned int UNMARK = 32767;    /* 0111111111111111 */
 
 
 static ts_num num_add(ts_num a, ts_num b);
