@@ -163,13 +163,13 @@ enum {
 };
 
 #define BACKQUOTE '`'
-const char *DELIMITERS = "()\";\f\t\v\n\r ";
+static const char* DELIMITERS = "()\";\f\t\v\n\r ";
 
 /*
  *  Basic memory allocation units
  */
 
-const char *banner = "TinyScheme 1.42";
+static const char* banner = "TinyScheme 1.42";
 
 #include <stdlib.h>
 #include <string.h>
@@ -210,15 +210,15 @@ enum scheme_types {
 };
 
 /* ADJ is enough slack to align cells in a TYPE_BITS-bit boundary */
-const unsigned int ADJ = 32;
-const unsigned int TYPE_BITS = 5;
-const unsigned int T_MASKTYPE = 31;                       /* 0000000000011111 */
-const unsigned int T_SYNTAX = 4096;                       /* 0001000000000000 */
-const unsigned int T_IMMUTABLE = 8192;                    /* 0010000000000000 */
-const unsigned int T_ATOM = 16384; /* 0100000000000000 */ /* only for gc */
-const unsigned int CLRATOM = 49151; /* 1011111111111111 */ /* only for gc */
-const unsigned int MARK = 32768;   /* 1000000000000000 */
-const unsigned int UNMARK = 32767; /* 0111111111111111 */
+static const unsigned int ADJ = 32;
+static const unsigned int TYPE_BITS = 5;
+static const unsigned int T_MASKTYPE = 31;                       /* 0000000000011111 */
+static const unsigned int T_SYNTAX = 4096;                       /* 0001000000000000 */
+static const unsigned int T_IMMUTABLE = 8192;                    /* 0010000000000000 */
+static const unsigned int T_ATOM = 16384; /* 0100000000000000 */ /* only for gc */
+static const unsigned int CLRATOM = 49151; /* 1011111111111111 */ /* only for gc */
+static const unsigned int MARK = 32768;   /* 1000000000000000 */
+static const unsigned int UNMARK = 32767; /* 0111111111111111 */
 
 static ts_num num_add(ts_num a, ts_num b);
 static ts_num num_mul(ts_num a, ts_num b);
