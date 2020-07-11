@@ -4669,6 +4669,7 @@ static struct ts_interface vtbl = {
     ts_load_str,
     ts_deinit,
     ts_set_in_port_file,
+    ts_set_in_port_str,
 
 #if !STANDALONE
     ts_load_file,
