@@ -310,6 +310,7 @@ struct ts_interface {
   int (*is_immutable)(ts_ptr p);
   void (*set_immutable)(ts_ptr p);
   void (*load_str)(scheme *sc, const char *input);
+  void (*deinit)(scheme *sc);
   ts_err (*load_file)(scheme *sc, const char *name);
   ts_ptr (*apply0)(scheme *sc, const char *procname);
   ts_ptr (*call)(scheme *sc, ts_ptr func, ts_ptr args);

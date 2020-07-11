@@ -4667,6 +4667,7 @@ static struct ts_interface vtbl = {
     ts_set_immutable,
 
     ts_load_str,
+    ts_deinit,
 
 #if !STANDALONE
     ts_load_file,
