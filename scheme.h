@@ -6,39 +6,39 @@
 #include <stdio.h>
 
 #ifndef _MSC_VER
-# define TS_EXPORT
+#define TS_EXPORT
 #else
-# ifdef _SCHEME_SOURCE
-#  define TS_EXPORT __declspec(dllexport)
-# else
-#  define TS_EXPORT __declspec(dllimport)
-# endif
+#ifdef _SCHEME_SOURCE
+#define TS_EXPORT __declspec(dllexport)
+#else
+#define TS_EXPORT __declspec(dllimport)
+#endif
 #endif
 
 typedef struct scheme scheme;
 typedef struct ts_cell *ts_ptr;
 
-typedef void * (*ts_func_alloc)(size_t);
+typedef void *(*ts_func_alloc)(size_t);
 typedef void (*ts_func_dealloc)(void *);
 typedef ts_ptr (*ts_foreign_func)(scheme *, ts_ptr);
 
 /* num, for generic arithmetic */
 typedef struct ts_num {
-     char is_fixnum;
-     union {
-          long ivalue;
-          double rvalue;
-     } value;
+  char is_fixnum;
+  union {
+    long ivalue;
+    double rvalue;
+  } value;
 } ts_num;
 
 typedef enum ts_port_kind {
-  ts_port_free=0,
-  ts_port_file=1,
-  ts_port_string=2,
-  ts_port_srfi6=4,
-  ts_port_input=16,
-  ts_port_output=32,
-  ts_port_saw_EOF=64
+  ts_port_free = 0,
+  ts_port_file = 1,
+  ts_port_string = 2,
+  ts_port_srfi6 = 4,
+  ts_port_input = 16,
+  ts_port_output = 32,
+  ts_port_saw_EOF = 64
 } ts_port_kind;
 
 typedef struct ts_port {
@@ -63,8 +63,8 @@ struct ts_cell {
   unsigned int _flag;
   union {
     struct {
-      char   *_svalue;
-      int   _length;
+      char *_svalue;
+      int _length;
     } _string;
     ts_num _number;
     ts_port *_port;
@@ -77,110 +77,110 @@ struct ts_cell {
 };
 
 struct scheme {
-/* arrays for segments */
-ts_func_alloc malloc;
-ts_func_dealloc free;
+  /* arrays for segments */
+  ts_func_alloc malloc;
+  ts_func_dealloc free;
 
-/* return code */
-int retcode;
-int tracing;
-
+  /* return code */
+  int retcode;
+  int tracing;
 
 #ifndef TS_CELL_SEGSIZE
-#define TS_CELL_SEGSIZE    5000  /* # of cells in one segment */
+#define TS_CELL_SEGSIZE 5000 /* # of cells in one segment */
 #endif
 #ifndef TS_CELL_NSEGMENT
-#define TS_CELL_NSEGMENT   10    /* # of segments for cells */
+#define TS_CELL_NSEGMENT 10 /* # of segments for cells */
 #endif
-char *alloc_seg[TS_CELL_NSEGMENT];
-ts_ptr cell_seg[TS_CELL_NSEGMENT];
-int     last_cell_seg;
+  char *alloc_seg[TS_CELL_NSEGMENT];
+  ts_ptr cell_seg[TS_CELL_NSEGMENT];
+  int last_cell_seg;
 
-/* We use 4 registers. */
-ts_ptr args;            /* register for arguments of function */
-ts_ptr envir;           /* stack register for current environment */
-ts_ptr code;            /* register for current code */
-ts_ptr dump;            /* stack register for next evaluation */
+  /* We use 4 registers. */
+  ts_ptr args;  /* register for arguments of function */
+  ts_ptr envir; /* stack register for current environment */
+  ts_ptr code;  /* register for current code */
+  ts_ptr dump;  /* stack register for next evaluation */
 
-int interactive_repl;    /* are we in an interactive REPL? */
+  int interactive_repl; /* are we in an interactive REPL? */
 
-struct ts_cell _sink;
-ts_ptr sink;            /* when mem. alloc. fails */
-struct ts_cell _NIL;
-ts_ptr NIL;             /* special cell representing empty cell */
-struct ts_cell _HASHT;
-ts_ptr T;               /* special cell representing #t */
-struct ts_cell _HASHF;
-ts_ptr F;               /* special cell representing #f */
-struct ts_cell _EOF_OBJ;
-ts_ptr EOF_OBJ;         /* special cell representing end-of-file object */
-ts_ptr oblist;          /* pointer to symbol table */
-ts_ptr global_env;      /* pointer to global environment */
-ts_ptr c_nest;          /* stack for nested calls from C */
+  struct ts_cell _sink;
+  ts_ptr sink; /* when mem. alloc. fails */
+  struct ts_cell _NIL;
+  ts_ptr NIL; /* special cell representing empty cell */
+  struct ts_cell _HASHT;
+  ts_ptr T; /* special cell representing #t */
+  struct ts_cell _HASHF;
+  ts_ptr F; /* special cell representing #f */
+  struct ts_cell _EOF_OBJ;
+  ts_ptr EOF_OBJ;    /* special cell representing end-of-file object */
+  ts_ptr oblist;     /* pointer to symbol table */
+  ts_ptr global_env; /* pointer to global environment */
+  ts_ptr c_nest;     /* stack for nested calls from C */
 
-/* global pointers to special symbols */
-ts_ptr LAMBDA;               /* pointer to syntax lambda */
-ts_ptr QUOTE;           /* pointer to syntax quote */
+  /* global pointers to special symbols */
+  ts_ptr LAMBDA; /* pointer to syntax lambda */
+  ts_ptr QUOTE;  /* pointer to syntax quote */
 
-ts_ptr QQUOTE;               /* pointer to symbol quasiquote */
-ts_ptr UNQUOTE;         /* pointer to symbol unquote */
-ts_ptr UNQUOTESP;       /* pointer to symbol unquote-splicing */
-ts_ptr FEED_TO;         /* => */
-ts_ptr COLON_HOOK;      /* *colon-hook* */
-ts_ptr ERROR_HOOK;      /* *error-hook* */
-ts_ptr SHARP_HOOK;  /* *sharp-hook* */
-ts_ptr COMPILE_HOOK;  /* *compile-hook* */
+  ts_ptr QQUOTE;       /* pointer to symbol quasiquote */
+  ts_ptr UNQUOTE;      /* pointer to symbol unquote */
+  ts_ptr UNQUOTESP;    /* pointer to symbol unquote-splicing */
+  ts_ptr FEED_TO;      /* => */
+  ts_ptr COLON_HOOK;   /* *colon-hook* */
+  ts_ptr ERROR_HOOK;   /* *error-hook* */
+  ts_ptr SHARP_HOOK;   /* *sharp-hook* */
+  ts_ptr COMPILE_HOOK; /* *compile-hook* */
 
-ts_ptr free_cell;       /* pointer to top of free cells */
-long    fcells;          /* # of free cells */
+  ts_ptr free_cell; /* pointer to top of free cells */
+  long fcells;      /* # of free cells */
 
-ts_ptr inport;
-ts_ptr outport;
-ts_ptr save_inport;
-ts_ptr loadport;
+  ts_ptr inport;
+  ts_ptr outport;
+  ts_ptr save_inport;
+  ts_ptr loadport;
 
 #ifndef TS_MAXFIL
 #define TS_MAXFIL 64
 #endif
-ts_port load_stack[TS_MAXFIL];     /* Stack of open files for port -1 (LOADing) */
-int nesting_stack[TS_MAXFIL];
-int file_i;
-int nesting;
+  ts_port load_stack[TS_MAXFIL]; /* Stack of open files for port -1 (LOADing) */
+  int nesting_stack[TS_MAXFIL];
+  int file_i;
+  int nesting;
 
-char    gc_verbose;      /* if gc_verbose is not zero, print gc status */
-char    no_memory;       /* Whether mem. alloc. has failed */
+  char gc_verbose; /* if gc_verbose is not zero, print gc status */
+  char no_memory;  /* Whether mem. alloc. has failed */
 
 #ifndef TS_LINESIZE
 #define TS_LINESIZE 1024
 #endif
-char    linebuff[TS_LINESIZE];
+  char linebuff[TS_LINESIZE];
 #ifndef TS_STRBUFFSIZE
 #define TS_STRBUFFSIZE 256
 #endif
-char    strbuff[TS_STRBUFFSIZE];
+  char strbuff[TS_STRBUFFSIZE];
 
-FILE *tmpfp;
-int tok;
-int print_flag;
-ts_ptr value;
-int op;
+  FILE *tmpfp;
+  int tok;
+  int print_flag;
+  ts_ptr value;
+  int op;
 
-void *ext_data;     /* For the benefit of foreign functions */
-long gensym_cnt;
+  void *ext_data; /* For the benefit of foreign functions */
+  long gensym_cnt;
 
-struct ts_interface *vptr;
-void *dump_base;    /* pointer to base of allocated dump stack */
-int dump_size;      /* number of frames allocated for dump stack */
+  struct ts_interface *vptr;
+  void *dump_base; /* pointer to base of allocated dump stack */
+  int dump_size;   /* number of frames allocated for dump stack */
 };
 
 typedef enum ts_err {
   ts_fopen_err = -1,
   ts_fclose_err = -2,
-  ts_type_err  = -3,
+  ts_type_err = -3,
 } ts_err;
 
 TS_EXPORT scheme *ts_init_new(void);
-TS_EXPORT scheme *ts_init_new_custom_alloc(ts_func_alloc malloc, ts_func_dealloc free);
+TS_EXPORT scheme *ts_init_new_custom_alloc(ts_func_alloc malloc,
+                                           ts_func_dealloc free);
 TS_EXPORT int ts_init(scheme *sc);
 TS_EXPORT int ts_init_custom_alloc(scheme *sc, ts_func_alloc, ts_func_dealloc);
 TS_EXPORT void ts_deinit(scheme *sc);
@@ -318,14 +318,11 @@ struct ts_interface {
   ts_ptr (*get_global)(scheme *sc, ts_ptr env, const char *name);
 };
 
-typedef struct ts_registerable
-{
-  ts_foreign_func  f;
-  const char *  name;
-}
-ts_registerable;
+typedef struct ts_registerable {
+  ts_foreign_func f;
+  const char *name;
+} ts_registerable;
 
-TS_EXPORT void ts_register_foreign_func_list(scheme * sc,
-                                       ts_registerable * list,
-                                       int n);
+TS_EXPORT void ts_register_foreign_func_list(scheme *sc, ts_registerable *list,
+                                             int n);
 #endif
