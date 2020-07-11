@@ -163,13 +163,13 @@ enum {
 };
 
 #define BACKQUOTE '`'
-static const char* DELIMITERS = "()\";\f\t\v\n\r ";
+static const char* const DELIMITERS = "()\";\f\t\v\n\r ";
 
 /*
  *  Basic memory allocation units
  */
 
-static const char* banner = "TinyScheme 1.42";
+static const char* const banner = "TinyScheme 1.42";
 
 #include <stdlib.h>
 #include <string.h>
