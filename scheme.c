@@ -279,9 +279,9 @@ INLINE INTERFACE int ts_is_real(ts_ptr p) {
 INLINE INTERFACE int ts_is_char(ts_ptr p) { return (type(p) == T_CHARACTER); }
 INTERFACE char *ts_str_val(ts_ptr p) { return strvalue(p); }
 ts_num ts_num_val(ts_ptr p) { return ((p)->_object._number); }
-INTERFACE long ts_int_val(ts_ptr p) {
+INTERFACE int ts_int_val(ts_ptr p) {
   return (num_ts_is_int(p) ? (p)->_object._number.value.ivalue
-                           : (long)(p)->_object._number.value.rvalue);
+                           : (int)(p)->_object._number.value.rvalue);
 }
 INTERFACE double ts_real_val(ts_ptr p) {
   return (!num_ts_is_int(p) ? (p)->_object._number.value.rvalue
@@ -291,7 +291,7 @@ INTERFACE double ts_real_val(ts_ptr p) {
 #define rvalue_unchecked(p) ((p)->_object._number.value.rvalue)
 #define set_num_integer(p) (p)->_object._number.is_fixnum = 1;
 #define set_num_real(p) (p)->_object._number.is_fixnum = 0;
-INTERFACE long ts_char_val(ts_ptr p) { return ivalue_unchecked(p); }
+INTERFACE int ts_char_val(ts_ptr p) { return ivalue_unchecked(p); }
 
 INLINE INTERFACE int ts_is_port(ts_ptr p) { return (type(p) == T_PORT); }
 INTERFACE int is_inport(ts_ptr p) {
@@ -400,7 +400,7 @@ static void file_pop(scheme *sc);
 static int file_interactive(scheme *sc);
 INLINE static int is_one_of(char *s, int c);
 static int alloc_cellseg(scheme *sc, int n);
-static long binary_decode(const char *s);
+static int binary_decode(const char *s);
 INLINE static ts_ptr get_cell(scheme *sc, ts_ptr a, ts_ptr b);
 static ts_ptr _get_cell(scheme *sc, ts_ptr a, ts_ptr b);
 static ts_ptr ts_reserve_cells(scheme *sc, int n);
@@ -456,7 +456,7 @@ static int syntaxnum(ts_ptr p);
 static void assign_proc(scheme *sc, enum opcodes, char *name);
 static void load_named_file(scheme *sc, FILE *fin, const char *filename);
 
-#define num_ivalue(n) (n.is_fixnum ? (n).value.ivalue : (long)(n).value.rvalue)
+#define num_ivalue(n) (n.is_fixnum ? (n).value.ivalue : (int)(n).value.rvalue)
 #define num_rvalue(n) \
   (!n.is_fixnum ? (n).value.rvalue : (double)(n).value.ivalue)
 
@@ -518,7 +518,7 @@ static ts_num num_sub(ts_num a, ts_num b) {
 
 static ts_num num_rem(ts_num a, ts_num b) {
   ts_num ret;
-  long e1, e2, res;
+  int e1, e2, res;
   ret.is_fixnum = a.is_fixnum && b.is_fixnum;
   e1 = num_ivalue(a);
   e2 = num_ivalue(b);
@@ -543,7 +543,7 @@ static ts_num num_rem(ts_num a, ts_num b) {
 
 static ts_num num_mod(ts_num a, ts_num b) {
   ts_num ret;
-  long e1, e2, res;
+  int e1, e2, res;
   ret.is_fixnum = a.is_fixnum && b.is_fixnum;
   e1 = num_ivalue(a);
   e2 = num_ivalue(b);
@@ -620,8 +620,8 @@ static double round_per_R5RS(double x) {
 
 static int is_zero_double(double x) { return x < DBL_MIN && x > -DBL_MIN; }
 
-static long binary_decode(const char *s) {
-  long x = 0;
+static int binary_decode(const char *s) {
+  int x = 0;
 
   while (*s != 0 && (*s == '1' || *s == '0')) {
     x <<= 1;
@@ -638,7 +638,7 @@ static int alloc_cellseg(scheme *sc, int n) {
   ts_ptr last;
   ts_ptr p;
   char *cp;
-  long i;
+  int i;
   int k;
   int adj = ADJ;
 
@@ -996,7 +996,7 @@ INTERFACE ts_ptr ts_mk_char(scheme *sc, int c) {
 }
 
 /* get number atom (integer) */
-INTERFACE ts_ptr ts_mk_int(scheme *sc, long ts_num) {
+INTERFACE ts_ptr ts_mk_int(scheme *sc, int ts_num) {
   ts_ptr x = get_cell(sc, sc->NIL, sc->NIL);
 
   typeflag(x) = (T_NUMBER | T_ATOM);
@@ -1112,8 +1112,8 @@ INTERFACE ts_ptr ts_gen_sym(scheme *sc) {
   ts_ptr x;
   char name[40];
 
-  for (; sc->gensym_cnt < LONG_MAX; sc->gensym_cnt++) {
-    snprintf(name, 40, "gensym-%ld", sc->gensym_cnt);
+  for (; sc->gensym_cnt < INT_MAX; sc->gensym_cnt++) {
+    snprintf(name, 40, "gensym-%d", sc->gensym_cnt);
 
     /* first check oblist */
     x = oblist_find_by_name(sc, name);
@@ -1194,7 +1194,7 @@ static ts_ptr mk_atom(scheme *sc, char *q) {
 
 /* make constant */
 static ts_ptr mk_sharp_const(scheme *sc, char *name) {
-  long x;
+  int x;
   char tmp[TS_STRBUFFSIZE];
 
   if (!strcmp(name, "t"))
@@ -1203,14 +1203,14 @@ static ts_ptr mk_sharp_const(scheme *sc, char *name) {
     return (sc->F);
   else if (*name == 'o') { /* #o (octal) */
     snprintf(tmp, TS_STRBUFFSIZE, "0%s", name + 1);
-    sscanf(tmp, "%lo", (long unsigned *)&x);
+    sscanf(tmp, "%o", (int unsigned *)&x);
     return (ts_mk_int(sc, x));
   } else if (*name == 'd') { /* #d (decimal) */
-    sscanf(name + 1, "%ld", (long int *)&x);
+    sscanf(name + 1, "%d", (int *)&x);
     return (ts_mk_int(sc, x));
   } else if (*name == 'x') { /* #x (hex) */
     snprintf(tmp, TS_STRBUFFSIZE, "0x%s", name + 1);
-    sscanf(tmp, "%lx", (long unsigned *)&x);
+    sscanf(tmp, "%x", (int unsigned *)&x);
     return (ts_mk_int(sc, x));
   } else if (*name == 'b') { /* #b (binary) */
     x = binary_decode(name + 1);
@@ -1366,7 +1366,7 @@ static void gc(scheme *sc, ts_ptr a, ts_ptr b) {
 
   if (sc->gc_verbose) {
     char msg[80];
-    snprintf(msg, 80, "done: %ld cells were recovered.\n", sc->fcells);
+    snprintf(msg, 80, "done: %d cells were recovered.\n", sc->fcells);
     ts_put_str(sc, msg);
   }
 }
@@ -1977,7 +1977,7 @@ static void atom2str(scheme *sc, ts_ptr l, int f, char **pp, int *plen) {
     p = sc->strbuff;
     if (f <= 1 || f == 10) /* f is the base for numbers if > 1 */ {
       if (num_ts_is_int(l)) {
-        snprintf(p, TS_STRBUFFSIZE, "%ld", ivalue_unchecked(l));
+        snprintf(p, TS_STRBUFFSIZE, "%d", ivalue_unchecked(l));
       } else {
         snprintf(p, TS_STRBUFFSIZE, "%.10g", rvalue_unchecked(l));
         /* r5rs says there must be a '.' (unless 'e'?) */
@@ -1989,19 +1989,19 @@ static void atom2str(scheme *sc, ts_ptr l, int f, char **pp, int *plen) {
         }
       }
     } else {
-      long v = ts_int_val(l);
+      int v = ts_int_val(l);
       if (f == 16) {
         if (v >= 0)
-          snprintf(p, TS_STRBUFFSIZE, "%lx", v);
+          snprintf(p, TS_STRBUFFSIZE, "%x", v);
         else
-          snprintf(p, TS_STRBUFFSIZE, "-%lx", -v);
+          snprintf(p, TS_STRBUFFSIZE, "-%x", -v);
       } else if (f == 8) {
         if (v >= 0)
-          snprintf(p, TS_STRBUFFSIZE, "%lo", v);
+          snprintf(p, TS_STRBUFFSIZE, "%o", v);
         else
-          snprintf(p, TS_STRBUFFSIZE, "-%lo", -v);
+          snprintf(p, TS_STRBUFFSIZE, "-%o", -v);
       } else if (f == 2) {
-        unsigned long b = (v < 0) ? -v : v;
+        unsigned int b = (v < 0) ? -v : v;
         p = &p[TS_STRBUFFSIZE - 1];
         *p = 0;
         do {
@@ -2063,7 +2063,7 @@ static void atom2str(scheme *sc, ts_ptr l, int f, char **pp, int *plen) {
     p = ts_sym_name(l);
   } else if (ts_is_proc(l)) {
     p = sc->strbuff;
-    snprintf(p, TS_STRBUFFSIZE, "#<%s PROCEDURE %ld>", procname(l), procnum(l));
+    snprintf(p, TS_STRBUFFSIZE, "#<%s PROCEDURE %d>", procname(l), procnum(l));
   } else if (ts_is_macro(l)) {
     p = "#<MACRO>";
   } else if (ts_is_closure(l)) {
@@ -2072,7 +2072,7 @@ static void atom2str(scheme *sc, ts_ptr l, int f, char **pp, int *plen) {
     p = "#<PROMISE>";
   } else if (ts_is_foreign(l)) {
     p = sc->strbuff;
-    snprintf(p, TS_STRBUFFSIZE, "#<FOREIGN PROCEDURE %ld>", procnum(l));
+    snprintf(p, TS_STRBUFFSIZE, "#<FOREIGN PROCEDURE %d>", procnum(l));
   } else if (is_continuation(l)) {
     p = "#<CONTINUATION>";
   } else {
@@ -2500,7 +2500,7 @@ static ts_ptr _s_return(scheme *sc, ts_ptr a) {
 static void s_save(scheme *sc, enum opcodes op, ts_ptr args, ts_ptr code) {
   sc->dump = cons(sc, sc->envir, cons(sc, (code), sc->dump));
   sc->dump = cons(sc, (args), sc->dump);
-  sc->dump = cons(sc, ts_mk_int(sc, (long)(op)), sc->dump);
+  sc->dump = cons(sc, ts_mk_int(sc, (int)(op)), sc->dump);
 }
 
 INLINE static void dump_stack_mark(scheme *sc) { mark(sc->dump); }
@@ -3197,7 +3197,7 @@ static ts_ptr opexe_2(scheme *sc, enum opcodes op) {
       /* Before returning integer result make sure we can. */
       /* If the test fails, result is too big for integer. */
       if (!real_result) {
-        long result_as_long = (long)result;
+        int result_as_long = (int)result;
         if (result != (double)result_as_long) real_result = 1;
       }
       if (real_result) {
@@ -3363,7 +3363,7 @@ static ts_ptr opexe_2(scheme *sc, enum opcodes op) {
 
     case OP_STR2ATOM: /* string->atom */ {
       char *s = strvalue(car(sc->args));
-      long pf = 0;
+      int pf = 0;
       if (cdr(sc->args) != sc->NIL) {
         /* we know cadr(sc->args) is a natural number */
         /* see if it is 2, 8, 10, or 16, or error */
@@ -3383,7 +3383,7 @@ static ts_ptr opexe_2(scheme *sc, enum opcodes op) {
           s_return(sc, mk_atom(sc, s));
         } else {
           char *ep;
-          long iv = strtol(s, &ep, (int)pf);
+          int iv = strtol(s, &ep, (int)pf);
           if (*ep == 0) {
             s_return(sc, ts_mk_int(sc, iv));
           } else {
@@ -3399,7 +3399,7 @@ static ts_ptr opexe_2(scheme *sc, enum opcodes op) {
       s_return(sc, x);
 
     case OP_ATOM2STR: /* atom->string */ {
-      long pf = 0;
+      int pf = 0;
       x = car(sc->args);
       if (cdr(sc->args) != sc->NIL) {
         /* we know cadr(sc->args) is a natural number */
@@ -4343,7 +4343,7 @@ static ts_ptr opexe_5(scheme *sc, enum opcodes op) {
 
 static ts_ptr opexe_6(scheme *sc, enum opcodes op) {
   ts_ptr x, y;
-  long v;
+  int v;
 
   switch (op) {
     case OP_LIST_LENGTH: /* length */ /* a.k */
@@ -4551,7 +4551,7 @@ static ts_ptr mk_proc(scheme *sc, enum opcodes op) {
 
   y = get_cell(sc, sc->NIL, sc->NIL);
   typeflag(y) = (T_PROC | T_ATOM);
-  ivalue_unchecked(y) = (long)op;
+  ivalue_unchecked(y) = (int)op;
   set_num_integer(y);
   return y;
 }

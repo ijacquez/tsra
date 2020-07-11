@@ -26,7 +26,7 @@ typedef ts_ptr (*ts_foreign_func)(scheme *, ts_ptr);
 typedef struct ts_num {
   char is_fixnum;
   union {
-    long ivalue;
+    int ivalue;
     double rvalue;
   } value;
 } ts_num;
@@ -131,7 +131,7 @@ struct scheme {
   ts_ptr COMPILE_HOOK; /* *compile-hook* */
 
   ts_ptr free_cell; /* pointer to top of free cells */
-  long fcells;      /* # of free cells */
+  int fcells;       /* # of free cells */
 
   ts_ptr inport;
   ts_ptr outport;
@@ -165,7 +165,7 @@ struct scheme {
   int op;
 
   void *ext_data; /* For the benefit of foreign functions */
-  long gensym_cnt;
+  int gensym_cnt;
 
   struct ts_interface *vptr;
   void *dump_base; /* pointer to base of allocated dump stack */
@@ -197,7 +197,7 @@ TS_EXPORT void ts_set_extern_data(scheme *sc, void *p);
 TS_EXPORT void ts_def(scheme *sc, ts_ptr env, ts_ptr symbol, ts_ptr value);
 
 TS_EXPORT ts_ptr ts_cons(scheme *sc, ts_ptr a, ts_ptr b, int immutable);
-TS_EXPORT ts_ptr ts_mk_int(scheme *sc, long ts_num);
+TS_EXPORT ts_ptr ts_mk_int(scheme *sc, int ts_num);
 TS_EXPORT ts_ptr ts_mk_real(scheme *sc, double ts_num);
 TS_EXPORT ts_ptr ts_mk_sym(scheme *sc, const char *name);
 TS_EXPORT ts_ptr ts_gen_sym(scheme *sc);
@@ -214,12 +214,12 @@ TS_EXPORT int ts_is_str(ts_ptr p);
 TS_EXPORT char *ts_str_val(ts_ptr p);
 TS_EXPORT int ts_is_num(ts_ptr p);
 TS_EXPORT ts_num ts_num_val(ts_ptr p);
-TS_EXPORT long ts_int_val(ts_ptr p);
+TS_EXPORT int ts_int_val(ts_ptr p);
 TS_EXPORT double ts_real_val(ts_ptr p);
 TS_EXPORT int ts_is_int(ts_ptr p);
 TS_EXPORT int ts_is_real(ts_ptr p);
 TS_EXPORT int ts_is_char(ts_ptr p);
-TS_EXPORT long ts_char_val(ts_ptr p);
+TS_EXPORT int ts_char_val(ts_ptr p);
 TS_EXPORT int ts_is_vec(ts_ptr p);
 
 TS_EXPORT int ts_is_port(ts_ptr p);
@@ -256,7 +256,7 @@ struct ts_interface {
   ts_ptr (*cons)(scheme *sc, ts_ptr a, ts_ptr b);
   ts_ptr (*immutable_cons)(scheme *sc, ts_ptr a, ts_ptr b);
   ts_ptr (*reserve_cells)(scheme *sc, int n);
-  ts_ptr (*mk_int)(scheme *sc, long ts_num);
+  ts_ptr (*mk_int)(scheme *sc, int ts_num);
   ts_ptr (*mk_real)(scheme *sc, double ts_num);
   ts_ptr (*mk_sym)(scheme *sc, const char *name);
   ts_ptr (*gen_sym)(scheme *sc);
@@ -272,12 +272,12 @@ struct ts_interface {
   char *(*str_val)(ts_ptr p);
   int (*is_num)(ts_ptr p);
   ts_num (*num_val)(ts_ptr p);
-  long (*int_val)(ts_ptr p);
+  int (*int_val)(ts_ptr p);
   double (*real_val)(ts_ptr p);
   int (*is_int)(ts_ptr p);
   int (*is_real)(ts_ptr p);
   int (*is_char)(ts_ptr p);
-  long (*char_val)(ts_ptr p);
+  int (*char_val)(ts_ptr p);
   int (*is_list)(scheme *sc, ts_ptr p);
   int (*is_vec)(ts_ptr p);
   int (*list_len)(scheme *sc, ts_ptr vec);
