@@ -162,7 +162,7 @@ enum {
   TOK_VEC = 12,
 };
 
-const char BACKQUOTE = '`';
+#define BACKQUOTE '`'
 const char *DELIMITERS = "()\";\f\t\v\n\r ";
 
 /*
@@ -398,7 +398,7 @@ static int is_ascii_name(const char *name, int *pc) {
 static int file_push(scheme *sc, const char *fname);
 static void file_pop(scheme *sc);
 static int file_interactive(scheme *sc);
-INLINE static int is_one_of(char *s, int c);
+INLINE static int is_one_of(const char *s, int c);
 static int alloc_cellseg(scheme *sc, int n);
 static int binary_decode(const char *s);
 INLINE static ts_ptr get_cell(scheme *sc, ts_ptr a, ts_ptr b);
@@ -429,7 +429,7 @@ static void gc(scheme *sc, ts_ptr a, ts_ptr b);
 static int basic_inchar(ts_port *pt);
 static int inchar(scheme *sc);
 static void backchar(scheme *sc, int c);
-static char *readstr_upto(scheme *sc, char *delim);
+static char *readstr_upto(scheme *sc, const char *delim);
 static ts_ptr readstrexp(scheme *sc);
 INLINE static int skipspace(scheme *sc);
 static int token(scheme *sc);
@@ -1662,7 +1662,7 @@ INTERFACE void ts_put_char(scheme *sc, int c) {
 }
 
 /* read characters up to delimiter, but cater to character constants */
-static char *readstr_upto(scheme *sc, char *delim) {
+static char *readstr_upto(scheme *sc, const char *delim) {
   char *p = sc->strbuff;
 
   while ((p - sc->strbuff < sizeof(sc->strbuff)) &&
@@ -1787,7 +1787,7 @@ static ts_ptr readstrexp(scheme *sc) {
 }
 
 /* check c is in chars */
-INLINE static int is_one_of(char *s, int c) {
+INLINE static int is_one_of(const char *s, int c) {
   if (c == EOF) return 1;
   while (*s)
     if (*s++ == c) return (1);
@@ -5044,12 +5044,12 @@ ts_ptr ts_get_global(scheme *sc, ts_ptr env, const char *name) {
 int main(int argc, char **argv) {
   scheme sc;
   FILE *fin = NULL;
-  char *file_name = InitFile;
+  const char *file_name = InitFile;
   int retcode;
   int isfile = 1;
 
   if (argc == 1) {
-    printf(banner);
+    printf("%s", banner);
   }
   if (argc == 2 && strcmp(argv[1], "-?") == 0) {
     printf("Usage: tinyscheme -?\n");
