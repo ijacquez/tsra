@@ -1,3 +1,27 @@
+# TSRA 0.0.2
+
+`hasprop` function renamed to `ts_has_prop`  
+`USE_SCHEME_STACK` define renamed to `USE_STACK`  
+`ts_load_named_file` function removed from public API  
+`ts_load_file` function implementation changed  
+`vec_len` function added  
+`ts_get_global` function added  
+`ts_apply0` function added `ts_interface` struct  
+`ts_call` function added `ts_interface` struct  
+`ts_eval` function added `ts_interface` struct 
+
+Mac OS 9 support code removed 
+
+for integers the `int` type is now used instead of the `long` type  
+
+`ts_eqv` function added to `ts_interface` struct  
+`ts_set_extern_data` function added to `ts_interface` struct  
+`ts_set_out_port_str` function added to `ts_interface` struct  
+`ts_set_out_port_file` function added to `ts_interface` struct  
+`ts_set_in_port_str` function added to `ts_interface` struct  
+`ts_set_in_port_file` function added to `ts_interface` struct  
+`ts_deinit` function added to `ts_interface` struct  
+
 # TSRA 0.0.1
 
 `set_vector_elem` function renamed to `ts_set_vec_elem`  
