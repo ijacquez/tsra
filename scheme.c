@@ -254,7 +254,7 @@ INTERFACE static ts_ptr ts_cons(scheme *sc, ts_ptr a, ts_ptr b) {
   return _cons(sc, a, b, 0);
 }
 
-INTERFACE static ts_ptr immutable_cons(scheme *sc, ts_ptr a, ts_ptr b) {
+INTERFACE static ts_ptr ts_immutable_cons(scheme *sc, ts_ptr a, ts_ptr b) {
   return _cons(sc, a, b, 1);
 }
 
@@ -901,13 +901,13 @@ static ts_ptr oblist_add_by_name(scheme *sc, const char *name) {
   ts_ptr x;
   int location;
 
-  x = immutable_cons(sc, ts_mk_str(sc, name), sc->NIL);
+  x = ts_immutable_cons(sc, ts_mk_str(sc, name), sc->NIL);
   typeflag(x) = T_SYMBOL;
   ts_set_immutable(car(x));
 
   location = hash_fn(name, ivalue_unchecked(sc->oblist));
   ts_set_vec_elem(sc->oblist, location,
-                  immutable_cons(sc, x, ts_vec_elem(sc->oblist, location)));
+                  ts_immutable_cons(sc, x, ts_vec_elem(sc->oblist, location)));
   return x;
 }
 
@@ -962,10 +962,10 @@ INLINE static ts_ptr oblist_find_by_name(scheme *sc, const char *name) {
 static ts_ptr oblist_add_by_name(scheme *sc, const char *name) {
   ts_ptr x;
 
-  x = immutable_cons(sc, ts_mk_str(sc, name), sc->NIL);
+  x = ts_immutable_cons(sc, ts_mk_str(sc, name), sc->NIL);
   typeflag(x) = T_SYMBOL;
   ts_set_immutable(car(x));
-  sc->oblist = immutable_cons(sc, x, sc->oblist);
+  sc->oblist = ts_immutable_cons(sc, x, sc->oblist);
   return x;
 }
 static ts_ptr oblist_all_symbols(scheme *sc) { return sc->oblist; }
@@ -2238,21 +2238,21 @@ static void new_frame_in_env(scheme *sc, ts_ptr old_env) {
     new_frame = sc->NIL;
   }
 
-  sc->envir = immutable_cons(sc, new_frame, old_env);
+  sc->envir = ts_immutable_cons(sc, new_frame, old_env);
   setenvironment(sc->envir);
 }
 
 INLINE static void new_slot_spec_in_env(scheme *sc, ts_ptr env, ts_ptr variable,
                                         ts_ptr value) {
-  ts_ptr slot = immutable_cons(sc, variable, value);
+  ts_ptr slot = ts_immutable_cons(sc, variable, value);
 
   if (ts_is_vec(car(env))) {
     int location = hash_fn(ts_sym_name(variable), ivalue_unchecked(car(env)));
 
     ts_set_vec_elem(car(env), location,
-                    immutable_cons(sc, slot, ts_vec_elem(car(env), location)));
+                    ts_immutable_cons(sc, slot, ts_vec_elem(car(env), location)));
   } else {
-    car(env) = immutable_cons(sc, slot, car(env));
+    car(env) = ts_immutable_cons(sc, slot, car(env));
   }
 }
 
@@ -2288,13 +2288,13 @@ static ts_ptr find_slot_in_env(scheme *sc, ts_ptr env, ts_ptr hdl, int all) {
 #else /* USE_ALIST_ENV */
 
 INLINE static void new_frame_in_env(scheme *sc, ts_ptr old_env) {
-  sc->envir = immutable_cons(sc, sc->NIL, old_env);
+  sc->envir = ts_immutable_cons(sc, sc->NIL, old_env);
   setenvironment(sc->envir);
 }
 
 INLINE static void new_slot_spec_in_env(scheme *sc, ts_ptr env, ts_ptr variable,
                                         ts_ptr value) {
-  car(env) = immutable_cons(sc, immutable_cons(sc, variable, value), car(env));
+  car(env) = ts_immutable_cons(sc, ts_immutable_cons(sc, variable, value), car(env));
 }
 
 static ts_ptr find_slot_in_env(scheme *sc, ts_ptr env, ts_ptr hdl, int all) {
@@ -4613,7 +4613,7 @@ static int syntaxnum(ts_ptr p) {
 static struct ts_interface vtbl = {
     ts_def,
     ts_cons,
-    immutable_cons,
+    ts_immutable_cons,
     ts_reserve_cells,
     ts_mk_int,
     ts_mk_real,
