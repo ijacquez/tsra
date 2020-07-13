@@ -256,7 +256,7 @@ INTERFACE ts_ptr ts_cons(scheme *sc, ts_ptr a, ts_ptr b) {
   return _cons(sc, a, b, 0);
 }
 
-INTERFACE static ts_ptr ts_immutable_cons(scheme *sc, ts_ptr a, ts_ptr b) {
+INTERFACE ts_ptr ts_immutable_cons(scheme *sc, ts_ptr a, ts_ptr b) {
   return _cons(sc, a, b, 1);
 }
 

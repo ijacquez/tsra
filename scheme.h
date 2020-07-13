@@ -197,6 +197,7 @@ TS_EXPORT void ts_set_extern_data(scheme *sc, void *p);
 TS_EXPORT void ts_def(scheme *sc, ts_ptr env, ts_ptr symbol, ts_ptr value);
 
 TS_EXPORT ts_ptr ts_cons(scheme *sc, ts_ptr a, ts_ptr b);
+TS_EXPORT ts_ptr ts_immutable_cons(scheme *sc, ts_ptr a, ts_ptr b);
 TS_EXPORT ts_ptr ts_mk_int(scheme *sc, int ts_num);
 TS_EXPORT ts_ptr ts_mk_real(scheme *sc, double ts_num);
 TS_EXPORT ts_ptr ts_mk_sym(scheme *sc, const char *name);
