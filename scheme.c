@@ -262,7 +262,7 @@ INLINE INTERFACE int ts_is_str(ts_ptr p) { return (type(p) == T_STRING); }
 #define strvalue(p) ((p)->_object._string._svalue)
 #define strlength(p) ((p)->_object._string._length)
 
-INTERFACE static int ts_is_list(scheme *sc, ts_ptr p);
+INTERFACE int ts_is_list(scheme *sc, ts_ptr p);
 INLINE INTERFACE int ts_is_vec(ts_ptr p) { return (type(p) == T_VECTOR); }
 INTERFACE void ts_fill_vec(ts_ptr vec, ts_ptr obj);
 INTERFACE static ts_ptr ts_vec_elem(ts_ptr vec, int ielem);
@@ -3626,7 +3626,7 @@ static ts_ptr opexe_2(scheme *sc, enum opcodes op) {
   return sc->T;
 }
 
-static int ts_is_list(scheme *sc, ts_ptr a) { return ts_list_len(sc, a) >= 0; }
+int ts_is_list(scheme *sc, ts_ptr a) { return ts_list_len(sc, a) >= 0; }
 
 /* Result is:
    proper list: length
