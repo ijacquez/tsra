@@ -413,7 +413,7 @@ static int count_consecutive_cells(ts_ptr x, int needed);
 static ts_ptr find_slot_in_env(scheme *sc, ts_ptr env, ts_ptr sym, int all);
 static ts_ptr mk_number(scheme *sc, ts_num n);
 static char *store_string(scheme *sc, int len, const char *str, char fill);
-static ts_ptr ts_mk_vec(scheme *sc, int len);
+ts_ptr ts_mk_vec(scheme *sc, int len);
 static ts_ptr mk_atom(scheme *sc, char *q);
 static ts_ptr mk_sharp_const(scheme *sc, char *name);
 static ts_ptr mk_port(scheme *sc, ts_port *p);
@@ -1063,7 +1063,7 @@ INTERFACE ts_ptr ts_mk_empty_str(scheme *sc, int len, char fill) {
   return (x);
 }
 
-INTERFACE static ts_ptr ts_mk_vec(scheme *sc, int len) {
+INTERFACE ts_ptr ts_mk_vec(scheme *sc, int len) {
   return get_vector_object(sc, len, sc->NIL);
 }
 
