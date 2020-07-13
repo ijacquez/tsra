@@ -250,7 +250,7 @@ static ts_num num_one;
 #define typeflag(p) ((p)->_flag)
 #define type(p) (typeflag(p) & T_MASKTYPE)
 
-INTERFACE static ts_ptr cons(scheme *sc, ts_ptr a, ts_ptr b) {
+INTERFACE static ts_ptr ts_cons(scheme *sc, ts_ptr a, ts_ptr b) {
   return _cons(sc, a, b, 0);
 }
 
@@ -934,7 +934,7 @@ static ts_ptr oblist_all_symbols(scheme *sc) {
 
   for (i = 0; i < ivalue_unchecked(sc->oblist); i++) {
     for (x = ts_vec_elem(sc->oblist, i); x != sc->NIL; x = cdr(x)) {
-      ob_list = cons(sc, x, ob_list);
+      ob_list = ts_cons(sc, x, ob_list);
     }
   }
   return ob_list;
@@ -1140,10 +1140,10 @@ static ts_ptr mk_atom(scheme *sc, char *q) {
 #if USE_COLON_HOOK
   if ((p = strstr(q, "::")) != 0) {
     *p = 0;
-    return cons(
+    return ts_cons(
         sc, sc->COLON_HOOK,
-        cons(sc, cons(sc, sc->QUOTE, cons(sc, mk_atom(sc, p + 2), sc->NIL)),
-             cons(sc, ts_mk_sym(sc, strlwr(q)), sc->NIL)));
+        ts_cons(sc, ts_cons(sc, sc->QUOTE, ts_cons(sc, mk_atom(sc, p + 2), sc->NIL)),
+             ts_cons(sc, ts_mk_sym(sc, strlwr(q)), sc->NIL)));
   }
 #endif
 
@@ -2109,10 +2109,10 @@ static ts_ptr list_star(scheme *sc, ts_ptr d) {
   if (cdr(d) == sc->NIL) {
     return car(d);
   }
-  p = cons(sc, car(d), cdr(d));
+  p = ts_cons(sc, car(d), cdr(d));
   q = p;
   while (cdr(cdr(p)) != sc->NIL) {
-    d = cons(sc, car(p), cdr(p));
+    d = ts_cons(sc, car(p), cdr(p));
     if (cdr(cdr(p)) != sc->NIL) {
       p = cdr(d);
     }
@@ -2127,7 +2127,7 @@ static ts_ptr reverse(scheme *sc, ts_ptr a) {
   ts_ptr p = sc->NIL;
 
   for (; ts_is_pair(a); a = cdr(a)) {
-    p = cons(sc, car(a), p);
+    p = ts_cons(sc, car(a), p);
   }
   return (p);
 }
@@ -2151,7 +2151,7 @@ static ts_ptr revappend(scheme *sc, ts_ptr a, ts_ptr b) {
   ts_ptr p = b;
 
   while (ts_is_pair(p)) {
-    result = cons(sc, car(p), result);
+    result = ts_cons(sc, car(p), result);
     p = cdr(p);
   }
 
@@ -2363,24 +2363,24 @@ static ts_ptr _Error_1(scheme *sc, const char *s, ts_ptr a) {
   x = find_slot_in_env(sc, sc->envir, hdl, 1);
   if (x != sc->NIL) {
     if (a != 0) {
-      sc->code = cons(sc, cons(sc, sc->QUOTE, cons(sc, (a), sc->NIL)), sc->NIL);
+      sc->code = ts_cons(sc, ts_cons(sc, sc->QUOTE, ts_cons(sc, (a), sc->NIL)), sc->NIL);
     } else {
       sc->code = sc->NIL;
     }
-    sc->code = cons(sc, ts_mk_str(sc, str), sc->code);
+    sc->code = ts_cons(sc, ts_mk_str(sc, str), sc->code);
     ts_set_immutable(car(sc->code));
-    sc->code = cons(sc, slot_value_in_env(x), sc->code);
+    sc->code = ts_cons(sc, slot_value_in_env(x), sc->code);
     sc->op = (int)OP_EVAL;
     return sc->T;
   }
 #endif
 
   if (a != 0) {
-    sc->args = cons(sc, (a), sc->NIL);
+    sc->args = ts_cons(sc, (a), sc->NIL);
   } else {
     sc->args = sc->NIL;
   }
-  sc->args = cons(sc, ts_mk_str(sc, str), sc->args);
+  sc->args = ts_cons(sc, ts_mk_str(sc, str), sc->args);
   ts_set_immutable(car(sc->args));
   sc->op = (int)OP_ERR0;
   return sc->T;
@@ -2500,9 +2500,9 @@ static ts_ptr _s_return(scheme *sc, ts_ptr a) {
 }
 
 static void s_save(scheme *sc, enum opcodes op, ts_ptr args, ts_ptr code) {
-  sc->dump = cons(sc, sc->envir, cons(sc, (code), sc->dump));
-  sc->dump = cons(sc, (args), sc->dump);
-  sc->dump = cons(sc, ts_mk_int(sc, (int)(op)), sc->dump);
+  sc->dump = ts_cons(sc, sc->envir, ts_cons(sc, (code), sc->dump));
+  sc->dump = ts_cons(sc, (args), sc->dump);
+  sc->dump = ts_cons(sc, ts_mk_int(sc, (int)(op)), sc->dump);
 }
 
 INLINE static void dump_stack_mark(scheme *sc) { mark(sc->dump); }
@@ -2622,7 +2622,7 @@ static ts_ptr opexe_0(scheme *sc, enum opcodes op) {
     case OP_E0ARGS:                 /* eval arguments */
       if (ts_is_macro(sc->value)) { /* macro expansion */
         s_save(sc, OP_DOMACRO, sc->NIL, sc->NIL);
-        sc->args = cons(sc, sc->code, sc->NIL);
+        sc->args = ts_cons(sc, sc->code, sc->NIL);
         sc->code = sc->value;
         s_goto(sc, OP_APPLY);
       } else {
@@ -2631,7 +2631,7 @@ static ts_ptr opexe_0(scheme *sc, enum opcodes op) {
       }
 
     case OP_E1ARGS: /* eval arguments */
-      sc->args = cons(sc, sc->value, sc->args);
+      sc->args = ts_cons(sc, sc->value, sc->args);
       if (ts_is_pair(sc->code)) { /* continue */
         s_save(sc, OP_E1ARGS, sc->args, cdr(sc->code));
         sc->code = car(sc->code);
@@ -2657,7 +2657,7 @@ static ts_ptr opexe_0(scheme *sc, enum opcodes op) {
       if (sc->tracing) {
         s_save(sc, OP_REAL_APPLY, sc->args, sc->code);
         sc->print_flag = 1;
-        /*  sc->args=cons(sc,sc->code,sc->args);*/
+        /*  sc->args=ts_cons(sc,sc->code,sc->args);*/
         ts_put_str(sc, "\nApply to: ");
         s_goto(sc, OP_P0LIST);
       }
@@ -2720,7 +2720,7 @@ static ts_ptr opexe_0(scheme *sc, enum opcodes op) {
           /* Fallthru */
         } else {
           s_save(sc, OP_LAMBDA1, sc->args, sc->code);
-          sc->args = cons(sc, sc->code, sc->NIL);
+          sc->args = ts_cons(sc, sc->code, sc->NIL);
           sc->code = slot_value_in_env(f);
           s_goto(sc, OP_APPLY);
         }
@@ -2757,7 +2757,7 @@ static ts_ptr opexe_0(scheme *sc, enum opcodes op) {
       if (ts_is_pair(car(sc->code))) {
         x = caar(sc->code);
         sc->code =
-            cons(sc, sc->LAMBDA, cons(sc, cdar(sc->code), cdr(sc->code)));
+            ts_cons(sc, sc->LAMBDA, ts_cons(sc, cdar(sc->code), cdr(sc->code)));
       } else {
         x = car(sc->code);
         sc->code = cadr(sc->code);
@@ -2830,7 +2830,7 @@ static ts_ptr opexe_0(scheme *sc, enum opcodes op) {
       s_goto(sc, OP_LET1);
 
     case OP_LET1: /* let (calculate parameters) */
-      sc->args = cons(sc, sc->value, sc->args);
+      sc->args = ts_cons(sc, sc->value, sc->args);
       if (ts_is_pair(sc->code)) { /* continue */
         if (!ts_is_pair(car(sc->code)) || !ts_is_pair(cdar(sc->code))) {
           Error_1(sc, "Bad syntax of binding spec in let :", car(sc->code));
@@ -2858,11 +2858,11 @@ static ts_ptr opexe_0(scheme *sc, enum opcodes op) {
           if (!ts_is_pair(x)) Error_1(sc, "Bad syntax of binding in let :", x);
           if (!ts_is_list(sc, car(x)))
             Error_1(sc, "Bad syntax of binding in let :", car(x));
-          sc->args = cons(sc, caar(x), sc->args);
+          sc->args = ts_cons(sc, caar(x), sc->args);
         }
         x = mk_closure(
             sc,
-            cons(sc, reverse_in_place(sc, sc->NIL, sc->args), cddr(sc->code)),
+            ts_cons(sc, reverse_in_place(sc, sc->NIL, sc->args), cddr(sc->code)),
             sc->envir);
         new_slot_in_env(sc, car(sc->code), x);
         sc->code = cddr(sc->code);
@@ -2923,7 +2923,7 @@ static ts_ptr opexe_1(scheme *sc, enum opcodes op) {
       s_goto(sc, OP_LET1REC);
 
     case OP_LET1REC: /* letrec (calculate parameters) */
-      sc->args = cons(sc, sc->value, sc->args);
+      sc->args = ts_cons(sc, sc->value, sc->args);
       if (ts_is_pair(sc->code)) { /* continue */
         if (!ts_is_pair(car(sc->code)) || !ts_is_pair(cdar(sc->code))) {
           Error_1(sc, "Bad syntax of binding spec in letrec :", car(sc->code));
@@ -2965,8 +2965,8 @@ static ts_ptr opexe_1(scheme *sc, enum opcodes op) {
           if (!ts_is_pair(cdr(sc->code))) {
             Error_0(sc, "syntax error in cond");
           }
-          x = cons(sc, sc->QUOTE, cons(sc, sc->value, sc->NIL));
-          sc->code = cons(sc, cadr(sc->code), cons(sc, x, sc->NIL));
+          x = ts_cons(sc, sc->QUOTE, ts_cons(sc, sc->value, sc->NIL));
+          sc->code = ts_cons(sc, cadr(sc->code), ts_cons(sc, x, sc->NIL));
           s_goto(sc, OP_EVAL);
         }
         s_goto(sc, OP_BEGIN);
@@ -2981,7 +2981,7 @@ static ts_ptr opexe_1(scheme *sc, enum opcodes op) {
       }
 
     case OP_DELAY: /* delay */
-      x = mk_closure(sc, cons(sc, sc->NIL, sc->code), sc->envir);
+      x = mk_closure(sc, ts_cons(sc, sc->NIL, sc->code), sc->envir);
       typeflag(x) = T_PROMISE;
       s_return(sc, x);
 
@@ -3030,15 +3030,15 @@ static ts_ptr opexe_1(scheme *sc, enum opcodes op) {
 
     case OP_C1STREAM:       /* cons-stream */
       sc->args = sc->value; /* save sc->value to register sc->args for gc */
-      x = mk_closure(sc, cons(sc, sc->NIL, sc->code), sc->envir);
+      x = mk_closure(sc, ts_cons(sc, sc->NIL, sc->code), sc->envir);
       typeflag(x) = T_PROMISE;
-      s_return(sc, cons(sc, sc->args, x));
+      s_return(sc, ts_cons(sc, sc->args, x));
 
     case OP_MACRO0: /* macro */
       if (ts_is_pair(car(sc->code))) {
         x = caar(sc->code);
         sc->code =
-            cons(sc, sc->LAMBDA, cons(sc, cdar(sc->code), cdr(sc->code)));
+            ts_cons(sc, sc->LAMBDA, ts_cons(sc, cdar(sc->code), cdr(sc->code)));
       } else {
         x = car(sc->code);
         sc->code = cadr(sc->code);
@@ -3113,7 +3113,7 @@ static ts_ptr opexe_1(scheme *sc, enum opcodes op) {
 
     case OP_CONTINUATION: /* call-with-current-continuation */
       sc->code = car(sc->args);
-      sc->args = cons(sc, mk_continuation(sc, sc->dump), sc->NIL);
+      sc->args = ts_cons(sc, mk_continuation(sc, sc->dump), sc->NIL);
       s_goto(sc, OP_APPLY);
 
     default:
@@ -3792,7 +3792,7 @@ static ts_ptr opexe_4(scheme *sc, enum opcodes op) {
     case OP_WRITE_CHAR: /* write-char */
       if (ts_is_pair(cdr(sc->args))) {
         if (cadr(sc->args) != sc->outport) {
-          x = cons(sc, sc->outport, sc->NIL);
+          x = ts_cons(sc, sc->outport, sc->NIL);
           s_save(sc, OP_SET_OUTPORT, x, sc->NIL);
           sc->outport = cadr(sc->args);
         }
@@ -3808,7 +3808,7 @@ static ts_ptr opexe_4(scheme *sc, enum opcodes op) {
     case OP_NEWLINE: /* newline */
       if (ts_is_pair(sc->args)) {
         if (car(sc->args) != sc->outport) {
-          x = cons(sc, sc->outport, sc->NIL);
+          x = ts_cons(sc, sc->outport, sc->NIL);
           s_save(sc, OP_SET_OUTPORT, x, sc->NIL);
           sc->outport = car(sc->args);
         }
@@ -3819,7 +3819,7 @@ static ts_ptr opexe_4(scheme *sc, enum opcodes op) {
     case OP_ERR0: /* error */
       sc->retcode = -1;
       if (!ts_is_str(car(sc->args))) {
-        sc->args = cons(sc, ts_mk_str(sc, " -- "), sc->args);
+        sc->args = ts_cons(sc, ts_mk_str(sc, " -- "), sc->args);
         ts_set_immutable(car(sc->args));
       }
       ts_put_str(sc, "Error: ");
@@ -3883,7 +3883,7 @@ static ts_ptr opexe_4(scheme *sc, enum opcodes op) {
         cdar(x) = caddr(sc->args);
       else
         symprop(car(sc->args)) =
-            cons(sc, cons(sc, y, caddr(sc->args)), symprop(car(sc->args)));
+            ts_cons(sc, ts_cons(sc, y, caddr(sc->args)), symprop(car(sc->args)));
       s_return(sc, sc->T);
 
     case OP_GET: /* get */
@@ -4069,7 +4069,7 @@ static ts_ptr opexe_5(scheme *sc, enum opcodes op) {
       }
       x = sc->inport;
       sc->inport = car(sc->args);
-      x = cons(sc, x, sc->NIL);
+      x = ts_cons(sc, x, sc->NIL);
       s_save(sc, OP_SET_INPORT, x, sc->NIL);
       s_goto(sc, OP_READ_INTERNAL);
 
@@ -4079,7 +4079,7 @@ static ts_ptr opexe_5(scheme *sc, enum opcodes op) {
       if (ts_is_pair(sc->args)) {
         if (car(sc->args) != sc->inport) {
           x = sc->inport;
-          x = cons(sc, x, sc->NIL);
+          x = ts_cons(sc, x, sc->NIL);
           s_save(sc, OP_SET_INPORT, x, sc->NIL);
           sc->inport = car(sc->args);
         }
@@ -4178,7 +4178,7 @@ static ts_ptr opexe_5(scheme *sc, enum opcodes op) {
           if (f == sc->NIL) {
             Error_0(sc, "undefined sharp expression");
           } else {
-            sc->code = cons(sc, slot_value_in_env(f), sc->NIL);
+            sc->code = ts_cons(sc, slot_value_in_env(f), sc->NIL);
             s_goto(sc, OP_EVAL);
           }
         }
@@ -4195,7 +4195,7 @@ static ts_ptr opexe_5(scheme *sc, enum opcodes op) {
       break;
 
     case OP_RDLIST: {
-      sc->args = cons(sc, sc->value, sc->args);
+      sc->args = ts_cons(sc, sc->value, sc->args);
       sc->tok = token(sc);
       /* We now skip comments in the scanner
                 while (sc->tok == TOK_COMMENT) {
@@ -4236,29 +4236,29 @@ static ts_ptr opexe_5(scheme *sc, enum opcodes op) {
       }
 
     case OP_RDQUOTE:
-      s_return(sc, cons(sc, sc->QUOTE, cons(sc, sc->value, sc->NIL)));
+      s_return(sc, ts_cons(sc, sc->QUOTE, ts_cons(sc, sc->value, sc->NIL)));
 
     case OP_RDQQUOTE:
-      s_return(sc, cons(sc, sc->QQUOTE, cons(sc, sc->value, sc->NIL)));
+      s_return(sc, ts_cons(sc, sc->QQUOTE, ts_cons(sc, sc->value, sc->NIL)));
 
     case OP_RDQQUOTEVEC:
       s_return(
           sc,
-          cons(sc, ts_mk_sym(sc, "apply"),
-               cons(sc, ts_mk_sym(sc, "vector"),
-                    cons(sc, cons(sc, sc->QQUOTE, cons(sc, sc->value, sc->NIL)),
+          ts_cons(sc, ts_mk_sym(sc, "apply"),
+               ts_cons(sc, ts_mk_sym(sc, "vector"),
+                    ts_cons(sc, ts_cons(sc, sc->QQUOTE, ts_cons(sc, sc->value, sc->NIL)),
                          sc->NIL))));
 
     case OP_RDUNQUOTE:
-      s_return(sc, cons(sc, sc->UNQUOTE, cons(sc, sc->value, sc->NIL)));
+      s_return(sc, ts_cons(sc, sc->UNQUOTE, ts_cons(sc, sc->value, sc->NIL)));
 
     case OP_RDUQTSP:
-      s_return(sc, cons(sc, sc->UNQUOTESP, cons(sc, sc->value, sc->NIL)));
+      s_return(sc, ts_cons(sc, sc->UNQUOTESP, ts_cons(sc, sc->value, sc->NIL)));
 
     case OP_RDVEC:
-      /*sc->code=cons(sc,mk_proc(sc,OP_VECTOR),sc->value);
+      /*sc->code=ts_cons(sc,mk_proc(sc,OP_VECTOR),sc->value);
       s_goto(sc,OP_EVAL); Cannot be quoted*/
-      /*x=cons(sc,mk_proc(sc,OP_VECTOR),sc->value);
+      /*x=ts_cons(sc,mk_proc(sc,OP_VECTOR),sc->value);
       s_return(sc,x); Cannot be part of pairs*/
       /*sc->code=mk_proc(sc,OP_VECTOR);
       sc->args=sc->value;
@@ -4270,7 +4270,7 @@ static ts_ptr opexe_5(scheme *sc, enum opcodes op) {
     case OP_P0LIST:
       if (ts_is_vec(sc->args)) {
         ts_put_str(sc, "#(");
-        sc->args = cons(sc, sc->args, ts_mk_int(sc, 0));
+        sc->args = ts_cons(sc, sc->args, ts_mk_int(sc, 0));
         s_goto(sc, OP_PVECFROM);
       } else if (ts_is_env(sc->args)) {
         ts_put_str(sc, "#<ENVIRONMENT>");
@@ -4374,9 +4374,9 @@ static ts_ptr opexe_6(scheme *sc, enum opcodes op) {
       if (sc->args == sc->NIL) {
         s_return(sc, sc->F);
       } else if (ts_is_closure(sc->args)) {
-        s_return(sc, cons(sc, sc->LAMBDA, ts_closure_code(sc->value)));
+        s_return(sc, ts_cons(sc, sc->LAMBDA, ts_closure_code(sc->value)));
       } else if (ts_is_macro(sc->args)) {
-        s_return(sc, cons(sc, sc->LAMBDA, ts_closure_code(sc->value)));
+        s_return(sc, ts_cons(sc, sc->LAMBDA, ts_closure_code(sc->value)));
       } else {
         s_return(sc, sc->F);
       }
@@ -4612,7 +4612,7 @@ static int syntaxnum(ts_ptr p) {
 #if USE_INTERFACE
 static struct ts_interface vtbl = {
     ts_def,
-    cons,
+    ts_cons,
     immutable_cons,
     ts_reserve_cells,
     ts_mk_int,
@@ -4970,13 +4970,13 @@ void ts_register_foreign_func_list(scheme *sc, ts_registerable *list,
 }
 
 ts_ptr ts_apply0(scheme *sc, const char *procname) {
-  return ts_eval(sc, cons(sc, ts_mk_sym(sc, procname), sc->NIL));
+  return ts_eval(sc, ts_cons(sc, ts_mk_sym(sc, procname), sc->NIL));
 }
 
 void save_from_C_call(scheme *sc) {
-  ts_ptr saved_data = cons(sc, car(sc->sink), cons(sc, sc->envir, sc->dump));
+  ts_ptr saved_data = ts_cons(sc, car(sc->sink), ts_cons(sc, sc->envir, sc->dump));
   /* Push */
-  sc->c_nest = cons(sc, saved_data, sc->c_nest);
+  sc->c_nest = ts_cons(sc, saved_data, sc->c_nest);
   /* Truncate the dump stack so TS will return here when done, not
      directly resume pre-C-call operations. */
   dump_stack_reset(sc);
@@ -5107,7 +5107,7 @@ int main(int argc, char **argv) {
       }
       for (; *argv; argv++) {
         ts_ptr value = ts_mk_str(&sc, *argv);
-        args = cons(&sc, value, args);
+        args = ts_cons(&sc, value, args);
       }
       args = reverse_in_place(&sc, sc.NIL, args);
       ts_def(&sc, sc.global_env, ts_mk_sym(&sc, "*args*"), args);
