@@ -266,7 +266,7 @@ INTERFACE int ts_is_list(scheme *sc, ts_ptr p);
 INLINE INTERFACE int ts_is_vec(ts_ptr p) { return (type(p) == T_VECTOR); }
 INTERFACE void ts_fill_vec(ts_ptr vec, ts_ptr obj);
 INTERFACE static ts_ptr ts_vec_elem(ts_ptr vec, int ielem);
-INTERFACE static ts_ptr ts_set_vec_elem(ts_ptr vec, int ielem, ts_ptr a);
+INTERFACE ts_ptr ts_set_vec_elem(ts_ptr vec, int ielem, ts_ptr a);
 INLINE INTERFACE int ts_is_num(ts_ptr p) { return (type(p) == T_NUMBER); }
 INTERFACE int ts_is_int(ts_ptr p) {
   if (!ts_is_num(p)) return 0;
@@ -1087,7 +1087,7 @@ INTERFACE static ts_ptr ts_vec_elem(ts_ptr vec, int ielem) {
   }
 }
 
-INTERFACE static ts_ptr ts_set_vec_elem(ts_ptr vec, int ielem, ts_ptr a) {
+INTERFACE ts_ptr ts_set_vec_elem(ts_ptr vec, int ielem, ts_ptr a) {
   int n = ielem / 2;
   if (ielem % 2 == 0) {
     return car(vec + 1 + n) = a;

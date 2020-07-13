@@ -255,6 +255,7 @@ TS_EXPORT int ts_is_list(scheme *sc, ts_ptr p);
 TS_EXPORT ts_ptr ts_mk_vec(scheme *sc, int len);
 TS_EXPORT void ts_put_char(scheme *sc, int c);
 TS_EXPORT ts_ptr ts_reserve_cells(scheme *sc, int n);
+TS_EXPORT ts_ptr ts_set_vec_elem(ts_ptr vec, int ielem, ts_ptr newel);
 
 struct ts_interface {
   void (*def)(scheme *sc, ts_ptr env, ts_ptr symbol, ts_ptr value);
