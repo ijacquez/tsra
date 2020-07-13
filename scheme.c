@@ -264,7 +264,7 @@ INLINE INTERFACE int ts_is_str(ts_ptr p) { return (type(p) == T_STRING); }
 
 INTERFACE static int ts_is_list(scheme *sc, ts_ptr p);
 INLINE INTERFACE int ts_is_vec(ts_ptr p) { return (type(p) == T_VECTOR); }
-INTERFACE static void ts_fill_vec(ts_ptr vec, ts_ptr obj);
+INTERFACE void ts_fill_vec(ts_ptr vec, ts_ptr obj);
 INTERFACE static ts_ptr ts_vec_elem(ts_ptr vec, int ielem);
 INTERFACE static ts_ptr ts_set_vec_elem(ts_ptr vec, int ielem, ts_ptr a);
 INLINE INTERFACE int ts_is_num(ts_ptr p) { return (type(p) == T_NUMBER); }
@@ -1067,7 +1067,7 @@ INTERFACE static ts_ptr ts_mk_vec(scheme *sc, int len) {
   return get_vector_object(sc, len, sc->NIL);
 }
 
-INTERFACE static void ts_fill_vec(ts_ptr vec, ts_ptr obj) {
+INTERFACE void ts_fill_vec(ts_ptr vec, ts_ptr obj) {
   int i;
   int num = ts_int_val(vec) / 2 + ts_int_val(vec) % 2;
   for (i = 0; i < num; i++) {
