@@ -318,6 +318,7 @@ struct ts_interface {
   void (*set_out_port_str)(scheme *sc, char *start, char *past_the_end);
   void (*set_extern_data)(scheme *sc, void *p);
   int (*eqv)(ts_ptr a, ts_ptr b);
+  int (*ts_has_prop)(ts_ptr p);
   ts_err (*load_file)(scheme *sc, const char *name);
   ts_ptr (*apply0)(scheme *sc, const char *procname);
   ts_ptr (*call)(scheme *sc, ts_ptr func, ts_ptr args);
