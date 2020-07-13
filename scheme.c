@@ -405,7 +405,7 @@ static int alloc_cellseg(scheme *sc, int n);
 static int binary_decode(const char *s);
 INLINE static ts_ptr get_cell(scheme *sc, ts_ptr a, ts_ptr b);
 static ts_ptr _get_cell(scheme *sc, ts_ptr a, ts_ptr b);
-static ts_ptr ts_reserve_cells(scheme *sc, int n);
+ts_ptr ts_reserve_cells(scheme *sc, int n);
 static ts_ptr get_consecutive_cells(scheme *sc, int n);
 static ts_ptr find_consecutive_cells(scheme *sc, int n);
 static void finalize_cell(scheme *sc, ts_ptr a);
@@ -723,7 +723,7 @@ static ts_ptr _get_cell(scheme *sc, ts_ptr a, ts_ptr b) {
 }
 
 /* make sure that there is a given number of cells free */
-static ts_ptr ts_reserve_cells(scheme *sc, int n) {
+ts_ptr ts_reserve_cells(scheme *sc, int n) {
   if (sc->no_memory) {
     return sc->NIL;
   }
