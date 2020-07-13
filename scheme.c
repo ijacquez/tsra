@@ -251,11 +251,11 @@ static ts_num num_one;
 #define type(p) (typeflag(p) & T_MASKTYPE)
 
 INTERFACE static ts_ptr cons(scheme *sc, ts_ptr a, ts_ptr b) {
-  return ts_cons(sc, a, b, 0);
+  return _cons(sc, a, b, 0);
 }
 
 INTERFACE static ts_ptr immutable_cons(scheme *sc, ts_ptr a, ts_ptr b) {
-  return ts_cons(sc, a, b, 1);
+  return _cons(sc, a, b, 1);
 }
 
 INLINE INTERFACE int ts_is_str(ts_ptr p) { return (type(p) == T_STRING); }
@@ -874,7 +874,7 @@ static void check_range_alloced(ts_ptr p, int n, int expect_alloced) {
 /* Medium level cell allocation */
 
 /* get new cons cell */
-ts_ptr ts_cons(scheme *sc, ts_ptr a, ts_ptr b, int immutable) {
+ts_ptr _cons(scheme *sc, ts_ptr a, ts_ptr b, int immutable) {
   ts_ptr x = get_cell(sc, a, b);
 
   typeflag(x) = T_PAIR;
