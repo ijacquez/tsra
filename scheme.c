@@ -250,7 +250,9 @@ static ts_num num_one;
 #define typeflag(p) ((p)->_flag)
 #define type(p) (typeflag(p) & T_MASKTYPE)
 
-INTERFACE static ts_ptr ts_cons(scheme *sc, ts_ptr a, ts_ptr b) {
+static ts_ptr _cons(scheme *sc, ts_ptr a, ts_ptr b, int immutable);
+
+INTERFACE ts_ptr ts_cons(scheme *sc, ts_ptr a, ts_ptr b) {
   return _cons(sc, a, b, 0);
 }
 
