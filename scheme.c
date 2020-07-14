@@ -4679,6 +4679,12 @@ static struct ts_interface vtbl = {
     ts_set_extern_data,
     ts_eqv,
     ts_mk_empty_str,
+#if USE_DL
+    ts_load_ext,
+#else
+    NULL,
+#endif
+
 #if USE_PLIST
     ts_has_prop,
 #else
