@@ -4698,7 +4698,9 @@ static struct ts_interface vtbl = {
     ts_eval,
     ts_vec_len,
     ts_get_global,
+    ts_register_foreign_func_list,
 #else
+    NULL,
     NULL,
     NULL,
     NULL,

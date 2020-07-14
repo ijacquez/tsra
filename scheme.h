@@ -178,6 +178,11 @@ typedef enum ts_err {
   ts_type_err = -3,
 } ts_err;
 
+typedef struct ts_registerable {
+  ts_foreign_func f;
+  const char *name;
+} ts_registerable;
+
 TS_EXPORT scheme *ts_init_new(void);
 TS_EXPORT scheme *ts_init_new_custom_alloc(ts_func_alloc malloc,
                                            ts_func_dealloc free);
@@ -258,7 +263,8 @@ TS_EXPORT void ts_put_char(scheme *sc, int c);
 TS_EXPORT ts_ptr ts_reserve_cells(scheme *sc, int n);
 TS_EXPORT ts_ptr ts_set_vec_elem(ts_ptr vec, int ielem, ts_ptr newel);
 TS_EXPORT ts_ptr ts_vec_elem(ts_ptr vec, int ielem);
-
+TS_EXPORT void ts_register_foreign_func_list(scheme *sc, ts_registerable *list,
+                                             int n);
 struct ts_interface {
   void (*def)(scheme *sc, ts_ptr env, ts_ptr symbol, ts_ptr value);
   ts_ptr (*cons)(scheme *sc, ts_ptr a, ts_ptr b);
@@ -334,13 +340,8 @@ struct ts_interface {
   ts_ptr (*eval)(scheme *sc, ts_ptr obj);
   int (*vec_len)(ts_ptr vec);
   ts_ptr (*get_global)(scheme *sc, ts_ptr env, const char *name);
+  void (*register_foreign_func_list)(scheme *sc, ts_registerable *list,
+                                             int n);
 };
 
-typedef struct ts_registerable {
-  ts_foreign_func f;
-  const char *name;
-} ts_registerable;
-
-TS_EXPORT void ts_register_foreign_func_list(scheme *sc, ts_registerable *list,
-                                             int n);
 #endif
