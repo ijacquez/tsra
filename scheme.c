@@ -1000,11 +1000,11 @@ INTERFACE ts_ptr ts_mk_char(scheme *sc, int c) {
 }
 
 /* get number atom (integer) */
-INTERFACE ts_ptr ts_mk_int(scheme *sc, int ts_num) {
+INTERFACE ts_ptr ts_mk_int(scheme *sc, int n) {
   ts_ptr x = get_cell(sc, sc->NIL, sc->NIL);
 
   typeflag(x) = (T_NUMBER | T_ATOM);
-  ivalue_unchecked(x) = ts_num;
+  ivalue_unchecked(x) = n;
   set_num_integer(x);
   return (x);
 }

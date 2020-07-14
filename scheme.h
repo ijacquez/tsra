@@ -203,8 +203,8 @@ TS_EXPORT void ts_def(scheme *sc, ts_ptr env, ts_ptr symbol, ts_ptr value);
 
 TS_EXPORT ts_ptr ts_cons(scheme *sc, ts_ptr a, ts_ptr b);
 TS_EXPORT ts_ptr ts_immutable_cons(scheme *sc, ts_ptr a, ts_ptr b);
-TS_EXPORT ts_ptr ts_mk_int(scheme *sc, int ts_num);
-TS_EXPORT ts_ptr ts_mk_real(scheme *sc, double ts_num);
+TS_EXPORT ts_ptr ts_mk_int(scheme *sc, int num);
+TS_EXPORT ts_ptr ts_mk_real(scheme *sc, double num);
 TS_EXPORT ts_ptr ts_mk_sym(scheme *sc, const char *name);
 TS_EXPORT ts_ptr ts_gen_sym(scheme *sc);
 TS_EXPORT ts_ptr ts_mk_str(scheme *sc, const char *str);
@@ -270,8 +270,8 @@ struct ts_interface {
   ts_ptr (*cons)(scheme *sc, ts_ptr a, ts_ptr b);
   ts_ptr (*immutable_cons)(scheme *sc, ts_ptr a, ts_ptr b);
   ts_ptr (*reserve_cells)(scheme *sc, int n);
-  ts_ptr (*mk_int)(scheme *sc, int ts_num);
-  ts_ptr (*mk_real)(scheme *sc, double ts_num);
+  ts_ptr (*mk_int)(scheme *sc, int num);
+  ts_ptr (*mk_real)(scheme *sc, double num);
   ts_ptr (*mk_sym)(scheme *sc, const char *name);
   ts_ptr (*gen_sym)(scheme *sc);
   ts_ptr (*mk_str)(scheme *sc, const char *str);
