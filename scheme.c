@@ -239,7 +239,7 @@ static int num_le(ts_num a, ts_num b);
 static double round_per_R5RS(double x);
 #endif
 static int is_zero_double(double x);
-INLINE static int num_ts_is_int(ts_ptr p) {
+INLINE static int num_is_integer(ts_ptr p) {
   return ((p)->_object._number.is_fixnum);
 }
 
@@ -272,7 +272,7 @@ INTERFACE ts_ptr ts_set_vec_elem(ts_ptr vec, int ielem, ts_ptr a);
 INLINE INTERFACE int ts_is_num(ts_ptr p) { return (type(p) == T_NUMBER); }
 INTERFACE int ts_is_int(ts_ptr p) {
   if (!ts_is_num(p)) return 0;
-  if (num_ts_is_int(p) || (double)ts_int_val(p) == ts_real_val(p)) return 1;
+  if (num_is_integer(p) || (double)ts_int_val(p) == ts_real_val(p)) return 1;
   return 0;
 }
 
@@ -284,11 +284,11 @@ INLINE INTERFACE int ts_is_char(ts_ptr p) { return (type(p) == T_CHARACTER); }
 INTERFACE char *ts_str_val(ts_ptr p) { return strvalue(p); }
 ts_num ts_num_val(ts_ptr p) { return ((p)->_object._number); }
 INTERFACE int ts_int_val(ts_ptr p) {
-  return (num_ts_is_int(p) ? (p)->_object._number.value.ivalue
+  return (num_is_integer(p) ? (p)->_object._number.value.ivalue
                            : (int)(p)->_object._number.value.rvalue);
 }
 INTERFACE double ts_real_val(ts_ptr p) {
-  return (!num_ts_is_int(p) ? (p)->_object._number.value.rvalue
+  return (!num_is_integer(p) ? (p)->_object._number.value.rvalue
                             : (double)(p)->_object._number.value.ivalue);
 }
 #define ivalue_unchecked(p) ((p)->_object._number.value.ivalue)
@@ -1980,7 +1980,7 @@ static void atom2str(scheme *sc, ts_ptr l, int f, char **pp, int *plen) {
   } else if (ts_is_num(l)) {
     p = sc->strbuff;
     if (f <= 1 || f == 10) /* f is the base for numbers if > 1 */ {
-      if (num_ts_is_int(l)) {
+      if (num_is_integer(l)) {
         snprintf(p, TS_STRBUFFSIZE, "%d", ivalue_unchecked(l));
       } else {
         snprintf(p, TS_STRBUFFSIZE, "%.10g", rvalue_unchecked(l));
@@ -2173,7 +2173,7 @@ int ts_eqv(ts_ptr a, ts_ptr b) {
       return (0);
   } else if (ts_is_num(a)) {
     if (ts_is_num(b)) {
-      if (num_ts_is_int(a) == num_ts_is_int(b))
+      if (num_is_integer(a) == num_is_integer(b))
         return num_eq(ts_num_val(a), ts_num_val(b));
     }
     return (0);
@@ -3136,7 +3136,7 @@ static ts_ptr opexe_2(scheme *sc, enum opcodes op) {
 #if USE_MATH
     case OP_INEX2EX: /* inexact->exact */
       x = car(sc->args);
-      if (num_ts_is_int(x)) {
+      if (num_is_integer(x)) {
         s_return(sc, x);
       } else if (modf(rvalue_unchecked(x), &dd) == 0.0) {
         s_return(sc, ts_mk_int(sc, ts_int_val(x)));
@@ -3190,7 +3190,7 @@ static ts_ptr opexe_2(scheme *sc, enum opcodes op) {
       int real_result = 1;
       ts_ptr y = cadr(sc->args);
       x = car(sc->args);
-      if (num_ts_is_int(x) && num_ts_is_int(y)) real_result = 0;
+      if (num_is_integer(x) && num_is_integer(y)) real_result = 0;
       /* This 'if' is an R5RS compatibility fix. */
       /* NOTE: Remove this 'if' fix for R6RS.    */
       if (ts_real_val(x) == 0 && ts_real_val(y) < 0) {
@@ -3232,7 +3232,7 @@ static ts_ptr opexe_2(scheme *sc, enum opcodes op) {
 
     case OP_ROUND:
       x = car(sc->args);
-      if (num_ts_is_int(x)) s_return(sc, x);
+      if (num_is_integer(x)) s_return(sc, x);
       s_return(sc, ts_mk_real(sc, round_per_R5RS(ts_real_val(x))));
 #endif
 
