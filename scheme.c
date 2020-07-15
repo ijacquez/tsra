@@ -238,7 +238,7 @@ static int num_le(ts_num a, ts_num b);
 #if USE_MATH
 static double round_per_R5RS(double x);
 #endif
-static int is_zero_double(double x);
+static bool is_zero_double(double x);
 INLINE static int num_is_integer(ts_ptr p) {
   return ((p)->_object._number.is_fixnum);
 }
@@ -298,10 +298,10 @@ INTERFACE double ts_real_val(ts_ptr p) {
 INTERFACE int ts_char_val(ts_ptr p) { return ivalue_unchecked(p); }
 
 INLINE INTERFACE bool ts_is_port(ts_ptr p) { return (type(p) == T_PORT); }
-INTERFACE int is_inport(ts_ptr p) {
+INTERFACE bool is_inport(ts_ptr p) {
   return ts_is_port(p) && p->_object._port->kind & ts_port_input;
 }
-INTERFACE int is_outport(ts_ptr p) {
+INTERFACE bool is_outport(ts_ptr p) {
   return ts_is_port(p) && p->_object._port->kind & ts_port_output;
 }
 
@@ -382,7 +382,7 @@ static const char *charnames[32] = {
     "vt",  "ff",  "cr",  "so",  "si",  "dle", "dc1", "dc2", "dc3", "dc4", "nak",
     "syn", "etb", "can", "em",  "sub", "esc", "fs",  "gs",  "rs",  "us"};
 
-static int is_ascii_name(const char *name, int *pc) {
+static bool is_ascii_name(const char *name, int *pc) {
   int i;
   for (i = 0; i < 32; i++) {
     if (stricmp(name, charnames[i]) == 0) {
@@ -402,7 +402,7 @@ static int is_ascii_name(const char *name, int *pc) {
 static int file_push(scheme *sc, const char *fname);
 static void file_pop(scheme *sc);
 static int file_interactive(scheme *sc);
-INLINE static int is_one_of(const char *s, int c);
+INLINE static bool is_one_of(const char *s, int c);
 static int alloc_cellseg(scheme *sc, int n);
 static int binary_decode(const char *s);
 INLINE static ts_ptr get_cell(scheme *sc, ts_ptr a, ts_ptr b);
@@ -566,7 +566,7 @@ static ts_num num_mod(ts_num a, ts_num b) {
 
 static int num_eq(ts_num a, ts_num b) {
   int ret;
-  int is_fixnum = a.is_fixnum && b.is_fixnum;
+  bool is_fixnum = a.is_fixnum && b.is_fixnum;
   if (is_fixnum) {
     ret = a.value.ivalue == b.value.ivalue;
   } else {
@@ -577,7 +577,7 @@ static int num_eq(ts_num a, ts_num b) {
 
 static int num_gt(ts_num a, ts_num b) {
   int ret;
-  int is_fixnum = a.is_fixnum && b.is_fixnum;
+  bool is_fixnum = a.is_fixnum && b.is_fixnum;
   if (is_fixnum) {
     ret = a.value.ivalue > b.value.ivalue;
   } else {
@@ -590,7 +590,7 @@ static int num_ge(ts_num a, ts_num b) { return !num_lt(a, b); }
 
 static int num_lt(ts_num a, ts_num b) {
   int ret;
-  int is_fixnum = a.is_fixnum && b.is_fixnum;
+  bool is_fixnum = a.is_fixnum && b.is_fixnum;
   if (is_fixnum) {
     ret = a.value.ivalue < b.value.ivalue;
   } else {
@@ -622,7 +622,7 @@ static double round_per_R5RS(double x) {
 }
 #endif
 
-static int is_zero_double(double x) { return x < DBL_MIN && x > -DBL_MIN; }
+static bool is_zero_double(double x) { return x < DBL_MIN && x > -DBL_MIN; }
 
 static int binary_decode(const char *s) {
   int x = 0;
@@ -1791,7 +1791,7 @@ static ts_ptr readstrexp(scheme *sc) {
 }
 
 /* check c is in chars */
-INLINE static int is_one_of(const char *s, int c) {
+INLINE static bool is_one_of(const char *s, int c) {
   if (c == EOF) return 1;
   while (*s)
     if (*s++ == c) return (1);
@@ -4400,9 +4400,9 @@ static ts_ptr opexe_6(scheme *sc, enum opcodes op) {
 typedef ts_ptr (*dispatch_func)(scheme *, enum opcodes);
 
 typedef int (*test_predicate)(ts_ptr);
-static int is_any(ts_ptr p) { return 1; }
+static bool is_any(ts_ptr p) { return 1; }
 
-static int is_nonneg(ts_ptr p) { return ts_int_val(p) >= 0 && ts_is_int(p); }
+static bool is_nonneg(ts_ptr p) { return ts_int_val(p) >= 0 && ts_is_int(p); }
 
 /* Correspond carefully with following defines! */
 static struct {
