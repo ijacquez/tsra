@@ -332,7 +332,7 @@ INTERFACE int ts_is_macro(ts_ptr p) { return (type(p) == T_MACRO); }
 INTERFACE ts_ptr ts_closure_code(ts_ptr p) { return car(p); }
 INTERFACE ts_ptr ts_closure_env(ts_ptr p) { return cdr(p); }
 
-INLINE INTERFACE int is_continuation(ts_ptr p) {
+INLINE INTERFACE int ts_is_continuation(ts_ptr p) {
   return (type(p) == T_CONTINUATION);
 }
 #define cont_dump(p) cdr(p)
@@ -2077,7 +2077,7 @@ static void atom2str(scheme *sc, ts_ptr l, int f, char **pp, int *plen) {
   } else if (ts_is_foreign(l)) {
     p = sc->strbuff;
     snprintf(p, TS_STRBUFFSIZE, "#<FOREIGN PROCEDURE %d>", procnum(l));
-  } else if (is_continuation(l)) {
+  } else if (ts_is_continuation(l)) {
     p = "#<CONTINUATION>";
   } else {
     p = "#<ERROR>";
@@ -2700,7 +2700,7 @@ static ts_ptr opexe_0(scheme *sc, enum opcodes op) {
         sc->code = cdr(ts_closure_code(sc->code));
         sc->args = sc->NIL;
         s_goto(sc, OP_BEGIN);
-      } else if (is_continuation(sc->code)) { /* CONTINUATION */
+      } else if (ts_is_continuation(sc->code)) { /* CONTINUATION */
         sc->dump = cont_dump(sc->code);
         s_return(sc, sc->args != sc->NIL ? car(sc->args) : sc->NIL);
       } else {
@@ -3749,7 +3749,7 @@ static ts_ptr opexe_3(scheme *sc, enum opcodes op) {
        * in R^3 report sec. 6.9
        */
       s_retbool(ts_is_proc(car(sc->args)) || ts_is_closure(car(sc->args)) ||
-                is_continuation(car(sc->args)) || ts_is_foreign(car(sc->args)));
+                ts_is_continuation(car(sc->args)) || ts_is_foreign(car(sc->args)));
     case OP_PAIRP: /* pair? */
       s_retbool(ts_is_pair(car(sc->args)));
     case OP_LISTP: /* list? */
@@ -4664,7 +4664,7 @@ static struct ts_interface vtbl = {
     ts_closure_code,
     ts_closure_env,
 
-    is_continuation,
+    ts_is_continuation,
     ts_is_promise,
     ts_is_env,
     ts_is_immutable,
