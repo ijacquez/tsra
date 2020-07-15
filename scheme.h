@@ -318,7 +318,7 @@ struct ts_interface {
   ts_ptr (*closure_code)(ts_ptr p);
   ts_ptr (*closure_env)(ts_ptr p);
 
-  int (*ts_is_continuation)(ts_ptr p);
+  int (*is_continuation)(ts_ptr p);
   int (*is_promise)(ts_ptr p);
   int (*is_env)(ts_ptr p);
   int (*is_immutable)(ts_ptr p);
