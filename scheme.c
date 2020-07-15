@@ -260,27 +260,27 @@ INTERFACE ts_ptr ts_immutable_cons(scheme *sc, ts_ptr a, ts_ptr b) {
   return _cons(sc, a, b, 1);
 }
 
-INLINE INTERFACE int ts_is_str(ts_ptr p) { return (type(p) == T_STRING); }
+INLINE INTERFACE bool ts_is_str(ts_ptr p) { return (type(p) == T_STRING); }
 #define strvalue(p) ((p)->_object._string._svalue)
 #define strlength(p) ((p)->_object._string._length)
 
-INTERFACE int ts_is_list(scheme *sc, ts_ptr p);
-INLINE INTERFACE int ts_is_vec(ts_ptr p) { return (type(p) == T_VECTOR); }
+INTERFACE bool ts_is_list(scheme *sc, ts_ptr p);
+INLINE INTERFACE bool ts_is_vec(ts_ptr p) { return (type(p) == T_VECTOR); }
 INTERFACE void ts_fill_vec(ts_ptr vec, ts_ptr obj);
 INTERFACE ts_ptr ts_vec_elem(ts_ptr vec, int ielem);
 INTERFACE ts_ptr ts_set_vec_elem(ts_ptr vec, int ielem, ts_ptr a);
-INLINE INTERFACE int ts_is_num(ts_ptr p) { return (type(p) == T_NUMBER); }
-INTERFACE int ts_is_int(ts_ptr p) {
+INLINE INTERFACE bool ts_is_num(ts_ptr p) { return (type(p) == T_NUMBER); }
+INTERFACE bool ts_is_int(ts_ptr p) {
   if (!ts_is_num(p)) return 0;
   if (num_is_integer(p) || (double)ts_int_val(p) == ts_real_val(p)) return 1;
   return 0;
 }
 
-INLINE INTERFACE int ts_is_real(ts_ptr p) {
+INLINE INTERFACE bool ts_is_real(ts_ptr p) {
   return ts_is_num(p) && (!(p)->_object._number.is_fixnum);
 }
 
-INLINE INTERFACE int ts_is_char(ts_ptr p) { return (type(p) == T_CHARACTER); }
+INLINE INTERFACE bool ts_is_char(ts_ptr p) { return (type(p) == T_CHARACTER); }
 INTERFACE char *ts_str_val(ts_ptr p) { return strvalue(p); }
 ts_num ts_num_val(ts_ptr p) { return ((p)->_object._number); }
 INTERFACE int ts_int_val(ts_ptr p) {
@@ -297,7 +297,7 @@ INTERFACE double ts_real_val(ts_ptr p) {
 #define set_num_real(p) (p)->_object._number.is_fixnum = 0;
 INTERFACE int ts_char_val(ts_ptr p) { return ivalue_unchecked(p); }
 
-INLINE INTERFACE int ts_is_port(ts_ptr p) { return (type(p) == T_PORT); }
+INLINE INTERFACE bool ts_is_port(ts_ptr p) { return (type(p) == T_PORT); }
 INTERFACE int is_inport(ts_ptr p) {
   return ts_is_port(p) && p->_object._port->kind & ts_port_input;
 }
@@ -305,7 +305,7 @@ INTERFACE int is_outport(ts_ptr p) {
   return ts_is_port(p) && p->_object._port->kind & ts_port_output;
 }
 
-INLINE INTERFACE int ts_is_pair(ts_ptr p) { return (type(p) == T_PAIR); }
+INLINE INTERFACE bool ts_is_pair(ts_ptr p) { return (type(p) == T_PAIR); }
 #define car(p) ((p)->_object._cons._car)
 #define cdr(p) ((p)->_object._cons._cdr)
 INTERFACE ts_ptr ts_pair_car(ts_ptr p) { return car(p); }
@@ -313,34 +313,34 @@ INTERFACE ts_ptr ts_pair_cdr(ts_ptr p) { return cdr(p); }
 INTERFACE ts_ptr ts_set_car(ts_ptr p, ts_ptr q) { return car(p) = q; }
 INTERFACE ts_ptr ts_set_cdr(ts_ptr p, ts_ptr q) { return cdr(p) = q; }
 
-INLINE INTERFACE int ts_is_sym(ts_ptr p) { return (type(p) == T_SYMBOL); }
+INLINE INTERFACE bool ts_is_sym(ts_ptr p) { return (type(p) == T_SYMBOL); }
 INTERFACE char *ts_sym_name(ts_ptr p) { return strvalue(car(p)); }
 #if USE_PLIST
 INLINE TS_EXPORT int ts_has_prop(ts_ptr p) { return (typeflag(p) & T_SYMBOL); }
 #define symprop(p) cdr(p)
 #endif
 
-INLINE INTERFACE int ts_is_syntax(ts_ptr p) { return (typeflag(p) & T_SYNTAX); }
-INTERFACE int ts_is_proc(ts_ptr p) { return (type(p) == T_PROC); }
-INTERFACE int ts_is_foreign(ts_ptr p) { return (type(p) == T_FOREIGN); }
+INLINE INTERFACE bool ts_is_syntax(ts_ptr p) { return (typeflag(p) & T_SYNTAX); }
+INTERFACE bool ts_is_proc(ts_ptr p) { return (type(p) == T_PROC); }
+INTERFACE bool ts_is_foreign(ts_ptr p) { return (type(p) == T_FOREIGN); }
 INTERFACE char *ts_syntax_name(ts_ptr p) { return strvalue(car(p)); }
 #define procnum(p) ts_int_val(p)
 static const char *procname(ts_ptr x);
 
-INLINE INTERFACE int ts_is_closure(ts_ptr p) { return (type(p) == T_CLOSURE); }
-INTERFACE int ts_is_macro(ts_ptr p) { return (type(p) == T_MACRO); }
+INLINE INTERFACE bool ts_is_closure(ts_ptr p) { return (type(p) == T_CLOSURE); }
+INTERFACE bool ts_is_macro(ts_ptr p) { return (type(p) == T_MACRO); }
 INTERFACE ts_ptr ts_closure_code(ts_ptr p) { return car(p); }
 INTERFACE ts_ptr ts_closure_env(ts_ptr p) { return cdr(p); }
 
-INLINE INTERFACE int ts_is_continuation(ts_ptr p) {
+INLINE INTERFACE bool ts_is_continuation(ts_ptr p) {
   return (type(p) == T_CONTINUATION);
 }
 #define cont_dump(p) cdr(p)
 
 /* To do: promise should be forced ONCE only */
-INLINE INTERFACE int ts_is_promise(ts_ptr p) { return (type(p) == T_PROMISE); }
+INLINE INTERFACE bool ts_is_promise(ts_ptr p) { return (type(p) == T_PROMISE); }
 
-INLINE INTERFACE int ts_is_env(ts_ptr p) { return (type(p) == T_ENVIRONMENT); }
+INLINE INTERFACE bool ts_is_env(ts_ptr p) { return (type(p) == T_ENVIRONMENT); }
 #define setenvironment(p) typeflag(p) = T_ENVIRONMENT
 
 #define is_atom(p) (typeflag(p) & T_ATOM)
@@ -351,7 +351,7 @@ INLINE INTERFACE int ts_is_env(ts_ptr p) { return (type(p) == T_ENVIRONMENT); }
 #define setmark(p) typeflag(p) |= MARK
 #define clrmark(p) typeflag(p) &= UNMARK
 
-INLINE INTERFACE int ts_is_immutable(ts_ptr p) {
+INLINE INTERFACE bool ts_is_immutable(ts_ptr p) {
   return (typeflag(p) & T_IMMUTABLE);
 }
 /*#define ts_set_immutable(p)  typeflag(p) |= T_IMMUTABLE*/
@@ -3628,7 +3628,7 @@ static ts_ptr opexe_2(scheme *sc, enum opcodes op) {
   return sc->T;
 }
 
-int ts_is_list(scheme *sc, ts_ptr a) { return ts_list_len(sc, a) >= 0; }
+bool ts_is_list(scheme *sc, ts_ptr a) { return ts_list_len(sc, a) >= 0; }
 
 /* Result is:
    proper list: length

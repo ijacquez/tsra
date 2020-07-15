@@ -4,6 +4,7 @@
 #define _SCHEME_H
 
 #include <stdio.h>
+#include <stdbool.h>
 
 #ifndef _MSC_VER
 #define TS_EXPORT
@@ -216,48 +217,48 @@ TS_EXPORT void ts_put_str(scheme *sc, const char *s);
 TS_EXPORT int ts_list_len(scheme *sc, ts_ptr a);
 TS_EXPORT int ts_eqv(ts_ptr a, ts_ptr b);
 
-TS_EXPORT int ts_is_str(ts_ptr p);
+TS_EXPORT bool ts_is_str(ts_ptr p);
 TS_EXPORT char *ts_str_val(ts_ptr p);
-TS_EXPORT int ts_is_num(ts_ptr p);
+TS_EXPORT bool ts_is_num(ts_ptr p);
 TS_EXPORT ts_num ts_num_val(ts_ptr p);
 TS_EXPORT int ts_int_val(ts_ptr p);
 TS_EXPORT double ts_real_val(ts_ptr p);
-TS_EXPORT int ts_is_int(ts_ptr p);
-TS_EXPORT int ts_is_real(ts_ptr p);
-TS_EXPORT int ts_is_char(ts_ptr p);
+TS_EXPORT bool ts_is_int(ts_ptr p);
+TS_EXPORT bool ts_is_real(ts_ptr p);
+TS_EXPORT bool ts_is_char(ts_ptr p);
 TS_EXPORT int ts_char_val(ts_ptr p);
-TS_EXPORT int ts_is_vec(ts_ptr p);
+TS_EXPORT bool ts_is_vec(ts_ptr p);
 
-TS_EXPORT int ts_is_port(ts_ptr p);
+TS_EXPORT bool ts_is_port(ts_ptr p);
 
-TS_EXPORT int ts_is_pair(ts_ptr p);
+TS_EXPORT bool ts_is_pair(ts_ptr p);
 TS_EXPORT ts_ptr ts_pair_car(ts_ptr p);
 TS_EXPORT ts_ptr ts_pair_cdr(ts_ptr p);
 TS_EXPORT ts_ptr ts_set_car(ts_ptr p, ts_ptr q);
 TS_EXPORT ts_ptr ts_set_cdr(ts_ptr p, ts_ptr q);
 
-TS_EXPORT int ts_is_sym(ts_ptr p);
+TS_EXPORT bool ts_is_sym(ts_ptr p);
 TS_EXPORT char *ts_sym_name(ts_ptr p);
 TS_EXPORT int ts_has_prop(ts_ptr p);
 
-TS_EXPORT int ts_is_syntax(ts_ptr p);
-TS_EXPORT int ts_is_proc(ts_ptr p);
-TS_EXPORT int ts_is_foreign(ts_ptr p);
+TS_EXPORT bool ts_is_syntax(ts_ptr p);
+TS_EXPORT bool ts_is_proc(ts_ptr p);
+TS_EXPORT bool ts_is_foreign(ts_ptr p);
 TS_EXPORT char *ts_syntax_name(ts_ptr p);
-TS_EXPORT int ts_is_closure(ts_ptr p);
-TS_EXPORT int ts_is_macro(ts_ptr p);
+TS_EXPORT bool ts_is_closure(ts_ptr p);
+TS_EXPORT bool ts_is_macro(ts_ptr p);
 TS_EXPORT ts_ptr ts_closure_code(ts_ptr p);
 TS_EXPORT ts_ptr ts_closure_env(ts_ptr p);
 
-TS_EXPORT int ts_is_continuation(ts_ptr p);
-TS_EXPORT int ts_is_promise(ts_ptr p);
-TS_EXPORT int ts_is_env(ts_ptr p);
-TS_EXPORT int ts_is_immutable(ts_ptr p);
+TS_EXPORT bool ts_is_continuation(ts_ptr p);
+TS_EXPORT bool ts_is_promise(ts_ptr p);
+TS_EXPORT bool ts_is_env(ts_ptr p);
+TS_EXPORT bool ts_is_immutable(ts_ptr p);
 TS_EXPORT void ts_set_immutable(ts_ptr p);
 TS_EXPORT int ts_vec_len(ts_ptr vec);
 TS_EXPORT ts_ptr ts_get_global(scheme *sc, ts_ptr env, const char *name);
 TS_EXPORT void ts_fill_vec(ts_ptr vec, ts_ptr elem);
-TS_EXPORT int ts_is_list(scheme *sc, ts_ptr p);
+TS_EXPORT bool ts_is_list(scheme *sc, ts_ptr p);
 TS_EXPORT ts_ptr ts_mk_vec(scheme *sc, int len);
 TS_EXPORT void ts_put_char(scheme *sc, int c);
 TS_EXPORT ts_ptr ts_reserve_cells(scheme *sc, int n);
@@ -282,46 +283,46 @@ struct ts_interface {
   void (*put_str)(scheme *sc, const char *s);
   void (*put_char)(scheme *sc, int c);
 
-  int (*is_str)(ts_ptr p);
+  bool (*is_str)(ts_ptr p);
   char *(*str_val)(ts_ptr p);
-  int (*is_num)(ts_ptr p);
+  bool (*is_num)(ts_ptr p);
   ts_num (*num_val)(ts_ptr p);
   int (*int_val)(ts_ptr p);
   double (*real_val)(ts_ptr p);
-  int (*is_int)(ts_ptr p);
-  int (*is_real)(ts_ptr p);
-  int (*is_char)(ts_ptr p);
+  bool (*is_int)(ts_ptr p);
+  bool (*is_real)(ts_ptr p);
+  bool (*is_char)(ts_ptr p);
   int (*char_val)(ts_ptr p);
-  int (*is_list)(scheme *sc, ts_ptr p);
-  int (*is_vec)(ts_ptr p);
+  bool (*is_list)(scheme *sc, ts_ptr p);
+  bool (*is_vec)(ts_ptr p);
   int (*list_len)(scheme *sc, ts_ptr vec);
   void (*fill_vec)(ts_ptr vec, ts_ptr elem);
   ts_ptr (*vec_elem)(ts_ptr vec, int ielem);
   ts_ptr (*set_vec_elem)(ts_ptr vec, int ielem, ts_ptr newel);
-  int (*is_port)(ts_ptr p);
+  bool (*is_port)(ts_ptr p);
 
-  int (*is_pair)(ts_ptr p);
+  bool (*is_pair)(ts_ptr p);
   ts_ptr (*pair_car)(ts_ptr p);
   ts_ptr (*pair_cdr)(ts_ptr p);
   ts_ptr (*set_car)(ts_ptr p, ts_ptr q);
   ts_ptr (*set_cdr)(ts_ptr p, ts_ptr q);
 
-  int (*is_sym)(ts_ptr p);
+  bool (*is_sym)(ts_ptr p);
   char *(*sym_name)(ts_ptr p);
 
-  int (*is_syntax)(ts_ptr p);
-  int (*is_proc)(ts_ptr p);
-  int (*is_foreign)(ts_ptr p);
+  bool (*is_syntax)(ts_ptr p);
+  bool (*is_proc)(ts_ptr p);
+  bool (*is_foreign)(ts_ptr p);
   char *(*syntax_name)(ts_ptr p);
-  int (*is_closure)(ts_ptr p);
-  int (*is_macro)(ts_ptr p);
+  bool (*is_closure)(ts_ptr p);
+  bool (*is_macro)(ts_ptr p);
   ts_ptr (*closure_code)(ts_ptr p);
   ts_ptr (*closure_env)(ts_ptr p);
 
-  int (*is_continuation)(ts_ptr p);
-  int (*is_promise)(ts_ptr p);
-  int (*is_env)(ts_ptr p);
-  int (*is_immutable)(ts_ptr p);
+  bool (*is_continuation)(ts_ptr p);
+  bool (*is_promise)(ts_ptr p);
+  bool (*is_env)(ts_ptr p);
+  bool (*is_immutable)(ts_ptr p);
   void (*set_immutable)(ts_ptr p);
   void (*load_str)(scheme *sc, const char *input);
   void (*deinit)(scheme *sc);
