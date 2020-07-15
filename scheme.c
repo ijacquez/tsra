@@ -369,11 +369,11 @@ INLINE INTERFACE void ts_set_immutable(ts_ptr p) { typeflag(p) |= T_IMMUTABLE; }
 #define cddddr(p) cdr(cdr(cdr(cdr(p))))
 
 #if USE_CHAR_CLASSIFIERS
-INLINE static int Cisalpha(int c) { return isascii(c) && isalpha(c); }
-static int Cisdigit(int c) { return isascii(c) && isdigit(c); }
-static int Cisspace(int c) { return isascii(c) && isspace(c); }
-static int Cisupper(int c) { return isascii(c) && isupper(c); }
-static int Cislower(int c) { return isascii(c) && islower(c); }
+INLINE static int Cisalpha(char c) { return isascii(c) && isalpha(c); }
+static int Cisdigit(char c) { return isascii(c) && isdigit(c); }
+static int Cisspace(char c) { return isascii(c) && isspace(c); }
+static int Cisupper(char c) { return isascii(c) && isupper(c); }
+static int Cislower(char c) { return isascii(c) && islower(c); }
 #endif
 
 #if USE_ASCII_NAMES
@@ -402,7 +402,7 @@ static bool is_ascii_name(const char *name, int *pc) {
 static int file_push(scheme *sc, const char *fname);
 static void file_pop(scheme *sc);
 static int file_interactive(scheme *sc);
-INLINE static bool is_one_of(const char *s, int c);
+INLINE static bool is_one_of(const char *s, char c);
 static int alloc_cellseg(scheme *sc, int n);
 static int binary_decode(const char *s);
 INLINE static ts_ptr get_cell(scheme *sc, ts_ptr a, ts_ptr b);
@@ -432,7 +432,7 @@ static void mark(ts_ptr a);
 static void gc(scheme *sc, ts_ptr a, ts_ptr b);
 static int basic_inchar(ts_port *pt);
 static int inchar(scheme *sc);
-static void backchar(scheme *sc, int c);
+static void backchar(scheme *sc, char c);
 static char *readstr_upto(scheme *sc, const char *delim);
 static ts_ptr readstrexp(scheme *sc);
 INLINE static int skipspace(scheme *sc);
@@ -990,7 +990,7 @@ ts_ptr ts_mk_foreign_func(scheme *sc, ts_foreign_func f) {
   return (x);
 }
 
-INTERFACE ts_ptr ts_mk_char(scheme *sc, int c) {
+INTERFACE ts_ptr ts_mk_char(scheme *sc, char c) {
   ts_ptr x = get_cell(sc, sc->NIL, sc->NIL);
 
   typeflag(x) = (T_CHARACTER | T_ATOM);
@@ -1220,7 +1220,7 @@ static ts_ptr mk_sharp_const(scheme *sc, char *name) {
     x = binary_decode(name + 1);
     return (ts_mk_int(sc, x));
   } else if (*name == '\\') { /* #\w (character) */
-    int c = 0;
+    char c = 0;
     if (stricmp(name + 1, "space") == 0) {
       c = ' ';
     } else if (stricmp(name + 1, "newline") == 0) {
@@ -1558,7 +1558,7 @@ static void port_close(scheme *sc, ts_ptr p, int flag) {
 
 /* get new character from input file */
 static int inchar(scheme *sc) {
-  int c;
+  char c;
   ts_port *pt;
 
   pt = sc->inport->_object._port;
@@ -1591,7 +1591,7 @@ static int basic_inchar(ts_port *pt) {
 }
 
 /* back character to input buffer */
-static void backchar(scheme *sc, int c) {
+static void backchar(scheme *sc, char c) {
   ts_port *pt;
   if (c == EOF) return;
   pt = sc->inport->_object._port;
@@ -1652,7 +1652,7 @@ static void putchars(scheme *sc, const char *s, int len) {
   }
 }
 
-INTERFACE void ts_put_char(scheme *sc, int c) {
+INTERFACE void ts_put_char(scheme *sc, char c) {
   ts_port *pt = sc->outport->_object._port;
   if (pt->kind & ts_port_file) {
     fputc(c, pt->rep.stdio.file);
@@ -1685,7 +1685,7 @@ static char *readstr_upto(scheme *sc, const char *delim) {
 /* read string expression "xxx...xxx" */
 static ts_ptr readstrexp(scheme *sc) {
   char *p = sc->strbuff;
-  int c;
+  char c;
   int c1 = 0;
   enum { st_ok, st_bsl, st_x1, st_x2, st_oct1, st_oct2 } state = st_ok;
 
@@ -1791,7 +1791,7 @@ static ts_ptr readstrexp(scheme *sc) {
 }
 
 /* check c is in chars */
-INLINE static bool is_one_of(const char *s, int c) {
+INLINE static bool is_one_of(const char *s, char c) {
   if (c == EOF) return 1;
   while (*s)
     if (*s++ == c) return (1);
@@ -1800,7 +1800,7 @@ INLINE static bool is_one_of(const char *s, int c) {
 
 /* skip white characters */
 INLINE static int skipspace(scheme *sc) {
-  int c = 0, curr_line = 0;
+  char c = 0, curr_line = 0;
 
   do {
     c = inchar(sc);
@@ -1825,7 +1825,7 @@ INLINE static int skipspace(scheme *sc) {
 
 /* get token */
 static int token(scheme *sc) {
-  int c;
+  char c;
   c = skipspace(sc);
   if (c == EOF) {
     return (TOK_EOF);
@@ -2025,7 +2025,7 @@ static void atom2str(scheme *sc, ts_ptr l, int f, char **pp, int *plen) {
       return;
     }
   } else if (ts_is_char(l)) {
-    int c = ts_char_val(l);
+    char c = ts_char_val(l);
     p = sc->strbuff;
     if (!f) {
       p[0] = c;
@@ -3467,7 +3467,7 @@ static ts_ptr opexe_2(scheme *sc, enum opcodes op) {
       char *str;
       ts_ptr x;
       int index;
-      int c;
+      char c;
 
       if (ts_is_immutable(car(sc->args))) {
         Error_1(sc, "string-set!: unable to alter immutable string:",
@@ -4077,7 +4077,7 @@ static ts_ptr opexe_5(scheme *sc, enum opcodes op) {
 
     case OP_READ_CHAR: /* read-char */
     case OP_PEEK_CHAR: /* peek-char */ {
-      int c;
+      char c;
       if (ts_is_pair(sc->args)) {
         if (car(sc->args) != sc->inport) {
           x = sc->inport;
@@ -4123,7 +4123,7 @@ static ts_ptr opexe_5(scheme *sc, enum opcodes op) {
            * Commented out because we now skip comments in the scanner
            *
                     case TOK_COMMENT: {
-                         int c;
+                         char c;
                          while ((c=inchar(sc)) != '\n' && c!=EOF)
                               ;
                          sc->tok = token(sc);
@@ -4201,7 +4201,7 @@ static ts_ptr opexe_5(scheme *sc, enum opcodes op) {
       sc->tok = token(sc);
       /* We now skip comments in the scanner
                 while (sc->tok == TOK_COMMENT) {
-                     int c;
+                     char c;
                      while ((c=inchar(sc)) != '\n' && c!=EOF)
                           ;
                      sc->tok = token(sc);
@@ -4210,7 +4210,7 @@ static ts_ptr opexe_5(scheme *sc, enum opcodes op) {
       if (sc->tok == TOK_EOF) {
         s_return(sc, sc->EOF_OBJ);
       } else if (sc->tok == TOK_RPAREN) {
-        int c = inchar(sc);
+        char c = inchar(sc);
         if (c != '\n') backchar(sc, c);
 #if SHOW_ERROR_LINE
         else if (sc->load_stack[sc->file_i].kind & ts_port_file)
