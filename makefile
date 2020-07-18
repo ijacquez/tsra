@@ -82,7 +82,7 @@ scheme$(EXE_EXT): $(OBJS)
 $(STATICLIBTARGET): $(OBJS)
 	$(AR) $@ $(OBJS)
 
-$(OBJS): scheme.h scheme-private.h opdefines.h
+$(OBJS): scheme.h opdefines.h
 dynload.$(Osuf): dynload.h
 
 clean:

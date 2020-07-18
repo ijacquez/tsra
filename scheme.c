@@ -116,7 +116,6 @@ enum opcodes {
   OP_MAXDEFINED
 };
 
-#include "scheme-private.h"
 #ifndef WIN32
 #include <unistd.h>
 #endif

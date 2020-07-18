@@ -5,7 +5,7 @@
 #ifndef DYNLOAD_H
 #define DYNLOAD_H
 
-#include "scheme-private.h"
+#include "scheme.h"
 
 TS_EXPORT ts_ptr ts_load_ext(scheme *sc, ts_ptr arglist);
 
