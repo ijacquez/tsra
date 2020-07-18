@@ -12,6 +12,7 @@
  *
  */
 
+#include "scheme.h"
 #define _SCHEME_SOURCE
 
 /*
@@ -202,7 +203,8 @@ enum scheme_types {
   T_MACRO = 12,
   T_PROMISE = 13,
   T_ENVIRONMENT = 14,
-  T_LAST_SYSTEM_TYPE = 14
+  T_USERDATA = 15,
+  T_LAST_SYSTEM_TYPE = 15
 };
 
 /* ADJ is enough slack to align cells in a TYPE_BITS-bit boundary */
@@ -1381,6 +1383,11 @@ static void finalize_cell(scheme *sc, ts_ptr a) {
     }
     sc->free(a->_object._port);
   }
+#if !STANDALONE
+  else if (ts_is_userdata(a)) {
+      a->userdata.finalizer(a->userdata.ptr);
+  }
+#endif
 }
 
 /* ========== Routines for Reading ========== */
@@ -2075,7 +2082,13 @@ static void atom2str(scheme *sc, ts_ptr l, int f, char **pp, int *plen) {
     snprintf(p, TS_STRBUFFSIZE, "#<FOREIGN PROCEDURE %d>", procnum(l));
   } else if (ts_is_continuation(l)) {
     p = "#<CONTINUATION>";
-  } else {
+  }
+#if !STANDALONE
+  else if (ts_is_userdata(l)) {
+    p = "#<USERDATA>";
+  }
+#endif
+  else {
     p = "#<ERROR>";
   }
   *pp = p;
@@ -4695,7 +4708,13 @@ static struct ts_interface vtbl = {
     ts_vec_len,
     ts_get_global,
     ts_register_foreign_func_list,
+    ts_mk_userdata,
+    ts_is_userdata,
+    ts_userdata_set_finalizer,
 #else
+    NULL,
+    NULL,
+    NULL,
     NULL,
     NULL,
     NULL,
@@ -5054,6 +5073,25 @@ ts_ptr ts_get_global(scheme *sc, ts_ptr env, const char *name) {
   ts_ptr slot = find_slot_in_env(sc, env, sym, 0);
 
   return slot_value_in_env(slot);
+}
+
+INTERFACE bool ts_is_userdata(ts_ptr ptr) { return type(ptr) == T_USERDATA; }
+
+void default_userdata_finalizer(void *ptr) {
+}
+
+INTERFACE void ts_userdata_set_finalizer(ts_ptr userdata, void (*finalizer)(void*)) {
+    userdata->userdata.finalizer = finalizer;
+}
+
+INTERFACE ts_ptr ts_mk_userdata(scheme *sc, void *ptr) {
+  ts_ptr cell = get_cell(sc, sc->NIL, sc->NIL);
+
+  typeflag(cell) = (T_USERDATA | T_ATOM);
+  cell->userdata.ptr = ptr;
+  cell->userdata.finalizer = default_userdata_finalizer;
+ 
+  return cell;
 }
 
 #endif
