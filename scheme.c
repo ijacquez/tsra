@@ -214,9 +214,9 @@ static const unsigned int T_MASKTYPE = 31;    /* 0000000000011111 */
 static const unsigned int T_SYNTAX = 4096;    /* 0001000000000000 */
 static const unsigned int T_IMMUTABLE = 8192; /* 0010000000000000 */
 static const unsigned int T_ATOM = 16384;
-    /* 0100000000000000 */ /* only for gc */
+/* 0100000000000000 */ /* only for gc */
 static const unsigned int CLRATOM = 49151;
-    /* 1011111111111111 */                /* only for gc */
+/* 1011111111111111 */                    /* only for gc */
 static const unsigned int MARK = 32768;   /* 1000000000000000 */
 static const unsigned int UNMARK = 32767; /* 0111111111111111 */
 
@@ -283,11 +283,11 @@ INTERFACE char *ts_str_val(ts_ptr p) { return strvalue(p); }
 ts_num ts_num_val(ts_ptr p) { return ((p)->_object._number); }
 INTERFACE int ts_int_val(ts_ptr p) {
   return (num_is_integer(p) ? (p)->_object._number.value.ivalue
-                           : (int)(p)->_object._number.value.rvalue);
+                            : (int)(p)->_object._number.value.rvalue);
 }
 INTERFACE double ts_real_val(ts_ptr p) {
   return (!num_is_integer(p) ? (p)->_object._number.value.rvalue
-                            : (double)(p)->_object._number.value.ivalue);
+                             : (double)(p)->_object._number.value.ivalue);
 }
 #define ivalue_unchecked(p) ((p)->_object._number.value.ivalue)
 #define rvalue_unchecked(p) ((p)->_object._number.value.rvalue)
@@ -318,7 +318,9 @@ inline TS_EXPORT int ts_has_prop(ts_ptr p) { return (typeflag(p) & T_SYMBOL); }
 #define symprop(p) cdr(p)
 #endif
 
-inline INTERFACE bool ts_is_syntax(ts_ptr p) { return (typeflag(p) & T_SYNTAX); }
+inline INTERFACE bool ts_is_syntax(ts_ptr p) {
+  return (typeflag(p) & T_SYNTAX);
+}
 INTERFACE bool ts_is_proc(ts_ptr p) { return (type(p) == T_PROC); }
 INTERFACE bool ts_is_foreign(ts_ptr p) { return (type(p) == T_FOREIGN); }
 INTERFACE char *ts_syntax_name(ts_ptr p) { return strvalue(car(p)); }
@@ -1140,10 +1142,11 @@ static ts_ptr mk_atom(scheme *sc, char *q) {
 #if USE_COLON_HOOK
   if ((p = strstr(q, "::")) != 0) {
     *p = 0;
-    return ts_cons(
-        sc, sc->COLON_HOOK,
-        ts_cons(sc, ts_cons(sc, sc->QUOTE, ts_cons(sc, mk_atom(sc, p + 2), sc->NIL)),
-             ts_cons(sc, ts_mk_sym(sc, strlwr(q)), sc->NIL)));
+    return ts_cons(sc, sc->COLON_HOOK,
+                   ts_cons(sc,
+                           ts_cons(sc, sc->QUOTE,
+                                   ts_cons(sc, mk_atom(sc, p + 2), sc->NIL)),
+                           ts_cons(sc, ts_mk_sym(sc, strlwr(q)), sc->NIL)));
   }
 #endif
 
@@ -1385,7 +1388,7 @@ static void finalize_cell(scheme *sc, ts_ptr a) {
   }
 #if !STANDALONE
   else if (ts_is_userdata(a)) {
-      a->userdata.finalizer(a->userdata.ptr);
+    a->userdata.finalizer(a->userdata.ptr);
   }
 #endif
 }
@@ -2260,8 +2263,9 @@ inline static void new_slot_spec_in_env(scheme *sc, ts_ptr env, ts_ptr variable,
   if (ts_is_vec(car(env))) {
     int location = hash_fn(ts_sym_name(variable), ivalue_unchecked(car(env)));
 
-    ts_set_vec_elem(car(env), location,
-                    ts_immutable_cons(sc, slot, ts_vec_elem(car(env), location)));
+    ts_set_vec_elem(
+        car(env), location,
+        ts_immutable_cons(sc, slot, ts_vec_elem(car(env), location)));
   } else {
     car(env) = ts_immutable_cons(sc, slot, car(env));
   }
@@ -2305,7 +2309,8 @@ inline static void new_frame_in_env(scheme *sc, ts_ptr old_env) {
 
 inline static void new_slot_spec_in_env(scheme *sc, ts_ptr env, ts_ptr variable,
                                         ts_ptr value) {
-  car(env) = ts_immutable_cons(sc, ts_immutable_cons(sc, variable, value), car(env));
+  car(env) =
+      ts_immutable_cons(sc, ts_immutable_cons(sc, variable, value), car(env));
 }
 
 static ts_ptr find_slot_in_env(scheme *sc, ts_ptr env, ts_ptr hdl, int all) {
@@ -2374,7 +2379,8 @@ static ts_ptr _Error_1(scheme *sc, const char *s, ts_ptr a) {
   x = find_slot_in_env(sc, sc->envir, hdl, 1);
   if (x != sc->NIL) {
     if (a != 0) {
-      sc->code = ts_cons(sc, ts_cons(sc, sc->QUOTE, ts_cons(sc, (a), sc->NIL)), sc->NIL);
+      sc->code = ts_cons(sc, ts_cons(sc, sc->QUOTE, ts_cons(sc, (a), sc->NIL)),
+                         sc->NIL);
     } else {
       sc->code = sc->NIL;
     }
@@ -2871,10 +2877,10 @@ static ts_ptr opexe_0(scheme *sc, enum opcodes op) {
             Error_1(sc, "Bad syntax of binding in let :", car(x));
           sc->args = ts_cons(sc, caar(x), sc->args);
         }
-        x = mk_closure(
-            sc,
-            ts_cons(sc, reverse_in_place(sc, sc->NIL, sc->args), cddr(sc->code)),
-            sc->envir);
+        x = mk_closure(sc,
+                       ts_cons(sc, reverse_in_place(sc, sc->NIL, sc->args),
+                               cddr(sc->code)),
+                       sc->envir);
         new_slot_in_env(sc, car(sc->code), x);
         sc->code = cddr(sc->code);
         sc->args = sc->NIL;
@@ -3758,7 +3764,8 @@ static ts_ptr opexe_3(scheme *sc, enum opcodes op) {
        * in R^3 report sec. 6.9
        */
       s_retbool(ts_is_proc(car(sc->args)) || ts_is_closure(car(sc->args)) ||
-                ts_is_continuation(car(sc->args)) || ts_is_foreign(car(sc->args)));
+                ts_is_continuation(car(sc->args)) ||
+                ts_is_foreign(car(sc->args)));
     case OP_PAIRP: /* pair? */
       s_retbool(ts_is_pair(car(sc->args)));
     case OP_LISTP: /* list? */
@@ -3893,8 +3900,8 @@ static ts_ptr opexe_4(scheme *sc, enum opcodes op) {
       if (x != sc->NIL)
         cdar(x) = caddr(sc->args);
       else
-        symprop(car(sc->args)) =
-            ts_cons(sc, ts_cons(sc, y, caddr(sc->args)), symprop(car(sc->args)));
+        symprop(car(sc->args)) = ts_cons(sc, ts_cons(sc, y, caddr(sc->args)),
+                                         symprop(car(sc->args)));
       s_return(sc, sc->T);
 
     case OP_GET: /* get */
@@ -4253,12 +4260,13 @@ static ts_ptr opexe_5(scheme *sc, enum opcodes op) {
       s_return(sc, ts_cons(sc, sc->QQUOTE, ts_cons(sc, sc->value, sc->NIL)));
 
     case OP_RDQQUOTEVEC:
-      s_return(
-          sc,
-          ts_cons(sc, ts_mk_sym(sc, "apply"),
-               ts_cons(sc, ts_mk_sym(sc, "vector"),
-                    ts_cons(sc, ts_cons(sc, sc->QQUOTE, ts_cons(sc, sc->value, sc->NIL)),
-                         sc->NIL))));
+      s_return(sc,
+               ts_cons(sc, ts_mk_sym(sc, "apply"),
+                       ts_cons(sc, ts_mk_sym(sc, "vector"),
+                               ts_cons(sc,
+                                       ts_cons(sc, sc->QQUOTE,
+                                               ts_cons(sc, sc->value, sc->NIL)),
+                                       sc->NIL))));
 
     case OP_RDUNQUOTE:
       s_return(sc, ts_cons(sc, sc->UNQUOTE, ts_cons(sc, sc->value, sc->NIL)));
@@ -4999,7 +5007,8 @@ ts_ptr ts_apply0(scheme *sc, const char *procname) {
 }
 
 void save_from_C_call(scheme *sc) {
-  ts_ptr saved_data = ts_cons(sc, car(sc->sink), ts_cons(sc, sc->envir, sc->dump));
+  ts_ptr saved_data =
+      ts_cons(sc, car(sc->sink), ts_cons(sc, sc->envir, sc->dump));
   /* Push */
   sc->c_nest = ts_cons(sc, saved_data, sc->c_nest);
   /* Truncate the dump stack so TS will return here when done, not
@@ -5077,11 +5086,11 @@ ts_ptr ts_get_global(scheme *sc, ts_ptr env, const char *name) {
 
 INTERFACE bool ts_is_userdata(ts_ptr ptr) { return type(ptr) == T_USERDATA; }
 
-void default_userdata_finalizer(void *ptr) {
-}
+void default_userdata_finalizer(void *ptr) {}
 
-INTERFACE void ts_userdata_set_finalizer(ts_ptr userdata, void (*finalizer)(void*)) {
-    userdata->userdata.finalizer = finalizer;
+INTERFACE void ts_userdata_set_finalizer(ts_ptr userdata,
+                                         void (*finalizer)(void *)) {
+  userdata->userdata.finalizer = finalizer;
 }
 
 INTERFACE ts_ptr ts_mk_userdata(scheme *sc, void *ptr) {
@@ -5090,7 +5099,7 @@ INTERFACE ts_ptr ts_mk_userdata(scheme *sc, void *ptr) {
   typeflag(cell) = (T_USERDATA | T_ATOM);
   cell->userdata.ptr = ptr;
   cell->userdata.finalizer = default_userdata_finalizer;
- 
+
   return cell;
 }
 

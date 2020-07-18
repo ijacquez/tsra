@@ -3,8 +3,8 @@
 #ifndef _SCHEME_H
 #define _SCHEME_H
 
-#include <stdio.h>
 #include <stdbool.h>
+#include <stdio.h>
 
 #ifndef _MSC_VER
 #define TS_EXPORT
@@ -76,8 +76,8 @@ struct ts_cell {
     } _cons;
   } _object;
   union {
-      void *ptr;
-      void (*finalizer)(void *);
+    void *ptr;
+    void (*finalizer)(void *);
   } userdata;
 };
 
@@ -272,7 +272,8 @@ TS_EXPORT void ts_register_foreign_func_list(scheme *sc, ts_registerable *list,
                                              int n);
 TS_EXPORT ts_ptr ts_mk_userdata(scheme *sc, void *ptr);
 TS_EXPORT bool ts_is_userdata(ts_ptr ptr);
-TS_EXPORT void ts_userdata_set_finalizer(ts_ptr userdata, void (*finalizer)(void*));
+TS_EXPORT void ts_userdata_set_finalizer(ts_ptr userdata,
+                                         void (*finalizer)(void *));
 
 struct ts_interface {
   void (*def)(scheme *sc, ts_ptr env, ts_ptr symbol, ts_ptr value);
@@ -349,11 +350,10 @@ struct ts_interface {
   ts_ptr (*eval)(scheme *sc, ts_ptr obj);
   int (*vec_len)(ts_ptr vec);
   ts_ptr (*get_global)(scheme *sc, ts_ptr env, const char *name);
-  void (*register_foreign_func_list)(scheme *sc, ts_registerable *list,
-                                             int n);
+  void (*register_foreign_func_list)(scheme *sc, ts_registerable *list, int n);
   ts_ptr (*mk_userdata)(scheme *sc, void *ptr);
   bool (*is_userdata)(ts_ptr ptr);
-  void (*userdata_set_finalizer)(ts_ptr userdata, void (*finalizer)(void*));
+  void (*userdata_set_finalizer)(ts_ptr userdata, void (*finalizer)(void *));
 };
 
 #endif
