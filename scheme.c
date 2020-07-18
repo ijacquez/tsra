@@ -12,7 +12,6 @@
  *
  */
 
-#include "scheme.h"
 #define _SCHEME_SOURCE
 
 /*
@@ -115,6 +114,8 @@ enum opcodes {
 #include "opdefines.h"
   OP_MAXDEFINED
 };
+
+#include "scheme.h"
 
 #ifndef WIN32
 #include <unistd.h>
