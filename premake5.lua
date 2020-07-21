@@ -1,7 +1,7 @@
 workspace "tsra"
    configurations { "debug", "release" }
    language "C"
-   files { "scheme.c", "scheme.h" }
+   files { "scheme.c", "scheme.h", "opdefines.h" }
 
    filter "configurations:Debug"
       symbols "On"
@@ -68,6 +68,16 @@ workspace "tsra"
        trigger = "use-stack",
        description = "Enable 'cons' stack"
    }
+   
+   newoption {
+       trigger = "show-error-line",
+       description = "Show line number when an error occurred"
+   }
+   
+   newoption {
+       trigger = "use-interface",
+       description = "Use dynamic interface"
+   }
 
    filter "options:use-math"
       defines { "USE_MATH=1" }
@@ -111,6 +121,12 @@ workspace "tsra"
 
    filter "system:windows"
       defines { "STDIO_ADDS_CR=1" }
+
+   filter "options:show-error-line"
+      defines { "SHOW_ERROR_LINE=1" }
+
+   filter "options:use-interface"
+      defines { "USE_INTERFACE=1" }
 
 project "tsra"
    kind "ConsoleApp"
