@@ -2,22 +2,40 @@
 Tinyscheme fork focused on extending API and fixing bugs. 
 
 ## Building
-Clone the repository
+1) Clone the repository
 ```
 $ git clone git@github.com:iZarif/tsra.git
 ``` 
 
-Change directory to `tsra`
+2) Change directory to `tsra`
 ```
 $ cd tsra
 ```
 
-Open `scheme.c` file and change `#define STANDALONE 1` line to `#define STANDALONE 0` 
+3) Download [premake5](https://premake.github.io/download.html#v5)  
+You can see the available options by entering into the terminal
+```
+$ [path_to_premake_binary] --help
+```
 
-Execute `make`
+There are switches (like --use-plist) that enable some additional features.
+
+4) Generate "project files"  
+This command, for example, will generate makefiles.
 ```
-$ make
+$ [path_to_premake_binary] gmake2
 ```
+
+Now you can see the list of available targets by entering into the terminal
+```
+$ make help
+```
+5) For example, to build a static library, run the following command
+```
+$ make libtsra
+```
+
+The output file will be in the `bin/debug/` folder
 
 ## Code example
 ```C
