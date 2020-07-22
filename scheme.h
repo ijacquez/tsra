@@ -243,7 +243,7 @@ TS_EXPORT ts_ptr ts_set_cdr(ts_ptr p, ts_ptr q);
 
 TS_EXPORT bool ts_is_sym(ts_ptr p);
 TS_EXPORT char *ts_sym_name(ts_ptr p);
-TS_EXPORT int ts_has_prop(ts_ptr p);
+TS_EXPORT bool ts_has_prop(ts_ptr p);
 
 TS_EXPORT bool ts_is_syntax(ts_ptr p);
 TS_EXPORT bool ts_is_proc(ts_ptr p);
@@ -343,7 +343,7 @@ struct ts_interface {
   int (*eqv)(ts_ptr a, ts_ptr b);
   ts_ptr (*mk_empty_str)(scheme *sc, int len, char fill);
   ts_ptr (*load_ext)(scheme *sc, ts_ptr arglist);
-  int (*has_prop)(ts_ptr p);
+  bool (*has_prop)(ts_ptr p);
   ts_err (*load_file)(scheme *sc, const char *name);
   ts_ptr (*apply0)(scheme *sc, const char *procname);
   ts_ptr (*call)(scheme *sc, ts_ptr func, ts_ptr args);

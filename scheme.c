@@ -220,7 +220,7 @@ INTERFACE ts_ptr ts_set_cdr(ts_ptr p, ts_ptr q) { return cdr(p) = q; }
 inline INTERFACE bool ts_is_sym(ts_ptr p) { return (type(p) == T_SYMBOL); }
 INTERFACE char *ts_sym_name(ts_ptr p) { return strvalue(car(p)); }
 #if USE_PLIST
-inline TS_EXPORT int ts_has_prop(ts_ptr p) { return (typeflag(p) & T_SYMBOL); }
+inline TS_EXPORT bool ts_has_prop(ts_ptr p) { return (typeflag(p) & T_SYMBOL); }
 #define symprop(p) cdr(p)
 #endif
 
