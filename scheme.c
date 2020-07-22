@@ -4323,7 +4323,7 @@ static ts_ptr opexe_6(scheme *sc, enum opcodes op) {
 typedef ts_ptr (*dispatch_func)(scheme *, enum opcodes);
 
 typedef bool (*test_predicate)(ts_ptr);
-static bool is_any(ts_ptr p) { return 1; }
+static bool is_any(ts_ptr p) { return true; }
 
 static bool is_nonneg(ts_ptr p) { return ts_int_val(p) >= 0 && ts_is_int(p); }
 
