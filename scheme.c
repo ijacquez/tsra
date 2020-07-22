@@ -288,7 +288,7 @@ static const char *charnames[32] = {
     "vt",  "ff",  "cr",  "so",  "si",  "dle", "dc1", "dc2", "dc3", "dc4", "nak",
     "syn", "etb", "can", "em",  "sub", "esc", "fs",  "gs",  "rs",  "us"};
 
-static bool is_ascii_name(const char *name, int *pc) {
+static bool is_ascii_name(const char *name, char *pc) {
   int i;
   for (i = 0; i < 32; i++) {
     if (stricmp(name, charnames[i]) == 0) {
