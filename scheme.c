@@ -154,16 +154,6 @@ static ts_num num_one;
 #define typeflag(p) ((p)->_flag)
 #define type(p) (typeflag(p) & T_MASKTYPE)
 
-static ts_ptr _cons(scheme *sc, ts_ptr a, ts_ptr b, int immutable);
-
-INTERFACE ts_ptr ts_cons(scheme *sc, ts_ptr a, ts_ptr b) {
-  return _cons(sc, a, b, 0);
-}
-
-INTERFACE ts_ptr ts_immutable_cons(scheme *sc, ts_ptr a, ts_ptr b) {
-  return _cons(sc, a, b, 1);
-}
-
 inline INTERFACE bool ts_is_str(ts_ptr p) { return (type(p) == T_STRING); }
 #define strvalue(p) ((p)->_object._string._svalue)
 #define strlength(p) ((p)->_object._string._length)
@@ -792,6 +782,14 @@ ts_ptr _cons(scheme *sc, ts_ptr a, ts_ptr b, int immutable) {
   car(x) = a;
   cdr(x) = b;
   return (x);
+}
+
+INTERFACE ts_ptr ts_cons(scheme *sc, ts_ptr a, ts_ptr b) {
+  return _cons(sc, a, b, 0);
+}
+
+INTERFACE ts_ptr ts_immutable_cons(scheme *sc, ts_ptr a, ts_ptr b) {
+  return _cons(sc, a, b, 1);
 }
 
 /* ========== oblist implementation  ========== */
