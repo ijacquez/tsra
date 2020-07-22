@@ -772,7 +772,7 @@ static void check_range_alloced(ts_ptr p, int n, int expect_alloced) {
 /* Medium level cell allocation */
 
 /* get new cons cell */
-ts_ptr _cons(scheme *sc, ts_ptr a, ts_ptr b, int immutable) {
+ts_ptr _cons(scheme *sc, ts_ptr a, ts_ptr b, bool immutable) {
   ts_ptr x = get_cell(sc, a, b);
 
   typeflag(x) = T_PAIR;
