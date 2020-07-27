@@ -340,7 +340,6 @@ static ts_ptr mk_proc(scheme *sc, enum opcodes op);
 static ts_ptr mk_closure(scheme *sc, ts_ptr c, ts_ptr e);
 static ts_ptr mk_continuation(scheme *sc, ts_ptr d);
 static ts_ptr reverse(scheme *sc, ts_ptr a);
-static ts_ptr reverse_in_place(scheme *sc, ts_ptr term, ts_ptr list);
 static ts_ptr revappend(scheme *sc, ts_ptr a, ts_ptr b);
 static void dump_stack_mark(scheme *);
 static ts_ptr opexe_0(scheme *sc, enum opcodes op);
@@ -354,7 +353,7 @@ static void Eval_Cycle(scheme *sc, enum opcodes op);
 static void assign_syntax(scheme *sc, char *name);
 static int syntaxnum(ts_ptr p);
 static void assign_proc(scheme *sc, enum opcodes, char *name);
-static void load_named_file(scheme *sc, FILE *fin, const char *filename);
+void load_named_file(scheme *sc, FILE *fin, const char *filename);
 
 #define num_ivalue(n) (n.is_fixnum ? (n).value.ivalue : (int)(n).value.rvalue)
 #define num_rvalue(n) \
@@ -2051,7 +2050,7 @@ static ts_ptr reverse(scheme *sc, ts_ptr a) {
 }
 
 /* reverse list --- in-place */
-static ts_ptr reverse_in_place(scheme *sc, ts_ptr term, ts_ptr list) {
+ts_ptr reverse_in_place(scheme *sc, ts_ptr term, ts_ptr list) {
   ts_ptr p = list, result = term, q;
 
   while (p != sc->NIL) {
@@ -4826,7 +4825,7 @@ void ts_deinit(scheme *sc) {
 
 static void load_file(scheme *sc, FILE *fin) { load_named_file(sc, fin, 0); }
 
-static void load_named_file(scheme *sc, FILE *fin, const char *filename) {
+void load_named_file(scheme *sc, FILE *fin, const char *filename) {
   if (fin == NULL) {
     fprintf(stderr, "File pointer can not be NULL when loading a file\n");
     return;
@@ -5009,95 +5008,3 @@ INTERFACE ts_ptr ts_mk_userdata(scheme *sc, void *ptr) {
 
 #endif
 
-/* ========== Main ========== */
-
-#if STANDALONE
-
-int main(int argc, char **argv) {
-  scheme sc;
-  FILE *fin = NULL;
-  const char *file_name = InitFile;
-  int retcode;
-  int isfile = 1;
-
-  if (argc == 1) {
-    printf("%s", banner);
-  }
-  if (argc == 2 && strcmp(argv[1], "-?") == 0) {
-    printf("Usage: tinyscheme -?\n");
-    printf("or:    tinyscheme [<file1> <file2> ...]\n");
-    printf("followed by\n");
-    printf("          -1 <file> [<arg1> <arg2> ...]\n");
-    printf("          -c <Scheme commands> [<arg1> <arg2> ...]\n");
-    printf("assuming that the executable is named tinyscheme.\n");
-    printf("Use - as filename for stdin.\n");
-    return 1;
-  }
-  if (!ts_init(&sc)) {
-    fprintf(stderr, "Could not initialize!\n");
-    return 2;
-  }
-  ts_set_in_port_file(&sc, stdin);
-  ts_set_out_port_file(&sc, stdout);
-#if USE_DL
-  ts_def(&sc, sc.global_env, ts_mk_sym(&sc, "load-extension"),
-         ts_mk_foreign_func(&sc, ts_load_ext));
-#endif
-  argv++;
-  if (access(file_name, 0) != 0) {
-    char *p = getenv("TINYSCHEMEINIT");
-    if (p != 0) {
-      file_name = p;
-    }
-  }
-  do {
-    if (strcmp(file_name, "-") == 0) {
-      fin = stdin;
-    } else if (strcmp(file_name, "-1") == 0 || strcmp(file_name, "-c") == 0) {
-      ts_ptr args = sc.NIL;
-      isfile = file_name[1] == '1';
-      file_name = *argv++;
-      if (strcmp(file_name, "-") == 0) {
-        fin = stdin;
-      } else if (isfile) {
-        fin = fopen(file_name, "r");
-      }
-      for (; *argv; argv++) {
-        ts_ptr value = ts_mk_str(&sc, *argv);
-        args = ts_cons(&sc, value, args);
-      }
-      args = reverse_in_place(&sc, sc.NIL, args);
-      ts_def(&sc, sc.global_env, ts_mk_sym(&sc, "*args*"), args);
-
-    } else {
-      fin = fopen(file_name, "r");
-    }
-    if (isfile && fin == 0) {
-      fprintf(stderr, "Could not open file %s\n", file_name);
-    } else {
-      if (isfile) {
-        load_named_file(&sc, fin, file_name);
-      } else {
-        ts_load_str(&sc, file_name);
-      }
-      if (!isfile || fin != stdin) {
-        if (sc.retcode != 0) {
-          fprintf(stderr, "Errors encountered reading %s\n", file_name);
-        }
-        if (isfile) {
-          fclose(fin);
-        }
-      }
-    }
-    file_name = *argv++;
-  } while (file_name != 0);
-  if (argc == 1) {
-    load_named_file(&sc, stdin, 0);
-  }
-  retcode = sc.retcode;
-  ts_deinit(&sc);
-
-  return retcode;
-}
-
-#endif

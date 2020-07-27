@@ -131,6 +131,7 @@ workspace "tsra"
 project "tsra"
    kind "ConsoleApp"
    defines { "STANDALONE=1" }
+   files { "main.c" }
 
    filter "system:linux or macosx"
       filter "options:use-math"
