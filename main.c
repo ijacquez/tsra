@@ -2,11 +2,8 @@
 #include <stdlib.h>
 #include <unistd.h>
 
-#include "scheme.h"
+#include "common.h"
 #include "dynload.h"
-
-ts_ptr reverse_in_place(scheme *sc, ts_ptr term, ts_ptr list);
-void load_named_file(scheme *sc, FILE *fin, const char *filename);
 
 int main(int argc, char **argv) {
   scheme sc;

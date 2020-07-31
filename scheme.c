@@ -14,14 +14,7 @@
 
 #define _SCHEME_SOURCE
 
-/* operator code */
-enum opcodes {
-#define _OP_DEF(A, B, C, D, E, OP) OP,
-#include "opdefines.h"
-  OP_MAXDEFINED
-};
-
-#include "scheme.h"
+#include "common.h"
 
 #ifndef WIN32
 #include <unistd.h>
@@ -94,38 +87,6 @@ const char *InitFile = "init.scm";
 
 const unsigned int FIRST_CELLSEGS = 3;
 
-enum scheme_types {
-  T_STRING = 1,
-  T_NUMBER = 2,
-  T_SYMBOL = 3,
-  T_PROC = 4,
-  T_PAIR = 5,
-  T_CLOSURE = 6,
-  T_CONTINUATION = 7,
-  T_FOREIGN = 8,
-  T_CHARACTER = 9,
-  T_PORT = 10,
-  T_VECTOR = 11,
-  T_MACRO = 12,
-  T_PROMISE = 13,
-  T_ENVIRONMENT = 14,
-  T_USERDATA = 15,
-  T_LAST_SYSTEM_TYPE = 15
-};
-
-/* ADJ is enough slack to align cells in a TYPE_BITS-bit boundary */
-static const unsigned int ADJ = 32;
-static const unsigned int TYPE_BITS = 5;
-static const unsigned int T_MASKTYPE = 31;    /* 0000000000011111 */
-static const unsigned int T_SYNTAX = 4096;    /* 0001000000000000 */
-static const unsigned int T_IMMUTABLE = 8192; /* 0010000000000000 */
-static const unsigned int T_ATOM = 16384;
-/* 0100000000000000 */ /* only for gc */
-static const unsigned int CLRATOM = 49151;
-/* 1011111111111111 */                    /* only for gc */
-static const unsigned int MARK = 32768;   /* 1000000000000000 */
-static const unsigned int UNMARK = 32767; /* 0111111111111111 */
-
 static ts_num num_add(ts_num a, ts_num b);
 static ts_num num_mul(ts_num a, ts_num b);
 static ts_num num_div(ts_num a, ts_num b);
@@ -149,10 +110,6 @@ inline static int num_is_integer(ts_ptr p) {
 
 static ts_num num_zero;
 static ts_num num_one;
-
-/* macros for cell operations */
-#define typeflag(p) ((p)->_flag)
-#define type(p) (typeflag(p) & T_MASKTYPE)
 
 inline INTERFACE bool ts_is_str(ts_ptr p) { return (type(p) == T_STRING); }
 #define strvalue(p) ((p)->_object._string._svalue)
@@ -200,8 +157,6 @@ INTERFACE bool is_outport(ts_ptr p) {
 }
 
 inline INTERFACE bool ts_is_pair(ts_ptr p) { return (type(p) == T_PAIR); }
-#define car(p) ((p)->_object._cons._car)
-#define cdr(p) ((p)->_object._cons._cdr)
 INTERFACE ts_ptr ts_pair_car(ts_ptr p) { return car(p); }
 INTERFACE ts_ptr ts_pair_cdr(ts_ptr p) { return cdr(p); }
 INTERFACE ts_ptr ts_set_car(ts_ptr p, ts_ptr q) { return car(p) = q; }
@@ -253,17 +208,6 @@ inline INTERFACE bool ts_is_immutable(ts_ptr p) {
 /*#define ts_set_immutable(p)  typeflag(p) |= T_IMMUTABLE*/
 inline INTERFACE void ts_set_immutable(ts_ptr p) { typeflag(p) |= T_IMMUTABLE; }
 
-#define caar(p) car(car(p))
-#define cadr(p) car(cdr(p))
-#define cdar(p) cdr(car(p))
-#define cddr(p) cdr(cdr(p))
-#define cadar(p) car(cdr(car(p)))
-#define caddr(p) car(cdr(cdr(p)))
-#define cdaar(p) cdr(car(car(p)))
-#define cadaar(p) car(cdr(car(car(p))))
-#define cadddr(p) car(cdr(cdr(cdr(p))))
-#define cddddr(p) cdr(cdr(cdr(cdr(p))))
-
 #if USE_CHAR_CLASSIFIERS
 inline static int Cisalpha(char c) { return isascii(c) && isalpha(c); }
 static int Cisdigit(char c) { return isascii(c) && isdigit(c); }
@@ -301,14 +245,12 @@ static int file_interactive(scheme *sc);
 inline static bool is_one_of(const char *s, char c);
 static int alloc_cellseg(scheme *sc, int n);
 static int binary_decode(const char *s);
-inline static ts_ptr get_cell(scheme *sc, ts_ptr a, ts_ptr b);
 static ts_ptr _get_cell(scheme *sc, ts_ptr a, ts_ptr b);
 ts_ptr ts_reserve_cells(scheme *sc, int n);
 static ts_ptr get_consecutive_cells(scheme *sc, int n);
 static ts_ptr find_consecutive_cells(scheme *sc, int n);
 static void finalize_cell(scheme *sc, ts_ptr a);
 static int count_consecutive_cells(ts_ptr x, int needed);
-static ts_ptr find_slot_in_env(scheme *sc, ts_ptr env, ts_ptr sym, int all);
 static ts_ptr mk_number(scheme *sc, ts_num n);
 static char *store_string(scheme *sc, int len, const char *str, char fill);
 ts_ptr ts_mk_vec(scheme *sc, int len);
@@ -349,7 +291,6 @@ static ts_ptr opexe_3(scheme *sc, enum opcodes op);
 static ts_ptr opexe_4(scheme *sc, enum opcodes op);
 static ts_ptr opexe_5(scheme *sc, enum opcodes op);
 static ts_ptr opexe_6(scheme *sc, enum opcodes op);
-static void Eval_Cycle(scheme *sc, enum opcodes op);
 static void assign_syntax(scheme *sc, char *name);
 static int syntaxnum(ts_ptr p);
 static void assign_proc(scheme *sc, enum opcodes, char *name);
@@ -584,7 +525,7 @@ static int alloc_cellseg(scheme *sc, int n) {
   return n;
 }
 
-inline static ts_ptr get_cell_x(scheme *sc, ts_ptr a, ts_ptr b) {
+static inline ts_ptr get_cell_x(scheme *sc, ts_ptr a, ts_ptr b) {
   if (sc->free_cell != sc->NIL) {
     ts_ptr x = sc->free_cell;
     sc->free_cell = cdr(x);
@@ -720,7 +661,7 @@ static void push_recent_alloc(scheme *sc, ts_ptr recent, ts_ptr extra) {
   car(sc->sink) = holder;
 }
 
-static ts_ptr get_cell(scheme *sc, ts_ptr a, ts_ptr b) {
+ts_ptr get_cell(scheme *sc, ts_ptr a, ts_ptr b) {
   ts_ptr cell = get_cell_x(sc, a, b);
   /* For right now, include "a" and "b" in "cell" so that gc doesn't
      think they are garbage. */
@@ -2174,7 +2115,7 @@ inline static void new_slot_spec_in_env(scheme *sc, ts_ptr env, ts_ptr variable,
   }
 }
 
-static ts_ptr find_slot_in_env(scheme *sc, ts_ptr env, ts_ptr hdl, int all) {
+ts_ptr find_slot_in_env(scheme *sc, ts_ptr env, ts_ptr hdl, int all) {
   ts_ptr x, y;
   int location;
 
@@ -2247,7 +2188,7 @@ inline static void set_slot_in_env(scheme *sc, ts_ptr slot, ts_ptr value) {
   cdr(slot) = value;
 }
 
-inline static ts_ptr slot_value_in_env(ts_ptr slot) { return cdr(slot); }
+inline ts_ptr slot_value_in_env(ts_ptr slot) { return cdr(slot); }
 
 /* ========== Evaluation Cycle ========== */
 
@@ -2370,7 +2311,7 @@ static ts_ptr _s_return(scheme *sc, ts_ptr a) {
   return sc->T;
 }
 
-inline static void dump_stack_reset(scheme *sc) {
+inline void dump_stack_reset(scheme *sc) {
   /* in this implementation, sc->dump is the number of frames on the stack */
   sc->dump = (ts_ptr)0;
 }
@@ -2402,7 +2343,7 @@ inline static void dump_stack_mark(scheme *sc) {
 
 #else
 
-inline static void dump_stack_reset(scheme *sc) { sc->dump = sc->NIL; }
+inline void dump_stack_reset(scheme *sc) { sc->dump = sc->NIL; }
 
 inline static void dump_stack_initialize(scheme *sc) { dump_stack_reset(sc); }
 
@@ -4385,7 +4326,7 @@ static const char *procname(ts_ptr x) {
 }
 
 /* kernel of this interpreter */
-static void Eval_Cycle(scheme *sc, enum opcodes op) {
+void Eval_Cycle(scheme *sc, enum opcodes op) {
   sc->op = op;
   for (;;) {
     op_code_info *pcd = dispatch_table + sc->op;
@@ -4823,7 +4764,7 @@ void ts_deinit(scheme *sc) {
 #endif
 }
 
-static void load_file(scheme *sc, FILE *fin) { load_named_file(sc, fin, 0); }
+void load_file(scheme *sc, FILE *fin) { load_named_file(sc, fin, 0); }
 
 void load_named_file(scheme *sc, FILE *fin, const char *filename) {
   if (fin == NULL) {
@@ -4890,121 +4831,4 @@ void ts_def(scheme *sc, ts_ptr envir, ts_ptr symbol, ts_ptr value) {
     new_slot_spec_in_env(sc, envir, symbol, value);
   }
 }
-
-#if !STANDALONE
-void scheme_register_foreign_func(scheme *sc, ts_registerable *sr) {
-  ts_def(sc, sc->global_env, ts_mk_sym(sc, sr->name),
-         ts_mk_foreign_func(sc, sr->f));
-}
-
-void ts_register_foreign_func_list(scheme *sc, ts_registerable *list,
-                                   int count) {
-  int i;
-  for (i = 0; i < count; i++) {
-    scheme_register_foreign_func(sc, list + i);
-  }
-}
-
-ts_ptr ts_apply0(scheme *sc, const char *procname) {
-  return ts_eval(sc, ts_cons(sc, ts_mk_sym(sc, procname), sc->NIL));
-}
-
-void save_from_C_call(scheme *sc) {
-  ts_ptr saved_data =
-      ts_cons(sc, car(sc->sink), ts_cons(sc, sc->envir, sc->dump));
-  /* Push */
-  sc->c_nest = ts_cons(sc, saved_data, sc->c_nest);
-  /* Truncate the dump stack so TS will return here when done, not
-     directly resume pre-C-call operations. */
-  dump_stack_reset(sc);
-}
-void restore_from_C_call(scheme *sc) {
-  car(sc->sink) = caar(sc->c_nest);
-  sc->envir = cadar(sc->c_nest);
-  sc->dump = cdr(cdar(sc->c_nest));
-  /* Pop */
-  sc->c_nest = cdr(sc->c_nest);
-}
-
-/* "func" and "args" are assumed to be already eval'ed. */
-ts_ptr ts_call(scheme *sc, ts_ptr func, ts_ptr args) {
-  int old_repl = sc->interactive_repl;
-  sc->interactive_repl = 0;
-  save_from_C_call(sc);
-  sc->envir = sc->global_env;
-  sc->args = args;
-  sc->code = func;
-  sc->retcode = 0;
-  Eval_Cycle(sc, OP_APPLY);
-  sc->interactive_repl = old_repl;
-  restore_from_C_call(sc);
-  return sc->value;
-}
-
-ts_ptr ts_eval(scheme *sc, ts_ptr obj) {
-  int old_repl = sc->interactive_repl;
-  sc->interactive_repl = 0;
-  save_from_C_call(sc);
-  sc->args = sc->NIL;
-  sc->code = obj;
-  sc->retcode = 0;
-  Eval_Cycle(sc, OP_EVAL);
-  sc->interactive_repl = old_repl;
-  restore_from_C_call(sc);
-  return sc->value;
-}
-
-ts_err ts_load_file(scheme *sc, const char *name) {
-  int status;
-  FILE *file = fopen(name, "r");
-
-  if (file == NULL) {
-    return ts_fopen_err;
-  }
-
-  load_file(sc, file);
-  status = fclose(file);
-
-  if (status == EOF) {
-    return ts_fclose_err;
-  }
-
-  return 0;
-}
-
-int ts_vec_len(ts_ptr vec) {
-  if (ts_is_vec(vec)) {
-    return ts_int_val(vec);
-  }
-
-  return ts_type_err;
-}
-
-ts_ptr ts_get_global(scheme *sc, ts_ptr env, const char *name) {
-  ts_ptr sym = ts_mk_sym(sc, name);
-  ts_ptr slot = find_slot_in_env(sc, env, sym, 0);
-
-  return slot_value_in_env(slot);
-}
-
-INTERFACE bool ts_is_userdata(ts_ptr ptr) { return type(ptr) == T_USERDATA; }
-
-void default_userdata_finalizer(void *ptr) {}
-
-INTERFACE void ts_userdata_set_finalizer(ts_ptr userdata,
-                                         void (*finalizer)(void *)) {
-  userdata->userdata.finalizer = finalizer;
-}
-
-INTERFACE ts_ptr ts_mk_userdata(scheme *sc, void *ptr) {
-  ts_ptr cell = get_cell(sc, sc->NIL, sc->NIL);
-
-  typeflag(cell) = (T_USERDATA | T_ATOM);
-  cell->userdata.ptr = ptr;
-  cell->userdata.finalizer = default_userdata_finalizer;
-
-  return cell;
-}
-
-#endif
 

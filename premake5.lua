@@ -1,7 +1,7 @@
 workspace "tsra"
    configurations { "debug", "release" }
    language "C"
-   files { "scheme.c", "scheme.h", "opdefines.h" }
+   files { "scheme.c", "scheme.h", "opdefines.h", "common.h" }
 
    filter "configurations:Debug"
       symbols "On"
@@ -142,6 +142,8 @@ project "tsra"
 
 project "libtsra"
    kind "StaticLib"
+   files { "library.c" }
 
 project "tsradll"
    kind "SharedLib"
+   files { "library.c" }
