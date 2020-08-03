@@ -144,6 +144,7 @@ project "libtsra"
    kind "StaticLib"
    files { "library.c" }
    targetname "tsra"
+   pic "On"
 
 project "tsradll"
    kind "SharedLib"
