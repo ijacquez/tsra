@@ -1,5 +1,5 @@
-#ifndef SCM_COMMON_H
-#define SCM_COMMON_H
+#ifndef TS_COMMON_H
+#define TS_COMMON_H
 
 #include "scheme.h"
 

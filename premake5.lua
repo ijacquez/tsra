@@ -1,7 +1,7 @@
 workspace "tsra"
    configurations { "debug", "release" }
    language "C"
-   files { "scheme.c", "scheme.h", "opdefines.h", "common.h" }
+   files { "scheme.c", "scheme.h", "opdefines.h", "common.h", "ts_std.h" }
 
    filter "configurations:Debug"
       symbols "On"
@@ -117,10 +117,10 @@ workspace "tsra"
       defines { "USE_STACK=1" }
 
    filter "system:linux or macosx"
-      defines { "USE_STRCASECMP=1", "USE_STRLWR=1" }
+      files { "ts_std_unix.c", "ts_std_unix.h" }
 
    filter "system:windows"
-      defines { "STDIO_ADDS_CR=1" }
+      files { "ts_std_win.h" }
 
    filter "options:show-error-line"
       defines { "SHOW_ERROR_LINE=1" }

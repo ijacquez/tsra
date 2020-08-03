@@ -100,8 +100,7 @@ bool ts_is_userdata(ts_ptr ptr) { return type(ptr) == T_USERDATA; }
 
 void default_userdata_finalizer(void *ptr) {}
 
-void ts_userdata_set_finalizer(ts_ptr userdata,
-                                         void (*finalizer)(void *)) {
+void ts_userdata_set_finalizer(ts_ptr userdata, void (*finalizer)(void *)) {
   userdata->userdata.finalizer = finalizer;
 }
 
@@ -114,4 +113,3 @@ ts_ptr ts_mk_userdata(scheme *sc, void *ptr) {
 
   return cell;
 }
-

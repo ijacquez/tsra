@@ -14,14 +14,15 @@
 
 #define _SCHEME_SOURCE
 
+#include "ts_std.h"
 #include "common.h"
 
-#ifndef WIN32
-#include <unistd.h>
-#endif
 #ifdef WIN32
-#define snprintf _snprintf
+#include "ts_std_win.h"
+#else
+#include "ts_std_unix.h"
 #endif
+
 #if USE_DL
 #include "dynload.h"
 #endif
@@ -32,11 +33,6 @@
 #include <ctype.h>
 #include <float.h>
 #include <limits.h>
-
-#if USE_STRCASECMP
-#include <strings.h>
-#define stricmp strcasecmp
-#endif
 
 /* Used for documentation purposes, to signal functions in 'interface' */
 #define INTERFACE
@@ -69,17 +65,6 @@ static const char *const banner = "TinyScheme 1.42";
 
 #include <stdlib.h>
 #include <string.h>
-
-#if USE_STRLWR
-static const char *strlwr(char *s) {
-  const char *p = s;
-  while (*s) {
-    *s = tolower(*s);
-    s++;
-  }
-  return p;
-}
-#endif
 
 const char *prompt = "ts> ";
 
@@ -4831,4 +4816,3 @@ void ts_def(scheme *sc, ts_ptr envir, ts_ptr symbol, ts_ptr value) {
     new_slot_spec_in_env(sc, envir, symbol, value);
   }
 }
-
