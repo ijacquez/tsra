@@ -143,7 +143,9 @@ project "tsra"
 project "libtsra"
    kind "StaticLib"
    files { "library.c" }
+   targetname "tsra"
 
 project "tsradll"
    kind "SharedLib"
    files { "library.c" }
+   targetname "tsra"
