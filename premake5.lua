@@ -106,39 +106,42 @@ workspace "tsra"
    filter "options:stdio-adds-cr"
       defines { "STDIO_ADDS_CR=1" }
 
-   filter "options:use-dl"
-      defines { "USE_DL=1" }
-      files { "dynload.c", "dynload.h" }
-
    filter "options:use-plist"
       defines { "USE_PLIST=1" }
 
    filter "options:use-stack"
       defines { "USE_STACK=1" }
 
-   filter "system:linux or macosx"
-      files { "ts_std_unix.c", "ts_std_unix.h" }
-
-   filter "system:windows"
-      files { "ts_std_win.h" }
-
    filter "options:show-error-line"
       defines { "SHOW_ERROR_LINE=1" }
 
    filter "options:use-interface"
       defines { "USE_INTERFACE=1" }
+   
+   filter "system:linux or macosx"
+      files { "ts_std_unix.c", "ts_std_unix.h" }
+
+   filter "system:windows"
+      files { "ts_std_win.h" }
+   
+   filter "options:use-dl"
+      files { "ts_dl.c", "ts_dl.h" }
+
+      filter "system:linux or macosx"
+         files { "ts_dl_unix.c", "ts_dl_unix.c" }
+         links { "dl" }
+
+      filter "system:windows"
+         files { "ts_dl_win.c", "ts_dl_win.h" }
+
+   filter "options:use-math"
+      filter "system:linux or macosx"
+         links { "m" }
 
 project "tsra"
    kind "ConsoleApp"
    defines { "STANDALONE=1" }
    files { "main.c" }
-
-   filter "system:linux or macosx"
-      filter "options:use-math"
-         links { "m" }
-
-      filter "options:use-dl"
-         links { "dl" }
 
 project "libtsra"
    kind "StaticLib"
