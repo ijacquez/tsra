@@ -17,12 +17,6 @@
 #include "ts_std.h"
 #include "common.h"
 
-#ifdef WIN32
-#include "ts_std_win.h"
-#else
-#include "ts_std_unix.h"
-#endif
-
 #if USE_DL
 #include "dynload.h"
 #endif

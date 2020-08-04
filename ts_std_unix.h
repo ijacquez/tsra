@@ -3,7 +3,7 @@
 
 #include <strings.h>
 
-#include "ts_std.h"
+const char *strlwr(char *s);
 
 #define stricmp strcasecmp
 
