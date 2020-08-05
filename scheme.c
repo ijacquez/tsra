@@ -3755,7 +3755,7 @@ static ts_ptr opexe_4(scheme *sc, enum opcodes op) {
 
     case OP_GCVERB: /* gc-verbose */
     {
-      int was = sc->gc_verbose;
+      bool was = sc->gc_verbose;
 
       sc->gc_verbose = (car(sc->args) != sc->F);
       s_retbool(was);
@@ -4579,8 +4579,8 @@ scheme *ts_init_new_custom_alloc(ts_func_alloc malloc, ts_func_dealloc free) {
 
 int ts_init(scheme *sc) { return ts_init_custom_alloc(sc, malloc, free); }
 
-int ts_init_custom_alloc(scheme *sc, ts_func_alloc malloc,
-                         ts_func_dealloc free) {
+bool ts_init_custom_alloc(scheme *sc, ts_func_alloc malloc,
+                          ts_func_dealloc free) {
   int i, n = sizeof(dispatch_table) / sizeof(dispatch_table[0]);
   ts_ptr x;
 
@@ -4603,17 +4603,17 @@ int ts_init_custom_alloc(scheme *sc, ts_func_alloc malloc,
   sc->EOF_OBJ = &sc->_EOF_OBJ;
   sc->free_cell = &sc->_NIL;
   sc->fcells = 0;
-  sc->no_memory = 0;
+  sc->no_memory = false;
   sc->inport = sc->NIL;
   sc->outport = sc->NIL;
   sc->save_inport = sc->NIL;
   sc->loadport = sc->NIL;
   sc->nesting = 0;
-  sc->interactive_repl = 0;
+  sc->interactive_repl = false;
 
   if (alloc_cellseg(sc, FIRST_CELLSEGS) != FIRST_CELLSEGS) {
-    sc->no_memory = 1;
-    return 0;
+    sc->no_memory = true;
+    return false;
   }
   sc->gc_verbose = 0;
   dump_stack_initialize(sc);
@@ -4726,7 +4726,7 @@ void ts_deinit(scheme *sc) {
     typeflag(sc->loadport) = T_ATOM;
   }
   sc->loadport = sc->NIL;
-  sc->gc_verbose = 0;
+  sc->gc_verbose = false;
   gc(sc, sc->NIL, sc->NIL);
 
   for (i = 0; i <= sc->last_cell_seg; i++) {
@@ -4770,7 +4770,7 @@ void load_named_file(scheme *sc, FILE *fin, const char *filename) {
   sc->loadport = mk_port(sc, sc->load_stack);
   sc->retcode = 0;
   if (fin == stdin) {
-    sc->interactive_repl = 1;
+    sc->interactive_repl = true;
   }
 
 #if SHOW_ERROR_LINE
@@ -4802,7 +4802,7 @@ void ts_load_str(scheme *sc, const char *cmd) {
   sc->load_stack[0].rep.string.curr = (char *)cmd;
   sc->loadport = mk_port(sc, sc->load_stack);
   sc->retcode = 0;
-  sc->interactive_repl = 0;
+  sc->interactive_repl = false;
   sc->inport = sc->loadport;
   sc->args = ts_mk_int(sc, sc->file_i);
   Eval_Cycle(sc, OP_T0LVL);

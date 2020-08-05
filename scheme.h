@@ -106,7 +106,7 @@ struct scheme {
   ts_ptr code;  /* register for current code */
   ts_ptr dump;  /* stack register for next evaluation */
 
-  int interactive_repl; /* are we in an interactive REPL? */
+  bool interactive_repl; /* are we in an interactive REPL? */
 
   struct ts_cell _sink;
   ts_ptr sink; /* when mem. alloc. fails */
@@ -151,8 +151,8 @@ struct scheme {
   int file_i;
   int nesting;
 
-  char gc_verbose; /* if gc_verbose is not zero, print gc status */
-  char no_memory;  /* Whether mem. alloc. has failed */
+  bool gc_verbose; /* if gc_verbose is not zero, print gc status */
+  bool no_memory;  /* Whether mem. alloc. has failed */
 
 #ifndef TS_LINESIZE
 #define TS_LINESIZE 1024
@@ -192,7 +192,7 @@ TS_EXPORT scheme *ts_init_new(void);
 TS_EXPORT scheme *ts_init_new_custom_alloc(ts_func_alloc malloc,
                                            ts_func_dealloc free);
 TS_EXPORT int ts_init(scheme *sc);
-TS_EXPORT int ts_init_custom_alloc(scheme *sc, ts_func_alloc, ts_func_dealloc);
+TS_EXPORT bool ts_init_custom_alloc(scheme *sc, ts_func_alloc, ts_func_dealloc);
 TS_EXPORT void ts_deinit(scheme *sc);
 TS_EXPORT void ts_set_in_port_file(scheme *sc, FILE *fin);
 TS_EXPORT void ts_set_in_port_str(scheme *sc, char *start, char *past_the_end);

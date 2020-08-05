@@ -41,8 +41,8 @@ void restore_from_C_call(scheme *sc) {
 
 /* "func" and "args" are assumed to be already eval'ed. */
 ts_ptr ts_call(scheme *sc, ts_ptr func, ts_ptr args) {
-  int old_repl = sc->interactive_repl;
-  sc->interactive_repl = 0;
+  bool old_repl = sc->interactive_repl;
+  sc->interactive_repl = false;
   save_from_C_call(sc);
   sc->envir = sc->global_env;
   sc->args = args;
@@ -55,8 +55,8 @@ ts_ptr ts_call(scheme *sc, ts_ptr func, ts_ptr args) {
 }
 
 ts_ptr ts_eval(scheme *sc, ts_ptr obj) {
-  int old_repl = sc->interactive_repl;
-  sc->interactive_repl = 0;
+  bool old_repl = sc->interactive_repl;
+  sc->interactive_repl = false;
   save_from_C_call(sc);
   sc->args = sc->NIL;
   sc->code = obj;
