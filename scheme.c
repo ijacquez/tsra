@@ -220,7 +220,7 @@ static bool is_ascii_name(const char *name, char *pc) {
 
 static int file_push(scheme *sc, const char *fname);
 static void file_pop(scheme *sc);
-static int file_interactive(scheme *sc);
+static bool file_interactive(scheme *sc);
 inline static bool is_one_of(const char *s, char c);
 static int alloc_cellseg(scheme *sc, int n);
 static int binary_decode(const char *s);
@@ -1250,9 +1250,10 @@ static void file_pop(scheme *sc) {
   }
 }
 
-static int file_interactive(scheme *sc) {
-  return sc->file_i == 0 && sc->load_stack[0].rep.stdio.file == stdin &&
-         sc->inport->_object._port->kind & ts_port_file;
+static bool file_interactive(scheme *sc) {
+  return (sc->file_i == 0) &&
+         (sc->load_stack[0].rep.stdio.file == stdin) &&
+         ((sc->inport->_object._port->kind & ts_port_file) != 0);
 }
 
 static ts_port *port_rep_from_filename(scheme *sc, const char *fn, int prop) {
