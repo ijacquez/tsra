@@ -4743,6 +4743,18 @@ void ts_deinit(scheme *sc) {
 #endif
 }
 
+bool is_file_exist(const char *fname) {
+  FILE *file = fopen(fname, "r");
+
+  if (file) {
+    fclose(file);
+
+    return true;
+  }
+
+  return false;
+}
+
 void load_file(scheme *sc, FILE *fin) { load_named_file(sc, fin, 0); }
 
 void load_named_file(scheme *sc, FILE *fin, const char *filename) {

@@ -1,9 +1,10 @@
 #include <stdlib.h>
 #include <string.h>
-#include <unistd.h>
 
 #include "common.h"
 #include "dynload.h"
+
+bool is_file_exist(const char *fname);
 
 int main(int argc, char **argv) {
   scheme sc;
@@ -36,7 +37,7 @@ int main(int argc, char **argv) {
          ts_mk_foreign_func(&sc, ts_load_ext));
 #endif
   argv++;
-  if (access(file_name, 0) != 0) {
+  if (!is_file_exist(file_name)) {
     char *p = getenv("TINYSCHEMEINIT");
     if (p != 0) {
       file_name = p;
