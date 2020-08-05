@@ -28,6 +28,9 @@
 #include <float.h>
 #include <limits.h>
 
+#include <stdlib.h>
+#include <string.h>
+
 /* Used for documentation purposes, to signal functions in 'interface' */
 #define INTERFACE
 
@@ -49,6 +52,7 @@ enum {
 };
 
 #define BACKQUOTE '`'
+
 static const char *const DELIMITERS = "()\";\f\t\v\n\r ";
 
 /*
@@ -56,13 +60,7 @@ static const char *const DELIMITERS = "()\";\f\t\v\n\r ";
  */
 
 static const char *const banner = "TinyScheme 1.42";
-
-#include <stdlib.h>
-#include <string.h>
-
-const char *prompt = "ts> ";
-
-const char *InitFile = "init.scm";
+static const char *prompt = "ts> ";
 
 const unsigned int FIRST_CELLSEGS = 3;
 
