@@ -2,5 +2,9 @@
 /*.so
 /*.dll
 /*.a
-/scheme
-/scheme.exe
+
+# Premake related
+/Makefile
+/*.make
+/bin/
+/obj/
