@@ -1,3 +1,9 @@
+# TSRA 0.0.3
+
+Makefile replaced with premake5  
+Added `userdata` scheme type  
+Added Windows support (successful cross-compilation)  
+
 # TSRA 0.0.2
 
 `hasprop` function renamed to `ts_has_prop`  
