@@ -127,10 +127,10 @@ INTERFACE int ts_char_val(ts_ptr p) { return ivalue_unchecked(p); }
 
 inline INTERFACE bool ts_is_port(ts_ptr p) { return (type(p) == T_PORT); }
 INTERFACE bool is_inport(ts_ptr p) {
-  return ts_is_port(p) && p->_object._port->kind & ts_port_input;
+  return ts_is_port(p) && p->_object._port->kind & TS_PORT_INPUT;
 }
 INTERFACE bool is_outport(ts_ptr p) {
-  return ts_is_port(p) && p->_object._port->kind & ts_port_output;
+  return ts_is_port(p) && p->_object._port->kind & TS_PORT_OUTPUT;
 }
 
 inline INTERFACE bool ts_is_pair(ts_ptr p) { return (type(p) == T_PAIR); }
@@ -1200,9 +1200,9 @@ static void finalize_cell(scheme *sc, ts_ptr a) {
   if (ts_is_str(a)) {
     sc->free(strvalue(a));
   } else if (ts_is_port(a)) {
-    if (a->_object._port->kind & ts_port_file &&
+    if (a->_object._port->kind & TS_PORT_FILE &&
         a->_object._port->rep.stdio.closeit) {
-      port_close(sc, a, ts_port_input | ts_port_output);
+      port_close(sc, a, TS_PORT_INPUT | TS_PORT_OUTPUT);
     }
     sc->free(a->_object._port);
   }
@@ -1222,7 +1222,7 @@ static int file_push(scheme *sc, const char *fname) {
   fin = fopen(fname, "r");
   if (fin != 0) {
     sc->file_i++;
-    sc->load_stack[sc->file_i].kind = ts_port_file | ts_port_input;
+    sc->load_stack[sc->file_i].kind = TS_PORT_FILE | TS_PORT_INPUT;
     sc->load_stack[sc->file_i].rep.stdio.file = fin;
     sc->load_stack[sc->file_i].rep.stdio.closeit = 1;
     sc->nesting_stack[sc->file_i] = 0;
@@ -1241,7 +1241,7 @@ static int file_push(scheme *sc, const char *fname) {
 static void file_pop(scheme *sc) {
   if (sc->file_i != 0) {
     sc->nesting = sc->nesting_stack[sc->file_i];
-    port_close(sc, sc->loadport, ts_port_input);
+    port_close(sc, sc->loadport, TS_PORT_INPUT);
     sc->file_i--;
     sc->loadport->_object._port = sc->load_stack + sc->file_i;
   }
@@ -1250,16 +1250,16 @@ static void file_pop(scheme *sc) {
 static bool file_interactive(scheme *sc) {
   return (sc->file_i == 0) &&
          (sc->load_stack[0].rep.stdio.file == stdin) &&
-         ((sc->inport->_object._port->kind & ts_port_file) != 0);
+         ((sc->inport->_object._port->kind & TS_PORT_FILE) != 0);
 }
 
 static ts_port *port_rep_from_filename(scheme *sc, const char *fn, int prop) {
   FILE *f;
   char *rw;
   ts_port *pt;
-  if (prop == (ts_port_input | ts_port_output)) {
+  if (prop == (TS_PORT_INPUT | TS_PORT_OUTPUT)) {
     rw = "a+";
-  } else if (prop == ts_port_output) {
+  } else if (prop == TS_PORT_OUTPUT) {
     rw = "w";
   } else {
     rw = "r";
@@ -1295,7 +1295,7 @@ static ts_port *port_rep_from_file(scheme *sc, FILE *f, int prop) {
   if (pt == NULL) {
     return NULL;
   }
-  pt->kind = ts_port_file | prop;
+  pt->kind = TS_PORT_FILE | prop;
   pt->rep.stdio.file = f;
   pt->rep.stdio.closeit = 0;
   return pt;
@@ -1317,7 +1317,7 @@ static ts_port *port_rep_from_string(scheme *sc, char *start,
   if (pt == 0) {
     return 0;
   }
-  pt->kind = ts_port_string | prop;
+  pt->kind = TS_PORT_STRING | prop;
   pt->rep.string.start = start;
   pt->rep.string.curr = start;
   pt->rep.string.past_the_end = past_the_end;
@@ -1349,7 +1349,7 @@ static ts_port *port_rep_from_scratch(scheme *sc) {
   }
   memset(start, ' ', BLOCK_SIZE - 1);
   start[BLOCK_SIZE - 1] = '\0';
-  pt->kind = ts_port_string | ts_port_output | ts_port_srfi6;
+  pt->kind = TS_PORT_STRING | TS_PORT_OUTPUT | TS_PORT_SRFI6;
   pt->rep.string.start = start;
   pt->rep.string.curr = start;
   pt->rep.string.past_the_end = start + BLOCK_SIZE - 1;
@@ -1368,8 +1368,8 @@ static ts_ptr port_from_scratch(scheme *sc) {
 static void port_close(scheme *sc, ts_ptr p, int flag) {
   ts_port *pt = p->_object._port;
   pt->kind &= ~flag;
-  if ((pt->kind & (ts_port_input | ts_port_output)) == 0) {
-    if (pt->kind & ts_port_file) {
+  if ((pt->kind & (TS_PORT_INPUT | TS_PORT_OUTPUT)) == 0) {
+    if (pt->kind & TS_PORT_FILE) {
 #if SHOW_ERROR_LINE
       /* Cleanup is here so (close-*-port) functions could work too */
       pt->rep.stdio.curr_line = 0;
@@ -1379,7 +1379,7 @@ static void port_close(scheme *sc, ts_ptr p, int flag) {
 
       fclose(pt->rep.stdio.file);
     }
-    pt->kind = ts_port_free;
+    pt->kind = TS_PORT_FREE;
   }
 }
 
@@ -1389,13 +1389,13 @@ static int inchar(scheme *sc) {
   ts_port *pt;
 
   pt = sc->inport->_object._port;
-  if (pt->kind & ts_port_saw_EOF) {
+  if (pt->kind & TS_PORT_SAW_EOF) {
     return EOF;
   }
   c = basic_inchar(pt);
   if (c == EOF && sc->inport == sc->loadport) {
-    /* Instead, set ts_port_saw_EOF */
-    pt->kind |= ts_port_saw_EOF;
+    /* Instead, set TS_PORT_SAW_EOF */
+    pt->kind |= TS_PORT_SAW_EOF;
 
     /* file_pop(sc); */
     return EOF;
@@ -1405,7 +1405,7 @@ static int inchar(scheme *sc) {
 }
 
 static int basic_inchar(ts_port *pt) {
-  if (pt->kind & ts_port_file) {
+  if (pt->kind & TS_PORT_FILE) {
     return fgetc(pt->rep.stdio.file);
   } else {
     if (*pt->rep.string.curr == 0 ||
@@ -1422,7 +1422,7 @@ static void backchar(scheme *sc, char c) {
   ts_port *pt;
   if (c == EOF) return;
   pt = sc->inport->_object._port;
-  if (pt->kind & ts_port_file) {
+  if (pt->kind & TS_PORT_FILE) {
     ungetc(c, pt->rep.stdio.file);
   } else {
     if (pt->rep.string.curr != pt->rep.string.start) {
@@ -1451,13 +1451,13 @@ static int realloc_port_string(scheme *sc, ts_port *p) {
 
 INTERFACE void ts_put_str(scheme *sc, const char *s) {
   ts_port *pt = sc->outport->_object._port;
-  if (pt->kind & ts_port_file) {
+  if (pt->kind & TS_PORT_FILE) {
     fputs(s, pt->rep.stdio.file);
   } else {
     for (; *s; s++) {
       if (pt->rep.string.curr != pt->rep.string.past_the_end) {
         *pt->rep.string.curr++ = *s;
-      } else if (pt->kind & ts_port_srfi6 && realloc_port_string(sc, pt)) {
+      } else if (pt->kind & TS_PORT_SRFI6 && realloc_port_string(sc, pt)) {
         *pt->rep.string.curr++ = *s;
       }
     }
@@ -1466,13 +1466,13 @@ INTERFACE void ts_put_str(scheme *sc, const char *s) {
 
 static void putchars(scheme *sc, const char *s, int len) {
   ts_port *pt = sc->outport->_object._port;
-  if (pt->kind & ts_port_file) {
+  if (pt->kind & TS_PORT_FILE) {
     fwrite(s, 1, len, pt->rep.stdio.file);
   } else {
     for (; len; len--) {
       if (pt->rep.string.curr != pt->rep.string.past_the_end) {
         *pt->rep.string.curr++ = *s++;
-      } else if (pt->kind & ts_port_srfi6 && realloc_port_string(sc, pt)) {
+      } else if (pt->kind & TS_PORT_SRFI6 && realloc_port_string(sc, pt)) {
         *pt->rep.string.curr++ = *s++;
       }
     }
@@ -1481,12 +1481,12 @@ static void putchars(scheme *sc, const char *s, int len) {
 
 INTERFACE void ts_put_char(scheme *sc, char c) {
   ts_port *pt = sc->outport->_object._port;
-  if (pt->kind & ts_port_file) {
+  if (pt->kind & TS_PORT_FILE) {
     fputc(c, pt->rep.stdio.file);
   } else {
     if (pt->rep.string.curr != pt->rep.string.past_the_end) {
       *pt->rep.string.curr++ = c;
-    } else if (pt->kind & ts_port_srfi6 && realloc_port_string(sc, pt)) {
+    } else if (pt->kind & TS_PORT_SRFI6 && realloc_port_string(sc, pt)) {
       *pt->rep.string.curr++ = c;
     }
   }
@@ -1638,7 +1638,7 @@ inline static int skipspace(scheme *sc) {
 
 /* record it */
 #if SHOW_ERROR_LINE
-  if (sc->load_stack[sc->file_i].kind & ts_port_file)
+  if (sc->load_stack[sc->file_i].kind & TS_PORT_FILE)
     sc->load_stack[sc->file_i].rep.stdio.curr_line += curr_line;
 #endif
 
@@ -1680,7 +1680,7 @@ static int token(scheme *sc) {
         ;
 
 #if SHOW_ERROR_LINE
-      if (c == '\n' && sc->load_stack[sc->file_i].kind & ts_port_file)
+      if (c == '\n' && sc->load_stack[sc->file_i].kind & TS_PORT_FILE)
         sc->load_stack[sc->file_i].rep.stdio.curr_line++;
 #endif
 
@@ -1709,7 +1709,7 @@ static int token(scheme *sc) {
           ;
 
 #if SHOW_ERROR_LINE
-        if (c == '\n' && sc->load_stack[sc->file_i].kind & ts_port_file)
+        if (c == '\n' && sc->load_stack[sc->file_i].kind & TS_PORT_FILE)
           sc->load_stack[sc->file_i].rep.stdio.curr_line++;
 #endif
 
@@ -2180,7 +2180,7 @@ static ts_ptr _Error_1(scheme *sc, const char *s, ts_ptr a) {
   char sbuf[TS_STRBUFFSIZE];
 
   /* make sure error is not in REPL */
-  if (sc->load_stack[sc->file_i].kind & ts_port_file &&
+  if (sc->load_stack[sc->file_i].kind & TS_PORT_FILE &&
       sc->load_stack[sc->file_i].rep.stdio.file != stdin) {
     int ln = sc->load_stack[sc->file_i].rep.stdio.curr_line;
     const char *fname = sc->load_stack[sc->file_i].rep.stdio.filename;
@@ -2366,7 +2366,7 @@ static ts_ptr opexe_0(scheme *sc, enum opcodes op) {
 
     case OP_T0LVL: /* top level */
       /* If we reached the end of file, this loop is done. */
-      if (sc->loadport->_object._port->kind & ts_port_saw_EOF) {
+      if (sc->loadport->_object._port->kind & TS_PORT_SAW_EOF) {
         if (sc->file_i == 0) {
           sc->args = sc->nil;
           s_goto(sc, OP_QUIT);
@@ -3782,13 +3782,13 @@ static ts_ptr opexe_4(scheme *sc, enum opcodes op) {
       ts_ptr p;
       switch (op) {
         case OP_OPEN_INFILE:
-          prop = ts_port_input;
+          prop = TS_PORT_INPUT;
           break;
         case OP_OPEN_OUTFILE:
-          prop = ts_port_output;
+          prop = TS_PORT_OUTPUT;
           break;
         case OP_OPEN_INOUTFILE:
-          prop = ts_port_input | ts_port_output;
+          prop = TS_PORT_INPUT | TS_PORT_OUTPUT;
           break;
         default:
           break; /* Quiet the compiler */
@@ -3807,10 +3807,10 @@ static ts_ptr opexe_4(scheme *sc, enum opcodes op) {
       ts_ptr p;
       switch (op) {
         case OP_OPEN_INSTRING:
-          prop = ts_port_input;
+          prop = TS_PORT_INPUT;
           break;
         case OP_OPEN_INOUTSTRING:
-          prop = ts_port_input | ts_port_output;
+          prop = TS_PORT_INPUT | TS_PORT_OUTPUT;
           break;
         default:
           break; /* Quiet the compiler */
@@ -3843,7 +3843,7 @@ static ts_ptr opexe_4(scheme *sc, enum opcodes op) {
     case OP_GET_OUTSTRING: /* get-output-string */ {
       ts_port *p;
 
-      if ((p = car(sc->args)->_object._port)->kind & ts_port_string) {
+      if ((p = car(sc->args)->_object._port)->kind & TS_PORT_STRING) {
         off_t size;
         char *str;
 
@@ -3864,11 +3864,11 @@ static ts_ptr opexe_4(scheme *sc, enum opcodes op) {
 #endif
 
     case OP_CLOSE_INPORT: /* close-input-port */
-      port_close(sc, car(sc->args), ts_port_input);
+      port_close(sc, car(sc->args), TS_PORT_INPUT);
       s_return(sc, sc->T);
 
     case OP_CLOSE_OUTPORT: /* close-output-port */
-      port_close(sc, car(sc->args), ts_port_output);
+      port_close(sc, car(sc->args), TS_PORT_OUTPUT);
       s_return(sc, sc->T);
 
     case OP_INT_ENV: /* interaction-environment */
@@ -3939,7 +3939,7 @@ static ts_ptr opexe_5(scheme *sc, enum opcodes op) {
       if (ts_is_pair(sc->args)) {
         p = car(sc->args);
       }
-      res = p->_object._port->kind & ts_port_string;
+      res = p->_object._port->kind & TS_PORT_STRING;
       s_retbool(res);
     }
 
@@ -4050,7 +4050,7 @@ static ts_ptr opexe_5(scheme *sc, enum opcodes op) {
         char c = inchar(sc);
         if (c != '\n') backchar(sc, c);
 #if SHOW_ERROR_LINE
-        else if (sc->load_stack[sc->file_i].kind & ts_port_file)
+        else if (sc->load_stack[sc->file_i].kind & TS_PORT_FILE)
           sc->load_stack[sc->file_i].rep.stdio.curr_line++;
 #endif
         sc->nesting_stack[sc->file_i]--;
@@ -4680,19 +4680,19 @@ bool ts_init_custom_alloc(scheme *sc, ts_func_alloc malloc,
 }
 
 void ts_set_in_port_file(scheme *sc, FILE *fin) {
-  sc->inport = port_from_file(sc, fin, ts_port_input);
+  sc->inport = port_from_file(sc, fin, TS_PORT_INPUT);
 }
 
 void ts_set_in_port_str(scheme *sc, char *start, char *past_the_end) {
-  sc->inport = port_from_string(sc, start, past_the_end, ts_port_input);
+  sc->inport = port_from_string(sc, start, past_the_end, TS_PORT_INPUT);
 }
 
 void ts_set_out_port_file(scheme *sc, FILE *fout) {
-  sc->outport = port_from_file(sc, fout, ts_port_output);
+  sc->outport = port_from_file(sc, fout, TS_PORT_OUTPUT);
 }
 
 void ts_set_out_port_str(scheme *sc, char *start, char *past_the_end) {
-  sc->outport = port_from_string(sc, start, past_the_end, ts_port_output);
+  sc->outport = port_from_string(sc, start, past_the_end, TS_PORT_OUTPUT);
 }
 
 void ts_set_extern_data(scheme *sc, void *p) { sc->ext_data = p; }
@@ -4733,7 +4733,7 @@ void ts_deinit(scheme *sc) {
 
 #if SHOW_ERROR_LINE
   for (i = 0; i <= sc->file_i; i++) {
-    if (sc->load_stack[i].kind & ts_port_file) {
+    if (sc->load_stack[i].kind & TS_PORT_FILE) {
       fname = sc->load_stack[i].rep.stdio.filename;
       if (fname) sc->free(fname);
     }
@@ -4763,7 +4763,7 @@ void load_named_file(scheme *sc, FILE *fin, const char *filename) {
   dump_stack_reset(sc);
   sc->envir = sc->global_env;
   sc->file_i = 0;
-  sc->load_stack[0].kind = ts_port_input | ts_port_file;
+  sc->load_stack[0].kind = TS_PORT_INPUT | TS_PORT_FILE;
   sc->load_stack[0].rep.stdio.file = fin;
   sc->loadport = mk_port(sc, sc->load_stack);
   sc->retcode = 0;
@@ -4793,7 +4793,7 @@ void ts_load_str(scheme *sc, const char *cmd) {
   dump_stack_reset(sc);
   sc->envir = sc->global_env;
   sc->file_i = 0;
-  sc->load_stack[0].kind = ts_port_input | ts_port_string;
+  sc->load_stack[0].kind = TS_PORT_INPUT | TS_PORT_STRING;
   sc->load_stack[0].rep.string.start =
       (char *)cmd; /* This func respects const */
   sc->load_stack[0].rep.string.past_the_end = (char *)cmd + strlen(cmd);
