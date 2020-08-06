@@ -110,30 +110,30 @@ struct scheme {
 
   struct ts_cell _sink;
   ts_ptr sink; /* when mem. alloc. fails */
-  struct ts_cell _NIL;
+  struct ts_cell _nil;
   ts_ptr nil; /* special cell representing empty cell */
-  struct ts_cell _HASHT;
+  struct ts_cell _hasht;
   ts_ptr T; /* special cell representing #t */
-  struct ts_cell _HASHF;
+  struct ts_cell _hashf;
   ts_ptr F; /* special cell representing #f */
-  struct ts_cell _EOF_OBJ;
-  ts_ptr EOF_OBJ;    /* special cell representing end-of-file object */
+  struct ts_cell _eof_obj;
+  ts_ptr eof_obj;    /* special cell representing end-of-file object */
   ts_ptr oblist;     /* pointer to symbol table */
   ts_ptr global_env; /* pointer to global environment */
   ts_ptr c_nest;     /* stack for nested calls from C */
 
   /* global pointers to special symbols */
-  ts_ptr LAMBDA; /* pointer to syntax lambda */
-  ts_ptr QUOTE;  /* pointer to syntax quote */
+  ts_ptr lambda; /* pointer to syntax lambda */
+  ts_ptr quote;  /* pointer to syntax quote */
 
-  ts_ptr QQUOTE;       /* pointer to symbol quasiquote */
-  ts_ptr UNQUOTE;      /* pointer to symbol unquote */
-  ts_ptr UNQUOTESP;    /* pointer to symbol unquote-splicing */
-  ts_ptr FEED_TO;      /* => */
-  ts_ptr COLON_HOOK;   /* *colon-hook* */
-  ts_ptr ERROR_HOOK;   /* *error-hook* */
-  ts_ptr SHARP_HOOK;   /* *sharp-hook* */
-  ts_ptr COMPILE_HOOK; /* *compile-hook* */
+  ts_ptr qquote;       /* pointer to symbol quasiquote */
+  ts_ptr unquote;      /* pointer to symbol unquote */
+  ts_ptr unquotesp;    /* pointer to symbol unquote-splicing */
+  ts_ptr feed_to;      /* => */
+  ts_ptr colon_hook;   /* *colon-hook* */
+  ts_ptr error_hook;   /* *error-hook* */
+  ts_ptr sharp_hook;   /* *sharp-hook* */
+  ts_ptr compile_hook; /* *compile-hook* */
 
   ts_ptr free_cell; /* pointer to top of free cells */
   int fcells;       /* # of free cells */

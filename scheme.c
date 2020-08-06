@@ -963,9 +963,9 @@ static ts_ptr mk_atom(scheme *sc, char *q) {
 #if USE_COLON_HOOK
   if ((p = strstr(q, "::")) != 0) {
     *p = 0;
-    return ts_cons(sc, sc->COLON_HOOK,
+    return ts_cons(sc, sc->colon_hook,
                    ts_cons(sc,
-                           ts_cons(sc, sc->QUOTE,
+                           ts_cons(sc, sc->quote,
                                    ts_cons(sc, mk_atom(sc, p + 2), sc->nil)),
                            ts_cons(sc, ts_mk_sym(sc, strlwr(q)), sc->nil)));
   }
@@ -1800,7 +1800,7 @@ static void atom2str(scheme *sc, ts_ptr l, int f, char **pp, int *plen) {
     p = "#t";
   } else if (l == sc->F) {
     p = "#f";
-  } else if (l == sc->EOF_OBJ) {
+  } else if (l == sc->eof_obj) {
     p = "#<EOF>";
   } else if (ts_is_port(l)) {
     p = "#<PORT>";
@@ -2173,7 +2173,7 @@ static ts_ptr _Error_1(scheme *sc, const char *s, ts_ptr a) {
   const char *str = s;
 #if USE_ERROR_HOOK
   ts_ptr x;
-  ts_ptr hdl = sc->ERROR_HOOK;
+  ts_ptr hdl = sc->error_hook;
 #endif
 
 #if SHOW_ERROR_LINE
@@ -2200,7 +2200,7 @@ static ts_ptr _Error_1(scheme *sc, const char *s, ts_ptr a) {
   x = find_slot_in_env(sc, sc->envir, hdl, 1);
   if (x != sc->nil) {
     if (a != 0) {
-      sc->code = ts_cons(sc, ts_cons(sc, sc->QUOTE, ts_cons(sc, (a), sc->nil)),
+      sc->code = ts_cons(sc, ts_cons(sc, sc->quote, ts_cons(sc, (a), sc->nil)),
                          sc->nil);
     } else {
       sc->code = sc->nil;
@@ -2402,7 +2402,7 @@ static ts_ptr opexe_0(scheme *sc, enum opcodes op) {
     case OP_READ_INTERNAL: /* internal read */
       sc->tok = token(sc);
       if (sc->tok == TOK_EOF) {
-        s_return(sc, sc->EOF_OBJ);
+        s_return(sc, sc->eof_obj);
       }
       s_goto(sc, OP_RDSEXPR);
 
@@ -2552,7 +2552,7 @@ static ts_ptr opexe_0(scheme *sc, enum opcodes op) {
       /* If the hook is defined, apply it to sc->code, otherwise
          set sc->value fall thru */
       {
-        ts_ptr f = find_slot_in_env(sc, sc->envir, sc->COMPILE_HOOK, 1);
+        ts_ptr f = find_slot_in_env(sc, sc->envir, sc->compile_hook, 1);
         if (f == sc->nil) {
           sc->value = sc->code;
           /* Fallthru */
@@ -2575,7 +2575,7 @@ static ts_ptr opexe_0(scheme *sc, enum opcodes op) {
 
     case OP_MKCLOSURE: /* make-closure */
       x = car(sc->args);
-      if (car(x) == sc->LAMBDA) {
+      if (car(x) == sc->lambda) {
         x = cdr(x);
       }
       if (cdr(sc->args) == sc->nil) {
@@ -2595,7 +2595,7 @@ static ts_ptr opexe_0(scheme *sc, enum opcodes op) {
       if (ts_is_pair(car(sc->code))) {
         x = caar(sc->code);
         sc->code =
-            ts_cons(sc, sc->LAMBDA, ts_cons(sc, cdar(sc->code), cdr(sc->code)));
+            ts_cons(sc, sc->lambda, ts_cons(sc, cdar(sc->code), cdr(sc->code)));
       } else {
         x = car(sc->code);
         sc->code = cadr(sc->code);
@@ -2799,11 +2799,11 @@ static ts_ptr opexe_1(scheme *sc, enum opcodes op) {
         if ((sc->code = cdar(sc->code)) == sc->nil) {
           s_return(sc, sc->value);
         }
-        if (!sc->code || car(sc->code) == sc->FEED_TO) {
+        if (!sc->code || car(sc->code) == sc->feed_to) {
           if (!ts_is_pair(cdr(sc->code))) {
             Error_0(sc, "syntax error in cond");
           }
-          x = ts_cons(sc, sc->QUOTE, ts_cons(sc, sc->value, sc->nil));
+          x = ts_cons(sc, sc->quote, ts_cons(sc, sc->value, sc->nil));
           sc->code = ts_cons(sc, cadr(sc->code), ts_cons(sc, x, sc->nil));
           s_goto(sc, OP_EVAL);
         }
@@ -2876,7 +2876,7 @@ static ts_ptr opexe_1(scheme *sc, enum opcodes op) {
       if (ts_is_pair(car(sc->code))) {
         x = caar(sc->code);
         sc->code =
-            ts_cons(sc, sc->LAMBDA, ts_cons(sc, cdar(sc->code), cdr(sc->code)));
+            ts_cons(sc, sc->lambda, ts_cons(sc, cdar(sc->code), cdr(sc->code)));
       } else {
         x = car(sc->code);
         sc->code = cadr(sc->code);
@@ -3510,7 +3510,7 @@ static ts_ptr opexe_3(scheme *sc, enum opcodes op) {
     case OP_BOOLP: /* boolean? */
       s_retbool(car(sc->args) == sc->F || car(sc->args) == sc->T);
     case OP_EOFOBJP: /* boolean? */
-      s_retbool(car(sc->args) == sc->EOF_OBJ);
+      s_retbool(car(sc->args) == sc->eof_obj);
     case OP_NULLP: /* null? */
       s_retbool(car(sc->args) == sc->nil);
     case OP_NUMEQ: /* = */
@@ -3925,7 +3925,7 @@ static ts_ptr opexe_5(scheme *sc, enum opcodes op) {
       }
       c = inchar(sc);
       if (c == EOF) {
-        s_return(sc, sc->EOF_OBJ);
+        s_return(sc, sc->eof_obj);
       }
       if (sc->op == OP_PEEK_CHAR) {
         backchar(sc, c);
@@ -3954,7 +3954,7 @@ static ts_ptr opexe_5(scheme *sc, enum opcodes op) {
     case OP_RDSEXPR:
       switch (sc->tok) {
         case TOK_EOF:
-          s_return(sc, sc->EOF_OBJ);
+          s_return(sc, sc->eof_obj);
           /* NOTREACHED */
           /*
            * Commented out because we now skip comments in the scanner
@@ -4013,7 +4013,7 @@ static ts_ptr opexe_5(scheme *sc, enum opcodes op) {
           ts_set_immutable(x);
           s_return(sc, x);
         case TOK_SHARP: {
-          ts_ptr f = find_slot_in_env(sc, sc->envir, sc->SHARP_HOOK, 1);
+          ts_ptr f = find_slot_in_env(sc, sc->envir, sc->sharp_hook, 1);
           if (f == sc->nil) {
             Error_0(sc, "undefined sharp expression");
           } else {
@@ -4045,7 +4045,7 @@ static ts_ptr opexe_5(scheme *sc, enum opcodes op) {
                 }
       */
       if (sc->tok == TOK_EOF) {
-        s_return(sc, sc->EOF_OBJ);
+        s_return(sc, sc->eof_obj);
       } else if (sc->tok == TOK_RPAREN) {
         char c = inchar(sc);
         if (c != '\n') backchar(sc, c);
@@ -4075,25 +4075,25 @@ static ts_ptr opexe_5(scheme *sc, enum opcodes op) {
       }
 
     case OP_RDQUOTE:
-      s_return(sc, ts_cons(sc, sc->QUOTE, ts_cons(sc, sc->value, sc->nil)));
+      s_return(sc, ts_cons(sc, sc->quote, ts_cons(sc, sc->value, sc->nil)));
 
     case OP_RDQQUOTE:
-      s_return(sc, ts_cons(sc, sc->QQUOTE, ts_cons(sc, sc->value, sc->nil)));
+      s_return(sc, ts_cons(sc, sc->qquote, ts_cons(sc, sc->value, sc->nil)));
 
     case OP_RDQQUOTEVEC:
       s_return(sc,
                ts_cons(sc, ts_mk_sym(sc, "apply"),
                        ts_cons(sc, ts_mk_sym(sc, "vector"),
                                ts_cons(sc,
-                                       ts_cons(sc, sc->QQUOTE,
+                                       ts_cons(sc, sc->qquote,
                                                ts_cons(sc, sc->value, sc->nil)),
                                        sc->nil))));
 
     case OP_RDUNQUOTE:
-      s_return(sc, ts_cons(sc, sc->UNQUOTE, ts_cons(sc, sc->value, sc->nil)));
+      s_return(sc, ts_cons(sc, sc->unquote, ts_cons(sc, sc->value, sc->nil)));
 
     case OP_RDUQTSP:
-      s_return(sc, ts_cons(sc, sc->UNQUOTESP, ts_cons(sc, sc->value, sc->nil)));
+      s_return(sc, ts_cons(sc, sc->unquotesp, ts_cons(sc, sc->value, sc->nil)));
 
     case OP_RDVEC:
       /*sc->code=ts_cons(sc,mk_proc(sc,OP_VECTOR),sc->value);
@@ -4118,19 +4118,19 @@ static ts_ptr opexe_5(scheme *sc, enum opcodes op) {
       } else if (!ts_is_pair(sc->args)) {
         printatom(sc, sc->args, sc->print_flag);
         s_return(sc, sc->T);
-      } else if (car(sc->args) == sc->QUOTE && ok_abbrev(cdr(sc->args))) {
+      } else if (car(sc->args) == sc->quote && ok_abbrev(cdr(sc->args))) {
         ts_put_str(sc, "'");
         sc->args = cadr(sc->args);
         s_goto(sc, OP_P0LIST);
-      } else if (car(sc->args) == sc->QQUOTE && ok_abbrev(cdr(sc->args))) {
+      } else if (car(sc->args) == sc->qquote && ok_abbrev(cdr(sc->args))) {
         ts_put_str(sc, "`");
         sc->args = cadr(sc->args);
         s_goto(sc, OP_P0LIST);
-      } else if (car(sc->args) == sc->UNQUOTE && ok_abbrev(cdr(sc->args))) {
+      } else if (car(sc->args) == sc->unquote && ok_abbrev(cdr(sc->args))) {
         ts_put_str(sc, ",");
         sc->args = cadr(sc->args);
         s_goto(sc, OP_P0LIST);
-      } else if (car(sc->args) == sc->UNQUOTESP && ok_abbrev(cdr(sc->args))) {
+      } else if (car(sc->args) == sc->unquotesp && ok_abbrev(cdr(sc->args))) {
         ts_put_str(sc, ",@");
         sc->args = cadr(sc->args);
         s_goto(sc, OP_P0LIST);
@@ -4214,9 +4214,9 @@ static ts_ptr opexe_6(scheme *sc, enum opcodes op) {
       if (sc->args == sc->nil) {
         s_return(sc, sc->F);
       } else if (ts_is_closure(sc->args)) {
-        s_return(sc, ts_cons(sc, sc->LAMBDA, ts_closure_code(sc->value)));
+        s_return(sc, ts_cons(sc, sc->lambda, ts_closure_code(sc->value)));
       } else if (ts_is_macro(sc->args)) {
-        s_return(sc, ts_cons(sc, sc->LAMBDA, ts_closure_code(sc->value)));
+        s_return(sc, ts_cons(sc, sc->lambda, ts_closure_code(sc->value)));
       } else {
         s_return(sc, sc->F);
       }
@@ -4595,11 +4595,11 @@ bool ts_init_custom_alloc(scheme *sc, ts_func_alloc malloc,
   sc->free = free;
   sc->last_cell_seg = -1;
   sc->sink = &sc->_sink;
-  sc->nil = &sc->_NIL;
-  sc->T = &sc->_HASHT;
-  sc->F = &sc->_HASHF;
-  sc->EOF_OBJ = &sc->_EOF_OBJ;
-  sc->free_cell = &sc->_NIL;
+  sc->nil = &sc->_nil;
+  sc->T = &sc->_hasht;
+  sc->F = &sc->_hashf;
+  sc->eof_obj = &sc->_eof_obj;
+  sc->free_cell = &sc->_nil;
   sc->fcells = 0;
   sc->no_memory = false;
   sc->inport = sc->nil;
@@ -4665,16 +4665,16 @@ bool ts_init_custom_alloc(scheme *sc, ts_func_alloc malloc,
   }
 
   /* initialization of global pointers to special symbols */
-  sc->LAMBDA = ts_mk_sym(sc, "lambda");
-  sc->QUOTE = ts_mk_sym(sc, "quote");
-  sc->QQUOTE = ts_mk_sym(sc, "quasiquote");
-  sc->UNQUOTE = ts_mk_sym(sc, "unquote");
-  sc->UNQUOTESP = ts_mk_sym(sc, "unquote-splicing");
-  sc->FEED_TO = ts_mk_sym(sc, "=>");
-  sc->COLON_HOOK = ts_mk_sym(sc, "*colon-hook*");
-  sc->ERROR_HOOK = ts_mk_sym(sc, "*error-hook*");
-  sc->SHARP_HOOK = ts_mk_sym(sc, "*sharp-hook*");
-  sc->COMPILE_HOOK = ts_mk_sym(sc, "*compile-hook*");
+  sc->lambda = ts_mk_sym(sc, "lambda");
+  sc->quote = ts_mk_sym(sc, "quote");
+  sc->qquote = ts_mk_sym(sc, "quasiquote");
+  sc->unquote = ts_mk_sym(sc, "unquote");
+  sc->unquotesp = ts_mk_sym(sc, "unquote-splicing");
+  sc->feed_to = ts_mk_sym(sc, "=>");
+  sc->colon_hook = ts_mk_sym(sc, "*colon-hook*");
+  sc->error_hook = ts_mk_sym(sc, "*error-hook*");
+  sc->sharp_hook = ts_mk_sym(sc, "*sharp-hook*");
+  sc->compile_hook = ts_mk_sym(sc, "*compile-hook*");
 
   return !sc->no_memory;
 }
