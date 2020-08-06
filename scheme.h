@@ -111,7 +111,7 @@ struct scheme {
   struct ts_cell _sink;
   ts_ptr sink; /* when mem. alloc. fails */
   struct ts_cell _NIL;
-  ts_ptr NIL; /* special cell representing empty cell */
+  ts_ptr nil; /* special cell representing empty cell */
   struct ts_cell _HASHT;
   ts_ptr T; /* special cell representing #t */
   struct ts_cell _HASHF;

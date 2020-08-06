@@ -486,15 +486,15 @@ static int alloc_cellseg(scheme *sc, int n) {
     for (p = newp; p <= last; p++) {
       typeflag(p) = 0;
       cdr(p) = p + 1;
-      car(p) = sc->NIL;
+      car(p) = sc->nil;
     }
     /* insert new cells in address order on free list */
-    if (sc->free_cell == sc->NIL || p < sc->free_cell) {
+    if (sc->free_cell == sc->nil || p < sc->free_cell) {
       cdr(last) = sc->free_cell;
       sc->free_cell = newp;
     } else {
       p = sc->free_cell;
-      while (cdr(p) != sc->NIL && newp > cdr(p)) p = cdr(p);
+      while (cdr(p) != sc->nil && newp > cdr(p)) p = cdr(p);
       cdr(last) = cdr(p);
       cdr(p) = newp;
     }
@@ -503,7 +503,7 @@ static int alloc_cellseg(scheme *sc, int n) {
 }
 
 static inline ts_ptr get_cell_x(scheme *sc, ts_ptr a, ts_ptr b) {
-  if (sc->free_cell != sc->NIL) {
+  if (sc->free_cell != sc->nil) {
     ts_ptr x = sc->free_cell;
     sc->free_cell = cdr(x);
     --sc->fcells;
@@ -520,12 +520,12 @@ static ts_ptr _get_cell(scheme *sc, ts_ptr a, ts_ptr b) {
     return sc->sink;
   }
 
-  if (sc->free_cell == sc->NIL) {
+  if (sc->free_cell == sc->nil) {
     const int min_to_be_recovered = sc->last_cell_seg * 8;
     gc(sc, a, b);
-    if (sc->fcells < min_to_be_recovered || sc->free_cell == sc->NIL) {
+    if (sc->fcells < min_to_be_recovered || sc->free_cell == sc->nil) {
       /* if only a few recovered, get more to avoid fruitless gc's */
-      if (!alloc_cellseg(sc, 1) && sc->free_cell == sc->NIL) {
+      if (!alloc_cellseg(sc, 1) && sc->free_cell == sc->nil) {
         sc->no_memory = 1;
         return sc->sink;
       }
@@ -540,24 +540,24 @@ static ts_ptr _get_cell(scheme *sc, ts_ptr a, ts_ptr b) {
 /* make sure that there is a given number of cells free */
 ts_ptr ts_reserve_cells(scheme *sc, int n) {
   if (sc->no_memory) {
-    return sc->NIL;
+    return sc->nil;
   }
 
   /* Are there enough cells available? */
   if (sc->fcells < n) {
     /* If not, try gc'ing some */
-    gc(sc, sc->NIL, sc->NIL);
+    gc(sc, sc->nil, sc->nil);
     if (sc->fcells < n) {
       /* If there still aren't, try getting more heap */
       if (!alloc_cellseg(sc, 1)) {
         sc->no_memory = 1;
-        return sc->NIL;
+        return sc->nil;
       }
     }
     if (sc->fcells < n) {
       /* If all fail, report failure */
       sc->no_memory = 1;
-      return sc->NIL;
+      return sc->nil;
     }
   }
   return (sc->T);
@@ -572,14 +572,14 @@ static ts_ptr get_consecutive_cells(scheme *sc, int n) {
 
   /* Are there any cells available? */
   x = find_consecutive_cells(sc, n);
-  if (x != sc->NIL) {
+  if (x != sc->nil) {
     return x;
   }
 
   /* If not, try gc'ing some */
-  gc(sc, sc->NIL, sc->NIL);
+  gc(sc, sc->nil, sc->nil);
   x = find_consecutive_cells(sc, n);
-  if (x != sc->NIL) {
+  if (x != sc->nil) {
     return x;
   }
 
@@ -590,7 +590,7 @@ static ts_ptr get_consecutive_cells(scheme *sc, int n) {
   }
 
   x = find_consecutive_cells(sc, n);
-  if (x != sc->NIL) {
+  if (x != sc->nil) {
     return x;
   }
 
@@ -614,7 +614,7 @@ static ts_ptr find_consecutive_cells(scheme *sc, int n) {
   int cnt;
 
   pp = &sc->free_cell;
-  while (*pp != sc->NIL) {
+  while (*pp != sc->nil) {
     cnt = count_consecutive_cells(*pp, n);
     if (cnt >= n) {
       ts_ptr x = *pp;
@@ -624,7 +624,7 @@ static ts_ptr find_consecutive_cells(scheme *sc, int n) {
     }
     pp = &cdr(*pp + cnt - 1);
   }
-  return sc->NIL;
+  return sc->nil;
 }
 
 /* To retain recent allocs before interpreter knows about them -
@@ -646,7 +646,7 @@ ts_ptr get_cell(scheme *sc, ts_ptr a, ts_ptr b) {
   typeflag(cell) = T_PAIR;
   car(cell) = a;
   cdr(cell) = b;
-  push_recent_alloc(sc, cell, sc->NIL);
+  push_recent_alloc(sc, cell, sc->nil);
   return cell;
 }
 
@@ -660,11 +660,11 @@ static ts_ptr get_vector_object(scheme *sc, int len, ts_ptr init) {
   ivalue_unchecked(cells) = len;
   set_num_integer(cells);
   ts_fill_vec(cells, init);
-  push_recent_alloc(sc, cells, sc->NIL);
+  push_recent_alloc(sc, cells, sc->nil);
   return cells;
 }
 
-inline static void ok_to_freely_gc(scheme *sc) { car(sc->sink) = sc->NIL; }
+inline static void ok_to_freely_gc(scheme *sc) { car(sc->sink) = sc->nil; }
 
 #if defined TSGRIND
 static void check_cell_alloced(ts_ptr p, int expect_alloced) {
@@ -724,7 +724,7 @@ static ts_ptr oblist_add_by_name(scheme *sc, const char *name) {
   ts_ptr x;
   int location;
 
-  x = ts_immutable_cons(sc, ts_mk_str(sc, name), sc->NIL);
+  x = ts_immutable_cons(sc, ts_mk_str(sc, name), sc->nil);
   typeflag(x) = T_SYMBOL;
   ts_set_immutable(car(x));
 
@@ -740,23 +740,23 @@ inline static ts_ptr oblist_find_by_name(scheme *sc, const char *name) {
   char *s;
 
   location = hash_fn(name, ivalue_unchecked(sc->oblist));
-  for (x = ts_vec_elem(sc->oblist, location); x != sc->NIL; x = cdr(x)) {
+  for (x = ts_vec_elem(sc->oblist, location); x != sc->nil; x = cdr(x)) {
     s = ts_sym_name(car(x));
     /* case-insensitive, per R5RS section 2. */
     if (stricmp(name, s) == 0) {
       return car(x);
     }
   }
-  return sc->NIL;
+  return sc->nil;
 }
 
 static ts_ptr oblist_all_symbols(scheme *sc) {
   int i;
   ts_ptr x;
-  ts_ptr ob_list = sc->NIL;
+  ts_ptr ob_list = sc->nil;
 
   for (i = 0; i < ivalue_unchecked(sc->oblist); i++) {
-    for (x = ts_vec_elem(sc->oblist, i); x != sc->NIL; x = cdr(x)) {
+    for (x = ts_vec_elem(sc->oblist, i); x != sc->nil; x = cdr(x)) {
       ob_list = ts_cons(sc, x, ob_list);
     }
   }
@@ -765,27 +765,27 @@ static ts_ptr oblist_all_symbols(scheme *sc) {
 
 #else
 
-static ts_ptr oblist_initial_value(scheme *sc) { return sc->NIL; }
+static ts_ptr oblist_initial_value(scheme *sc) { return sc->nil; }
 
 inline static ts_ptr oblist_find_by_name(scheme *sc, const char *name) {
   ts_ptr x;
   char *s;
 
-  for (x = sc->oblist; x != sc->NIL; x = cdr(x)) {
+  for (x = sc->oblist; x != sc->nil; x = cdr(x)) {
     s = ts_sym_name(car(x));
     /* case-insensitive, per R5RS section 2. */
     if (stricmp(name, s) == 0) {
       return car(x);
     }
   }
-  return sc->NIL;
+  return sc->nil;
 }
 
 /* returns the new symbol */
 static ts_ptr oblist_add_by_name(scheme *sc, const char *name) {
   ts_ptr x;
 
-  x = ts_immutable_cons(sc, ts_mk_str(sc, name), sc->NIL);
+  x = ts_immutable_cons(sc, ts_mk_str(sc, name), sc->nil);
   typeflag(x) = T_SYMBOL;
   ts_set_immutable(car(x));
   sc->oblist = ts_immutable_cons(sc, x, sc->oblist);
@@ -796,7 +796,7 @@ static ts_ptr oblist_all_symbols(scheme *sc) { return sc->oblist; }
 #endif
 
 static ts_ptr mk_port(scheme *sc, ts_port *p) {
-  ts_ptr x = get_cell(sc, sc->NIL, sc->NIL);
+  ts_ptr x = get_cell(sc, sc->nil, sc->nil);
 
   typeflag(x) = T_PORT | T_ATOM;
   x->_object._port = p;
@@ -804,7 +804,7 @@ static ts_ptr mk_port(scheme *sc, ts_port *p) {
 }
 
 ts_ptr ts_mk_foreign_func(scheme *sc, ts_foreign_func f) {
-  ts_ptr x = get_cell(sc, sc->NIL, sc->NIL);
+  ts_ptr x = get_cell(sc, sc->nil, sc->nil);
 
   typeflag(x) = (T_FOREIGN | T_ATOM);
   x->_object._ff = f;
@@ -812,7 +812,7 @@ ts_ptr ts_mk_foreign_func(scheme *sc, ts_foreign_func f) {
 }
 
 INTERFACE ts_ptr ts_mk_char(scheme *sc, char c) {
-  ts_ptr x = get_cell(sc, sc->NIL, sc->NIL);
+  ts_ptr x = get_cell(sc, sc->nil, sc->nil);
 
   typeflag(x) = (T_CHARACTER | T_ATOM);
   ivalue_unchecked(x) = c;
@@ -822,7 +822,7 @@ INTERFACE ts_ptr ts_mk_char(scheme *sc, char c) {
 
 /* get number atom (integer) */
 INTERFACE ts_ptr ts_mk_int(scheme *sc, int n) {
-  ts_ptr x = get_cell(sc, sc->NIL, sc->NIL);
+  ts_ptr x = get_cell(sc, sc->nil, sc->nil);
 
   typeflag(x) = (T_NUMBER | T_ATOM);
   ivalue_unchecked(x) = n;
@@ -831,7 +831,7 @@ INTERFACE ts_ptr ts_mk_int(scheme *sc, int n) {
 }
 
 INTERFACE ts_ptr ts_mk_real(scheme *sc, double n) {
-  ts_ptr x = get_cell(sc, sc->NIL, sc->NIL);
+  ts_ptr x = get_cell(sc, sc->nil, sc->nil);
 
   typeflag(x) = (T_NUMBER | T_ATOM);
   rvalue_unchecked(x) = n;
@@ -871,7 +871,7 @@ INTERFACE ts_ptr ts_mk_str(scheme *sc, const char *str) {
 }
 
 INTERFACE ts_ptr ts_mk_counted_str(scheme *sc, const char *str, int len) {
-  ts_ptr x = get_cell(sc, sc->NIL, sc->NIL);
+  ts_ptr x = get_cell(sc, sc->nil, sc->nil);
   typeflag(x) = (T_STRING | T_ATOM);
   strvalue(x) = store_string(sc, len, str, 0);
   strlength(x) = len;
@@ -879,7 +879,7 @@ INTERFACE ts_ptr ts_mk_counted_str(scheme *sc, const char *str, int len) {
 }
 
 INTERFACE ts_ptr ts_mk_empty_str(scheme *sc, int len, char fill) {
-  ts_ptr x = get_cell(sc, sc->NIL, sc->NIL);
+  ts_ptr x = get_cell(sc, sc->nil, sc->nil);
   typeflag(x) = (T_STRING | T_ATOM);
   strvalue(x) = store_string(sc, len, 0, fill);
   strlength(x) = len;
@@ -887,7 +887,7 @@ INTERFACE ts_ptr ts_mk_empty_str(scheme *sc, int len, char fill) {
 }
 
 INTERFACE ts_ptr ts_mk_vec(scheme *sc, int len) {
-  return get_vector_object(sc, len, sc->NIL);
+  return get_vector_object(sc, len, sc->nil);
 }
 
 INTERFACE void ts_fill_vec(ts_ptr vec, ts_ptr obj) {
@@ -925,7 +925,7 @@ INTERFACE ts_ptr ts_mk_sym(scheme *sc, const char *name) {
 
   /* first check oblist */
   x = oblist_find_by_name(sc, name);
-  if (x != sc->NIL) {
+  if (x != sc->nil) {
     return (x);
   } else {
     x = oblist_add_by_name(sc, name);
@@ -943,7 +943,7 @@ INTERFACE ts_ptr ts_gen_sym(scheme *sc) {
     /* first check oblist */
     x = oblist_find_by_name(sc, name);
 
-    if (x != sc->NIL) {
+    if (x != sc->nil) {
       continue;
     } else {
       x = oblist_add_by_name(sc, name);
@@ -951,7 +951,7 @@ INTERFACE ts_ptr ts_gen_sym(scheme *sc) {
     }
   }
 
-  return sc->NIL;
+  return sc->nil;
 }
 
 /* make symbol or number atom from string */
@@ -966,8 +966,8 @@ static ts_ptr mk_atom(scheme *sc, char *q) {
     return ts_cons(sc, sc->COLON_HOOK,
                    ts_cons(sc,
                            ts_cons(sc, sc->QUOTE,
-                                   ts_cons(sc, mk_atom(sc, p + 2), sc->NIL)),
-                           ts_cons(sc, ts_mk_sym(sc, strlwr(q)), sc->NIL)));
+                                   ts_cons(sc, mk_atom(sc, p + 2), sc->nil)),
+                           ts_cons(sc, ts_mk_sym(sc, strlwr(q)), sc->nil)));
   }
 #endif
 
@@ -1055,7 +1055,7 @@ static ts_ptr mk_sharp_const(scheme *sc, char *name) {
       if ((*c1_endptr == '\0') && (c1 < UCHAR_MAX)) {
         c = c1;
       } else {
-        return sc->NIL;
+        return sc->nil;
       }
 #if USE_ASCII_NAMES
     } else if (is_ascii_name(name + 1, &c)) {
@@ -1064,11 +1064,11 @@ static ts_ptr mk_sharp_const(scheme *sc, char *name) {
     } else if (name[2] == 0) {
       c = name[1];
     } else {
-      return sc->NIL;
+      return sc->nil;
     }
     return ts_mk_char(sc, c);
   } else
-    return (sc->NIL);
+    return sc->nil;
 }
 
 /* ========== garbage collector ========== */
@@ -1162,9 +1162,9 @@ static void gc(scheme *sc, ts_ptr a, ts_ptr b) {
   mark(b);
 
   /* garbage collect */
-  clrmark(sc->NIL);
+  clrmark(sc->nil);
   sc->fcells = 0;
-  sc->free_cell = sc->NIL;
+  sc->free_cell = sc->nil;
   /* free-list is kept sorted by address so as to maintain consecutive
      ranges, if possible, for use with vectors. Here we scan the cells
      (which are also kept sorted by address) downwards to build the
@@ -1180,7 +1180,7 @@ static void gc(scheme *sc, ts_ptr a, ts_ptr b) {
         if (typeflag(p) != 0) {
           finalize_cell(sc, p);
           typeflag(p) = 0;
-          car(p) = sc->NIL;
+          car(p) = sc->nil;
         }
         ++sc->fcells;
         cdr(p) = sc->free_cell;
@@ -1283,7 +1283,7 @@ static ts_ptr port_from_filename(scheme *sc, const char *fn, int prop) {
   ts_port *pt;
   pt = port_rep_from_filename(sc, fn, prop);
   if (pt == 0) {
-    return sc->NIL;
+    return sc->nil;
   }
   return mk_port(sc, pt);
 }
@@ -1305,7 +1305,7 @@ static ts_ptr port_from_file(scheme *sc, FILE *f, int prop) {
   ts_port *pt;
   pt = port_rep_from_file(sc, f, prop);
   if (pt == 0) {
-    return sc->NIL;
+    return sc->nil;
   }
   return mk_port(sc, pt);
 }
@@ -1329,7 +1329,7 @@ static ts_ptr port_from_string(scheme *sc, char *start, char *past_the_end,
   ts_port *pt;
   pt = port_rep_from_string(sc, start, past_the_end, prop);
   if (pt == 0) {
-    return sc->NIL;
+    return sc->nil;
   }
   return mk_port(sc, pt);
 }
@@ -1360,7 +1360,7 @@ static ts_ptr port_from_scratch(scheme *sc) {
   ts_port *pt;
   pt = port_rep_from_scratch(sc);
   if (pt == 0) {
-    return sc->NIL;
+    return sc->nil;
   }
   return mk_port(sc, pt);
 }
@@ -1733,7 +1733,7 @@ static int token(scheme *sc) {
 }
 
 /* ========== Routines for Printing ========== */
-#define ok_abbrev(x) (ts_is_pair(x) && cdr(x) == sc->NIL)
+#define ok_abbrev(x) (ts_is_pair(x) && cdr(x) == sc->nil)
 
 static void printslashstring(scheme *sc, char *p, int len) {
   int i;
@@ -1794,7 +1794,7 @@ static void printatom(scheme *sc, ts_ptr l, int f) {
 static void atom2str(scheme *sc, ts_ptr l, int f, char **pp, int *plen) {
   char *p;
 
-  if (l == sc->NIL) {
+  if (l == sc->nil) {
     p = "()";
   } else if (l == sc->T) {
     p = "#t";
@@ -1932,7 +1932,7 @@ static ts_ptr mk_closure(scheme *sc, ts_ptr c, ts_ptr e) {
 
 /* make continuation. */
 static ts_ptr mk_continuation(scheme *sc, ts_ptr d) {
-  ts_ptr x = get_cell(sc, sc->NIL, d);
+  ts_ptr x = get_cell(sc, sc->nil, d);
 
   typeflag(x) = T_CONTINUATION;
   cont_dump(x) = d;
@@ -1941,14 +1941,14 @@ static ts_ptr mk_continuation(scheme *sc, ts_ptr d) {
 
 static ts_ptr list_star(scheme *sc, ts_ptr d) {
   ts_ptr p, q;
-  if (cdr(d) == sc->NIL) {
+  if (cdr(d) == sc->nil) {
     return car(d);
   }
   p = ts_cons(sc, car(d), cdr(d));
   q = p;
-  while (cdr(cdr(p)) != sc->NIL) {
+  while (cdr(cdr(p)) != sc->nil) {
     d = ts_cons(sc, car(p), cdr(p));
-    if (cdr(cdr(p)) != sc->NIL) {
+    if (cdr(cdr(p)) != sc->nil) {
       p = cdr(d);
     }
   }
@@ -1959,7 +1959,7 @@ static ts_ptr list_star(scheme *sc, ts_ptr d) {
 /* reverse list -- produce new list */
 static ts_ptr reverse(scheme *sc, ts_ptr a) {
   /* a must be checked by gc */
-  ts_ptr p = sc->NIL;
+  ts_ptr p = sc->nil;
 
   for (; ts_is_pair(a); a = cdr(a)) {
     p = ts_cons(sc, car(a), p);
@@ -1971,7 +1971,7 @@ static ts_ptr reverse(scheme *sc, ts_ptr a) {
 ts_ptr reverse_in_place(scheme *sc, ts_ptr term, ts_ptr list) {
   ts_ptr p = list, result = term, q;
 
-  while (p != sc->NIL) {
+  while (p != sc->nil) {
     q = cdr(p);
     cdr(p) = result;
     result = p;
@@ -1990,7 +1990,7 @@ static ts_ptr revappend(scheme *sc, ts_ptr a, ts_ptr b) {
     p = cdr(p);
   }
 
-  if (p == sc->NIL) {
+  if (p == sc->nil) {
     return result;
   }
 
@@ -2067,10 +2067,10 @@ static void new_frame_in_env(scheme *sc, ts_ptr old_env) {
   ts_ptr new_frame;
 
   /* The interaction-environment has about 300 variables in it. */
-  if (old_env == sc->NIL) {
+  if (old_env == sc->nil) {
     new_frame = ts_mk_vec(sc, 461);
   } else {
-    new_frame = sc->NIL;
+    new_frame = sc->nil;
   }
 
   sc->envir = ts_immutable_cons(sc, new_frame, old_env);
@@ -2096,35 +2096,35 @@ ts_ptr find_slot_in_env(scheme *sc, ts_ptr env, ts_ptr hdl, int all) {
   ts_ptr x, y;
   int location;
 
-  for (x = env; x != sc->NIL; x = cdr(x)) {
+  for (x = env; x != sc->nil; x = cdr(x)) {
     if (ts_is_vec(car(x))) {
       location = hash_fn(ts_sym_name(hdl), ivalue_unchecked(car(x)));
       y = ts_vec_elem(car(x), location);
     } else {
       y = car(x);
     }
-    for (; y != sc->NIL; y = cdr(y)) {
+    for (; y != sc->nil; y = cdr(y)) {
       if (caar(y) == hdl) {
         break;
       }
     }
-    if (y != sc->NIL) {
+    if (y != sc->nil) {
       break;
     }
     if (!all) {
-      return sc->NIL;
+      return sc->nil;
     }
   }
-  if (x != sc->NIL) {
+  if (x != sc->nil) {
     return car(y);
   }
-  return sc->NIL;
+  return sc->nil;
 }
 
 #else /* USE_ALIST_ENV */
 
 inline static void new_frame_in_env(scheme *sc, ts_ptr old_env) {
-  sc->envir = ts_immutable_cons(sc, sc->NIL, old_env);
+  sc->envir = ts_immutable_cons(sc, sc->nil, old_env);
   setenvironment(sc->envir);
 }
 
@@ -2136,23 +2136,23 @@ inline static void new_slot_spec_in_env(scheme *sc, ts_ptr env, ts_ptr variable,
 
 static ts_ptr find_slot_in_env(scheme *sc, ts_ptr env, ts_ptr hdl, int all) {
   ts_ptr x, y;
-  for (x = env; x != sc->NIL; x = cdr(x)) {
-    for (y = car(x); y != sc->NIL; y = cdr(y)) {
+  for (x = env; x != sc->nil; x = cdr(x)) {
+    for (y = car(x); y != sc->nil; y = cdr(y)) {
       if (caar(y) == hdl) {
         break;
       }
     }
-    if (y != sc->NIL) {
+    if (y != sc->nil) {
       break;
     }
     if (!all) {
-      return sc->NIL;
+      return sc->nil;
     }
   }
-  if (x != sc->NIL) {
+  if (x != sc->nil) {
     return car(y);
   }
-  return sc->NIL;
+  return sc->nil;
 }
 
 #endif /* USE_ALIST_ENV else */
@@ -2198,12 +2198,12 @@ static ts_ptr _Error_1(scheme *sc, const char *s, ts_ptr a) {
 
 #if USE_ERROR_HOOK
   x = find_slot_in_env(sc, sc->envir, hdl, 1);
-  if (x != sc->NIL) {
+  if (x != sc->nil) {
     if (a != 0) {
-      sc->code = ts_cons(sc, ts_cons(sc, sc->QUOTE, ts_cons(sc, (a), sc->NIL)),
-                         sc->NIL);
+      sc->code = ts_cons(sc, ts_cons(sc, sc->QUOTE, ts_cons(sc, (a), sc->nil)),
+                         sc->nil);
     } else {
-      sc->code = sc->NIL;
+      sc->code = sc->nil;
     }
     sc->code = ts_cons(sc, ts_mk_str(sc, str), sc->code);
     ts_set_immutable(car(sc->code));
@@ -2214,9 +2214,9 @@ static ts_ptr _Error_1(scheme *sc, const char *s, ts_ptr a) {
 #endif
 
   if (a != 0) {
-    sc->args = ts_cons(sc, (a), sc->NIL);
+    sc->args = ts_cons(sc, (a), sc->nil);
   } else {
-    sc->args = sc->NIL;
+    sc->args = sc->nil;
   }
   sc->args = ts_cons(sc, ts_mk_str(sc, str), sc->args);
   ts_set_immutable(car(sc->args));
@@ -2276,7 +2276,7 @@ static ts_ptr _s_return(scheme *sc, ts_ptr a) {
 
   sc->value = (a);
   if (nframes <= 0) {
-    return sc->NIL;
+    return sc->nil;
   }
   nframes--;
   frame = (struct dump_stack_frame *)sc->dump_base + nframes;
@@ -2320,15 +2320,15 @@ inline static void dump_stack_mark(scheme *sc) {
 
 #else
 
-inline void dump_stack_reset(scheme *sc) { sc->dump = sc->NIL; }
+inline void dump_stack_reset(scheme *sc) { sc->dump = sc->nil; }
 
 inline static void dump_stack_initialize(scheme *sc) { dump_stack_reset(sc); }
 
-static void dump_stack_free(scheme *sc) { sc->dump = sc->NIL; }
+static void dump_stack_free(scheme *sc) { sc->dump = sc->nil; }
 
 static ts_ptr _s_return(scheme *sc, ts_ptr a) {
   sc->value = (a);
-  if (sc->dump == sc->NIL) return sc->NIL;
+  if (sc->dump == sc->nil) return sc->nil;
   sc->op = ts_int_val(car(sc->dump));
   sc->args = cadr(sc->dump);
   sc->envir = caddr(sc->dump);
@@ -2368,7 +2368,7 @@ static ts_ptr opexe_0(scheme *sc, enum opcodes op) {
       /* If we reached the end of file, this loop is done. */
       if (sc->loadport->_object._port->kind & ts_port_saw_EOF) {
         if (sc->file_i == 0) {
-          sc->args = sc->NIL;
+          sc->args = sc->nil;
           s_goto(sc, OP_QUIT);
         } else {
           file_pop(sc);
@@ -2389,9 +2389,9 @@ static ts_ptr opexe_0(scheme *sc, enum opcodes op) {
       sc->nesting = 0;
       sc->save_inport = sc->inport;
       sc->inport = sc->loadport;
-      s_save(sc, OP_T0LVL, sc->NIL, sc->NIL);
-      s_save(sc, OP_VALUEPRINT, sc->NIL, sc->NIL);
-      s_save(sc, OP_T1LVL, sc->NIL, sc->NIL);
+      s_save(sc, OP_T0LVL, sc->nil, sc->nil);
+      s_save(sc, OP_VALUEPRINT, sc->nil, sc->nil);
+      s_save(sc, OP_T1LVL, sc->nil, sc->nil);
       s_goto(sc, OP_READ_INTERNAL);
 
     case OP_T1LVL: /* top level */
@@ -2427,7 +2427,7 @@ static ts_ptr opexe_0(scheme *sc, enum opcodes op) {
     case OP_EVAL: /* main part of evaluation */
 #if USE_TRACING
       if (sc->tracing) {
-        /*s_save(sc,OP_VALUEPRINT,sc->NIL,sc->NIL);*/
+        /*s_save(sc,OP_VALUEPRINT,sc->nil,sc->nil);*/
         s_save(sc, OP_REAL_EVAL, sc->args, sc->code);
         sc->args = sc->code;
         ts_put_str(sc, "\nEval: ");
@@ -2438,7 +2438,7 @@ static ts_ptr opexe_0(scheme *sc, enum opcodes op) {
 #endif
       if (ts_is_sym(sc->code)) { /* symbol */
         x = find_slot_in_env(sc, sc->envir, sc->code, 1);
-        if (x != sc->NIL) {
+        if (x != sc->nil) {
           s_return(sc, slot_value_in_env(x));
         } else {
           Error_1(sc, "eval: unbound variable:", sc->code);
@@ -2448,8 +2448,8 @@ static ts_ptr opexe_0(scheme *sc, enum opcodes op) {
           sc->code = cdr(sc->code);
           s_goto(sc, syntaxnum(x));
         } else { /* first, eval top element and eval arguments */
-          s_save(sc, OP_E0ARGS, sc->NIL, sc->code);
-          /* If no macros => s_save(sc,OP_E1ARGS, sc->NIL, cdr(sc->code));*/
+          s_save(sc, OP_E0ARGS, sc->nil, sc->code);
+          /* If no macros => s_save(sc,OP_E1ARGS, sc->nil, cdr(sc->code));*/
           sc->code = car(sc->code);
           s_goto(sc, OP_EVAL);
         }
@@ -2459,8 +2459,8 @@ static ts_ptr opexe_0(scheme *sc, enum opcodes op) {
 
     case OP_E0ARGS:                 /* eval arguments */
       if (ts_is_macro(sc->value)) { /* macro expansion */
-        s_save(sc, OP_DOMACRO, sc->NIL, sc->NIL);
-        sc->args = ts_cons(sc, sc->code, sc->NIL);
+        s_save(sc, OP_DOMACRO, sc->nil, sc->nil);
+        sc->args = ts_cons(sc, sc->code, sc->nil);
         sc->code = sc->value;
         s_goto(sc, OP_APPLY);
       } else {
@@ -2473,10 +2473,10 @@ static ts_ptr opexe_0(scheme *sc, enum opcodes op) {
       if (ts_is_pair(sc->code)) { /* continue */
         s_save(sc, OP_E1ARGS, sc->args, cdr(sc->code));
         sc->code = car(sc->code);
-        sc->args = sc->NIL;
+        sc->args = sc->nil;
         s_goto(sc, OP_EVAL);
       } else { /* end */
-        sc->args = reverse_in_place(sc, sc->NIL, sc->args);
+        sc->args = reverse_in_place(sc, sc->nil, sc->args);
         sc->code = car(sc->args);
         sc->args = cdr(sc->args);
         s_goto(sc, OP_APPLY);
@@ -2506,7 +2506,7 @@ static ts_ptr opexe_0(scheme *sc, enum opcodes op) {
         s_goto(sc, procnum(sc->code)); /* PROCEDURE */
       } else if (ts_is_foreign(sc->code)) {
         /* Keep nested calls from GC'ing the arglist */
-        push_recent_alloc(sc, sc->args, sc->NIL);
+        push_recent_alloc(sc, sc->args, sc->nil);
         x = sc->code->_object._ff(sc, sc->args);
         s_return(sc, x);
       } else if (ts_is_closure(sc->code) || ts_is_macro(sc->code) ||
@@ -2516,15 +2516,15 @@ static ts_ptr opexe_0(scheme *sc, enum opcodes op) {
         new_frame_in_env(sc, ts_closure_env(sc->code));
         for (x = car(ts_closure_code(sc->code)), y = sc->args; ts_is_pair(x);
              x = cdr(x), y = cdr(y)) {
-          if (y == sc->NIL) {
+          if (y == sc->nil) {
             Error_0(sc, "not enough arguments");
           } else {
             new_slot_in_env(sc, car(x), car(y));
           }
         }
-        if (x == sc->NIL) {
+        if (x == sc->nil) {
           /*--
-           * if (y != sc->NIL) {
+           * if (y != sc->nil) {
            *   Error_0(sc,"too many arguments");
            * }
            */
@@ -2534,11 +2534,11 @@ static ts_ptr opexe_0(scheme *sc, enum opcodes op) {
           Error_1(sc, "syntax error in closure: not a symbol:", x);
         }
         sc->code = cdr(ts_closure_code(sc->code));
-        sc->args = sc->NIL;
+        sc->args = sc->nil;
         s_goto(sc, OP_BEGIN);
       } else if (ts_is_continuation(sc->code)) { /* CONTINUATION */
         sc->dump = cont_dump(sc->code);
-        s_return(sc, sc->args != sc->NIL ? car(sc->args) : sc->NIL);
+        s_return(sc, sc->args != sc->nil ? car(sc->args) : sc->nil);
       } else {
         Error_0(sc, "illegal function");
       }
@@ -2553,12 +2553,12 @@ static ts_ptr opexe_0(scheme *sc, enum opcodes op) {
          set sc->value fall thru */
       {
         ts_ptr f = find_slot_in_env(sc, sc->envir, sc->COMPILE_HOOK, 1);
-        if (f == sc->NIL) {
+        if (f == sc->nil) {
           sc->value = sc->code;
           /* Fallthru */
         } else {
           s_save(sc, OP_LAMBDA1, sc->args, sc->code);
-          sc->args = ts_cons(sc, sc->code, sc->NIL);
+          sc->args = ts_cons(sc, sc->code, sc->nil);
           sc->code = slot_value_in_env(f);
           s_goto(sc, OP_APPLY);
         }
@@ -2578,7 +2578,7 @@ static ts_ptr opexe_0(scheme *sc, enum opcodes op) {
       if (car(x) == sc->LAMBDA) {
         x = cdr(x);
       }
-      if (cdr(sc->args) == sc->NIL) {
+      if (cdr(sc->args) == sc->nil) {
         y = sc->envir;
       } else {
         y = cadr(sc->args);
@@ -2603,12 +2603,12 @@ static ts_ptr opexe_0(scheme *sc, enum opcodes op) {
       if (!ts_is_sym(x)) {
         Error_0(sc, "variable is not a symbol");
       }
-      s_save(sc, OP_DEF1, sc->NIL, x);
+      s_save(sc, OP_DEF1, sc->nil, x);
       s_goto(sc, OP_EVAL);
 
     case OP_DEF1: /* define */
       x = find_slot_in_env(sc, sc->envir, sc->code, 0);
-      if (x != sc->NIL) {
+      if (x != sc->nil) {
         set_slot_in_env(sc, x, sc->value);
       } else {
         new_slot_in_env(sc, sc->code, sc->value);
@@ -2617,21 +2617,21 @@ static ts_ptr opexe_0(scheme *sc, enum opcodes op) {
 
     case OP_DEFP: /* defined? */
       x = sc->envir;
-      if (cdr(sc->args) != sc->NIL) {
+      if (cdr(sc->args) != sc->nil) {
         x = cadr(sc->args);
       }
-      s_retbool(find_slot_in_env(sc, x, car(sc->args), 1) != sc->NIL);
+      s_retbool(find_slot_in_env(sc, x, car(sc->args), 1) != sc->nil);
 
     case OP_SET0: /* set! */
       if (ts_is_immutable(car(sc->code)))
         Error_1(sc, "set!: unable to alter immutable variable", car(sc->code));
-      s_save(sc, OP_SET1, sc->NIL, car(sc->code));
+      s_save(sc, OP_SET1, sc->nil, car(sc->code));
       sc->code = cadr(sc->code);
       s_goto(sc, OP_EVAL);
 
     case OP_SET1: /* set! */
       y = find_slot_in_env(sc, sc->envir, sc->code, 1);
-      if (y != sc->NIL) {
+      if (y != sc->nil) {
         set_slot_in_env(sc, y, sc->value);
         s_return(sc, sc->value);
       } else {
@@ -2642,14 +2642,14 @@ static ts_ptr opexe_0(scheme *sc, enum opcodes op) {
       if (!ts_is_pair(sc->code)) {
         s_return(sc, sc->code);
       }
-      if (cdr(sc->code) != sc->NIL) {
-        s_save(sc, OP_BEGIN, sc->NIL, cdr(sc->code));
+      if (cdr(sc->code) != sc->nil) {
+        s_save(sc, OP_BEGIN, sc->nil, cdr(sc->code));
       }
       sc->code = car(sc->code);
       s_goto(sc, OP_EVAL);
 
     case OP_IF0: /* if */
-      s_save(sc, OP_IF1, sc->NIL, cdr(sc->code));
+      s_save(sc, OP_IF1, sc->nil, cdr(sc->code));
       sc->code = car(sc->code);
       s_goto(sc, OP_EVAL);
 
@@ -2658,11 +2658,11 @@ static ts_ptr opexe_0(scheme *sc, enum opcodes op) {
         sc->code = car(sc->code);
       else
         sc->code = cadr(sc->code); /* (if #f 1) ==> () because
-                                    * car(sc->NIL) = sc->NIL */
+                                    * car(sc->nil) = sc->nil */
       s_goto(sc, OP_EVAL);
 
     case OP_LET0: /* let */
-      sc->args = sc->NIL;
+      sc->args = sc->nil;
       sc->value = sc->code;
       sc->code = ts_is_sym(car(sc->code)) ? cadr(sc->code) : car(sc->code);
       s_goto(sc, OP_LET1);
@@ -2675,10 +2675,10 @@ static ts_ptr opexe_0(scheme *sc, enum opcodes op) {
         }
         s_save(sc, OP_LET1, sc->args, cdr(sc->code));
         sc->code = cadar(sc->code);
-        sc->args = sc->NIL;
+        sc->args = sc->nil;
         s_goto(sc, OP_EVAL);
       } else { /* end */
-        sc->args = reverse_in_place(sc, sc->NIL, sc->args);
+        sc->args = reverse_in_place(sc, sc->nil, sc->args);
         sc->code = car(sc->args);
         sc->args = cdr(sc->args);
         s_goto(sc, OP_LET2);
@@ -2688,31 +2688,31 @@ static ts_ptr opexe_0(scheme *sc, enum opcodes op) {
       new_frame_in_env(sc, sc->envir);
       for (x = ts_is_sym(car(sc->code)) ? cadr(sc->code) : car(sc->code),
           y = sc->args;
-           y != sc->NIL; x = cdr(x), y = cdr(y)) {
+           y != sc->nil; x = cdr(x), y = cdr(y)) {
         new_slot_in_env(sc, caar(x), car(y));
       }
       if (ts_is_sym(car(sc->code))) { /* named let */
-        for (x = cadr(sc->code), sc->args = sc->NIL; x != sc->NIL; x = cdr(x)) {
+        for (x = cadr(sc->code), sc->args = sc->nil; x != sc->nil; x = cdr(x)) {
           if (!ts_is_pair(x)) Error_1(sc, "Bad syntax of binding in let :", x);
           if (!ts_is_list(sc, car(x)))
             Error_1(sc, "Bad syntax of binding in let :", car(x));
           sc->args = ts_cons(sc, caar(x), sc->args);
         }
         x = mk_closure(sc,
-                       ts_cons(sc, reverse_in_place(sc, sc->NIL, sc->args),
+                       ts_cons(sc, reverse_in_place(sc, sc->nil, sc->args),
                                cddr(sc->code)),
                        sc->envir);
         new_slot_in_env(sc, car(sc->code), x);
         sc->code = cddr(sc->code);
-        sc->args = sc->NIL;
+        sc->args = sc->nil;
       } else {
         sc->code = cdr(sc->code);
-        sc->args = sc->NIL;
+        sc->args = sc->nil;
       }
       s_goto(sc, OP_BEGIN);
 
     case OP_LET0AST: /* let* */
-      if (car(sc->code) == sc->NIL) {
+      if (car(sc->code) == sc->nil) {
         new_frame_in_env(sc, sc->envir);
         sc->code = cdr(sc->code);
         s_goto(sc, OP_BEGIN);
@@ -2735,11 +2735,11 @@ static ts_ptr opexe_0(scheme *sc, enum opcodes op) {
       if (ts_is_pair(sc->code)) { /* continue */
         s_save(sc, OP_LET2AST, sc->args, sc->code);
         sc->code = cadar(sc->code);
-        sc->args = sc->NIL;
+        sc->args = sc->nil;
         s_goto(sc, OP_EVAL);
       } else { /* end */
         sc->code = sc->args;
-        sc->args = sc->NIL;
+        sc->args = sc->nil;
         s_goto(sc, OP_BEGIN);
       }
     default:
@@ -2755,7 +2755,7 @@ static ts_ptr opexe_1(scheme *sc, enum opcodes op) {
   switch (op) {
     case OP_LET0REC: /* letrec */
       new_frame_in_env(sc, sc->envir);
-      sc->args = sc->NIL;
+      sc->args = sc->nil;
       sc->value = sc->code;
       sc->code = car(sc->code);
       s_goto(sc, OP_LET1REC);
@@ -2768,107 +2768,107 @@ static ts_ptr opexe_1(scheme *sc, enum opcodes op) {
         }
         s_save(sc, OP_LET1REC, sc->args, cdr(sc->code));
         sc->code = cadar(sc->code);
-        sc->args = sc->NIL;
+        sc->args = sc->nil;
         s_goto(sc, OP_EVAL);
       } else { /* end */
-        sc->args = reverse_in_place(sc, sc->NIL, sc->args);
+        sc->args = reverse_in_place(sc, sc->nil, sc->args);
         sc->code = car(sc->args);
         sc->args = cdr(sc->args);
         s_goto(sc, OP_LET2REC);
       }
 
     case OP_LET2REC: /* letrec */
-      for (x = car(sc->code), y = sc->args; y != sc->NIL;
+      for (x = car(sc->code), y = sc->args; y != sc->nil;
            x = cdr(x), y = cdr(y)) {
         new_slot_in_env(sc, caar(x), car(y));
       }
       sc->code = cdr(sc->code);
-      sc->args = sc->NIL;
+      sc->args = sc->nil;
       s_goto(sc, OP_BEGIN);
 
     case OP_COND0: /* cond */
       if (!ts_is_pair(sc->code)) {
         Error_0(sc, "syntax error in cond");
       }
-      s_save(sc, OP_COND1, sc->NIL, sc->code);
+      s_save(sc, OP_COND1, sc->nil, sc->code);
       sc->code = caar(sc->code);
       s_goto(sc, OP_EVAL);
 
     case OP_COND1: /* cond */
       if (is_true(sc->value)) {
-        if ((sc->code = cdar(sc->code)) == sc->NIL) {
+        if ((sc->code = cdar(sc->code)) == sc->nil) {
           s_return(sc, sc->value);
         }
         if (!sc->code || car(sc->code) == sc->FEED_TO) {
           if (!ts_is_pair(cdr(sc->code))) {
             Error_0(sc, "syntax error in cond");
           }
-          x = ts_cons(sc, sc->QUOTE, ts_cons(sc, sc->value, sc->NIL));
-          sc->code = ts_cons(sc, cadr(sc->code), ts_cons(sc, x, sc->NIL));
+          x = ts_cons(sc, sc->QUOTE, ts_cons(sc, sc->value, sc->nil));
+          sc->code = ts_cons(sc, cadr(sc->code), ts_cons(sc, x, sc->nil));
           s_goto(sc, OP_EVAL);
         }
         s_goto(sc, OP_BEGIN);
       } else {
-        if ((sc->code = cdr(sc->code)) == sc->NIL) {
-          s_return(sc, sc->NIL);
+        if ((sc->code = cdr(sc->code)) == sc->nil) {
+          s_return(sc, sc->nil);
         } else {
-          s_save(sc, OP_COND1, sc->NIL, sc->code);
+          s_save(sc, OP_COND1, sc->nil, sc->code);
           sc->code = caar(sc->code);
           s_goto(sc, OP_EVAL);
         }
       }
 
     case OP_DELAY: /* delay */
-      x = mk_closure(sc, ts_cons(sc, sc->NIL, sc->code), sc->envir);
+      x = mk_closure(sc, ts_cons(sc, sc->nil, sc->code), sc->envir);
       typeflag(x) = T_PROMISE;
       s_return(sc, x);
 
     case OP_AND0: /* and */
-      if (sc->code == sc->NIL) {
+      if (sc->code == sc->nil) {
         s_return(sc, sc->T);
       }
-      s_save(sc, OP_AND1, sc->NIL, cdr(sc->code));
+      s_save(sc, OP_AND1, sc->nil, cdr(sc->code));
       sc->code = car(sc->code);
       s_goto(sc, OP_EVAL);
 
     case OP_AND1: /* and */
       if (is_false(sc->value)) {
         s_return(sc, sc->value);
-      } else if (sc->code == sc->NIL) {
+      } else if (sc->code == sc->nil) {
         s_return(sc, sc->value);
       } else {
-        s_save(sc, OP_AND1, sc->NIL, cdr(sc->code));
+        s_save(sc, OP_AND1, sc->nil, cdr(sc->code));
         sc->code = car(sc->code);
         s_goto(sc, OP_EVAL);
       }
 
     case OP_OR0: /* or */
-      if (sc->code == sc->NIL) {
+      if (sc->code == sc->nil) {
         s_return(sc, sc->F);
       }
-      s_save(sc, OP_OR1, sc->NIL, cdr(sc->code));
+      s_save(sc, OP_OR1, sc->nil, cdr(sc->code));
       sc->code = car(sc->code);
       s_goto(sc, OP_EVAL);
 
     case OP_OR1: /* or */
       if (is_true(sc->value)) {
         s_return(sc, sc->value);
-      } else if (sc->code == sc->NIL) {
+      } else if (sc->code == sc->nil) {
         s_return(sc, sc->value);
       } else {
-        s_save(sc, OP_OR1, sc->NIL, cdr(sc->code));
+        s_save(sc, OP_OR1, sc->nil, cdr(sc->code));
         sc->code = car(sc->code);
         s_goto(sc, OP_EVAL);
       }
 
     case OP_C0STREAM: /* cons-stream */
-      s_save(sc, OP_C1STREAM, sc->NIL, cdr(sc->code));
+      s_save(sc, OP_C1STREAM, sc->nil, cdr(sc->code));
       sc->code = car(sc->code);
       s_goto(sc, OP_EVAL);
 
     case OP_C1STREAM:       /* cons-stream */
       sc->args = sc->value; /* save sc->value to register sc->args for gc */
-      x = mk_closure(sc, ts_cons(sc, sc->NIL, sc->code), sc->envir);
+      x = mk_closure(sc, ts_cons(sc, sc->nil, sc->code), sc->envir);
       typeflag(x) = T_PROMISE;
       s_return(sc, ts_cons(sc, sc->args, x));
 
@@ -2884,13 +2884,13 @@ static ts_ptr opexe_1(scheme *sc, enum opcodes op) {
       if (!ts_is_sym(x)) {
         Error_0(sc, "variable is not a symbol");
       }
-      s_save(sc, OP_MACRO1, sc->NIL, x);
+      s_save(sc, OP_MACRO1, sc->nil, x);
       s_goto(sc, OP_EVAL);
 
     case OP_MACRO1: /* macro */
       typeflag(sc->value) = T_MACRO;
       x = find_slot_in_env(sc, sc->envir, sc->code, 0);
-      if (x != sc->NIL) {
+      if (x != sc->nil) {
         set_slot_in_env(sc, x, sc->value);
       } else {
         new_slot_in_env(sc, sc->code, sc->value);
@@ -2898,42 +2898,42 @@ static ts_ptr opexe_1(scheme *sc, enum opcodes op) {
       s_return(sc, sc->code);
 
     case OP_CASE0: /* case */
-      s_save(sc, OP_CASE1, sc->NIL, cdr(sc->code));
+      s_save(sc, OP_CASE1, sc->nil, cdr(sc->code));
       sc->code = car(sc->code);
       s_goto(sc, OP_EVAL);
 
     case OP_CASE1: /* case */
-      for (x = sc->code; x != sc->NIL; x = cdr(x)) {
+      for (x = sc->code; x != sc->nil; x = cdr(x)) {
         if (!ts_is_pair(y = caar(x))) {
           break;
         }
-        for (; y != sc->NIL; y = cdr(y)) {
+        for (; y != sc->nil; y = cdr(y)) {
           if (ts_eqv(car(y), sc->value)) {
             break;
           }
         }
-        if (y != sc->NIL) {
+        if (y != sc->nil) {
           break;
         }
       }
-      if (x != sc->NIL) {
+      if (x != sc->nil) {
         if (ts_is_pair(caar(x))) {
           sc->code = cdar(x);
           s_goto(sc, OP_BEGIN);
         } else { /* else */
-          s_save(sc, OP_CASE2, sc->NIL, cdar(x));
+          s_save(sc, OP_CASE2, sc->nil, cdar(x));
           sc->code = caar(x);
           s_goto(sc, OP_EVAL);
         }
       } else {
-        s_return(sc, sc->NIL);
+        s_return(sc, sc->nil);
       }
 
     case OP_CASE2: /* case */
       if (is_true(sc->value)) {
         s_goto(sc, OP_BEGIN);
       } else {
-        s_return(sc, sc->NIL);
+        s_return(sc, sc->nil);
       }
 
     case OP_PAPPLY: /* apply */
@@ -2943,7 +2943,7 @@ static ts_ptr opexe_1(scheme *sc, enum opcodes op) {
       s_goto(sc, OP_APPLY);
 
     case OP_PEVAL: /* eval */
-      if (cdr(sc->args) != sc->NIL) {
+      if (cdr(sc->args) != sc->nil) {
         sc->envir = cadr(sc->args);
       }
       sc->code = car(sc->args);
@@ -2951,7 +2951,7 @@ static ts_ptr opexe_1(scheme *sc, enum opcodes op) {
 
     case OP_CONTINUATION: /* call-with-current-continuation */
       sc->code = car(sc->args);
-      sc->args = ts_cons(sc, mk_continuation(sc, sc->dump), sc->NIL);
+      sc->args = ts_cons(sc, mk_continuation(sc, sc->dump), sc->nil);
       s_goto(sc, OP_APPLY);
 
     default:
@@ -3010,7 +3010,7 @@ static ts_ptr opexe_2(scheme *sc, enum opcodes op) {
 
     case OP_ATAN:
       x = car(sc->args);
-      if (cdr(sc->args) == sc->NIL) {
+      if (cdr(sc->args) == sc->nil) {
         s_return(sc, ts_mk_real(sc, atan(ts_real_val(x))));
       } else {
         ts_ptr y = cadr(sc->args);
@@ -3074,40 +3074,40 @@ static ts_ptr opexe_2(scheme *sc, enum opcodes op) {
 
     case OP_ADD: /* + */
       v = num_zero;
-      for (x = sc->args; x != sc->NIL; x = cdr(x)) {
+      for (x = sc->args; x != sc->nil; x = cdr(x)) {
         v = num_add(v, ts_num_val(car(x)));
       }
       s_return(sc, mk_number(sc, v));
 
     case OP_MUL: /* * */
       v = num_one;
-      for (x = sc->args; x != sc->NIL; x = cdr(x)) {
+      for (x = sc->args; x != sc->nil; x = cdr(x)) {
         v = num_mul(v, ts_num_val(car(x)));
       }
       s_return(sc, mk_number(sc, v));
 
     case OP_SUB: /* - */
-      if (cdr(sc->args) == sc->NIL) {
+      if (cdr(sc->args) == sc->nil) {
         x = sc->args;
         v = num_zero;
       } else {
         x = cdr(sc->args);
         v = ts_num_val(car(sc->args));
       }
-      for (; x != sc->NIL; x = cdr(x)) {
+      for (; x != sc->nil; x = cdr(x)) {
         v = num_sub(v, ts_num_val(car(x)));
       }
       s_return(sc, mk_number(sc, v));
 
     case OP_DIV: /* / */
-      if (cdr(sc->args) == sc->NIL) {
+      if (cdr(sc->args) == sc->nil) {
         x = sc->args;
         v = num_one;
       } else {
         x = cdr(sc->args);
         v = ts_num_val(car(sc->args));
       }
-      for (; x != sc->NIL; x = cdr(x)) {
+      for (; x != sc->nil; x = cdr(x)) {
         if (!is_zero_double(ts_real_val(car(x))))
           v = num_div(v, ts_num_val(car(x)));
         else {
@@ -3204,7 +3204,7 @@ static ts_ptr opexe_2(scheme *sc, enum opcodes op) {
     case OP_STR2ATOM: /* string->atom */ {
       char *s = strvalue(car(sc->args));
       int pf = 0;
-      if (cdr(sc->args) != sc->NIL) {
+      if (cdr(sc->args) != sc->nil) {
         /* we know cadr(sc->args) is a natural number */
         /* see if it is 2, 8, 10, or 16, or error */
         pf = ivalue_unchecked(cadr(sc->args));
@@ -3241,7 +3241,7 @@ static ts_ptr opexe_2(scheme *sc, enum opcodes op) {
     case OP_ATOM2STR: /* atom->string */ {
       int pf = 0;
       x = car(sc->args);
-      if (cdr(sc->args) != sc->NIL) {
+      if (cdr(sc->args) != sc->nil) {
         /* we know cadr(sc->args) is a natural number */
         /* see if it is 2, 8, 10, or 16, or error */
         pf = ivalue_unchecked(cadr(sc->args));
@@ -3270,7 +3270,7 @@ static ts_ptr opexe_2(scheme *sc, enum opcodes op) {
 
       len = ts_int_val(car(sc->args));
 
-      if (cdr(sc->args) != sc->NIL) {
+      if (cdr(sc->args) != sc->nil) {
         fill = ts_char_val(cadr(sc->args));
       }
       s_return(sc, ts_mk_empty_str(sc, len, (char)fill));
@@ -3334,12 +3334,12 @@ static ts_ptr opexe_2(scheme *sc, enum opcodes op) {
       char *pos;
 
       /* compute needed length for new string */
-      for (x = sc->args; x != sc->NIL; x = cdr(x)) {
+      for (x = sc->args; x != sc->nil; x = cdr(x)) {
         len += strlength(car(x));
       }
       newstr = ts_mk_empty_str(sc, len, ' ');
       /* store the contents of the argument strings into the new string */
-      for (pos = strvalue(newstr), x = sc->args; x != sc->NIL;
+      for (pos = strvalue(newstr), x = sc->args; x != sc->nil;
            pos += strlength(car(x)), x = cdr(x)) {
         memcpy(pos, strvalue(car(x)), strlength(car(x)));
       }
@@ -3360,7 +3360,7 @@ static ts_ptr opexe_2(scheme *sc, enum opcodes op) {
         Error_1(sc, "substring: start out of bounds:", cadr(sc->args));
       }
 
-      if (cddr(sc->args) != sc->NIL) {
+      if (cddr(sc->args) != sc->nil) {
         index1 = ts_int_val(caddr(sc->args));
         if (index1 > strlength(car(sc->args)) || index1 < index0) {
           Error_1(sc, "substring: end out of bounds:", caddr(sc->args));
@@ -3395,20 +3395,20 @@ static ts_ptr opexe_2(scheme *sc, enum opcodes op) {
     }
 
     case OP_MKVECTOR: { /* make-vector */
-      ts_ptr fill = sc->NIL;
+      ts_ptr fill = sc->nil;
       int len;
       ts_ptr vec;
 
       len = ts_int_val(car(sc->args));
 
-      if (cdr(sc->args) != sc->NIL) {
+      if (cdr(sc->args) != sc->nil) {
         fill = cadr(sc->args);
       }
       vec = ts_mk_vec(sc, len);
       if (sc->no_memory) {
         s_return(sc, sc->sink);
       }
-      if (fill != sc->NIL) {
+      if (fill != sc->nil) {
         ts_fill_vec(vec, fill);
       }
       s_return(sc, vec);
@@ -3478,11 +3478,11 @@ int ts_list_len(scheme *sc, ts_ptr a) {
 
   slow = fast = a;
   while (1) {
-    if (fast == sc->NIL) return i;
+    if (fast == sc->nil) return i;
     if (!ts_is_pair(fast)) return -2 - i;
     fast = cdr(fast);
     ++i;
-    if (fast == sc->NIL) return i;
+    if (fast == sc->nil) return i;
     if (!ts_is_pair(fast)) return -2 - i;
     ++i;
     fast = cdr(fast);
@@ -3512,7 +3512,7 @@ static ts_ptr opexe_3(scheme *sc, enum opcodes op) {
     case OP_EOFOBJP: /* boolean? */
       s_retbool(car(sc->args) == sc->EOF_OBJ);
     case OP_NULLP: /* null? */
-      s_retbool(car(sc->args) == sc->NIL);
+      s_retbool(car(sc->args) == sc->nil);
     case OP_NUMEQ: /* = */
     case OP_LESS:  /* < */
     case OP_GRE:   /* > */
@@ -3541,7 +3541,7 @@ static ts_ptr opexe_3(scheme *sc, enum opcodes op) {
       v = ts_num_val(car(x));
       x = cdr(x);
 
-      for (; x != sc->NIL; x = cdr(x)) {
+      for (; x != sc->nil; x = cdr(x)) {
         if (!comp_func(v, ts_num_val(car(x)))) {
           s_retbool(0);
         }
@@ -3615,8 +3615,8 @@ static ts_ptr opexe_4(scheme *sc, enum opcodes op) {
       sc->code = car(sc->args);
       if (ts_is_promise(sc->code)) {
         /* Should change type to closure here */
-        s_save(sc, OP_SAVE_FORCED, sc->NIL, sc->code);
-        sc->args = sc->NIL;
+        s_save(sc, OP_SAVE_FORCED, sc->nil, sc->code);
+        sc->args = sc->nil;
         s_goto(sc, OP_APPLY);
       } else {
         s_return(sc, sc->code);
@@ -3631,8 +3631,8 @@ static ts_ptr opexe_4(scheme *sc, enum opcodes op) {
     case OP_WRITE_CHAR: /* write-char */
       if (ts_is_pair(cdr(sc->args))) {
         if (cadr(sc->args) != sc->outport) {
-          x = ts_cons(sc, sc->outport, sc->NIL);
-          s_save(sc, OP_SET_OUTPORT, x, sc->NIL);
+          x = ts_cons(sc, sc->outport, sc->nil);
+          s_save(sc, OP_SET_OUTPORT, x, sc->nil);
           sc->outport = cadr(sc->args);
         }
       }
@@ -3647,8 +3647,8 @@ static ts_ptr opexe_4(scheme *sc, enum opcodes op) {
     case OP_NEWLINE: /* newline */
       if (ts_is_pair(sc->args)) {
         if (car(sc->args) != sc->outport) {
-          x = ts_cons(sc, sc->outport, sc->NIL);
-          s_save(sc, OP_SET_OUTPORT, x, sc->NIL);
+          x = ts_cons(sc, sc->outport, sc->nil);
+          s_save(sc, OP_SET_OUTPORT, x, sc->nil);
           sc->outport = car(sc->args);
         }
       }
@@ -3668,8 +3668,8 @@ static ts_ptr opexe_4(scheme *sc, enum opcodes op) {
 
     case OP_ERR1: /* error */
       ts_put_str(sc, " ");
-      if (sc->args != sc->NIL) {
-        s_save(sc, OP_ERR1, cdr(sc->args), sc->NIL);
+      if (sc->args != sc->nil) {
+        s_save(sc, OP_ERR1, cdr(sc->args), sc->nil);
         sc->args = car(sc->args);
         sc->print_flag = 1;
         s_goto(sc, OP_P0LIST);
@@ -3678,7 +3678,7 @@ static ts_ptr opexe_4(scheme *sc, enum opcodes op) {
         if (sc->interactive_repl) {
           s_goto(sc, OP_T0LVL);
         } else {
-          return sc->NIL;
+          return sc->nil;
         }
       }
 
@@ -3689,7 +3689,7 @@ static ts_ptr opexe_4(scheme *sc, enum opcodes op) {
       s_return(sc, list_star(sc, sc->args));
 
     case OP_APPEND: /* append */
-      x = sc->NIL;
+      x = sc->nil;
       y = sc->args;
       if (y == x) {
         s_return(sc, x);
@@ -3697,7 +3697,7 @@ static ts_ptr opexe_4(scheme *sc, enum opcodes op) {
 
       /* cdr() in the while condition is not a typo. If car() */
       /* is used (append '() 'a) will return the wrong result.*/
-      while (cdr(y) != sc->NIL) {
+      while (cdr(y) != sc->nil) {
         x = revappend(sc, x, car(y));
         y = cdr(y);
         if (x == sc->F) {
@@ -3712,13 +3712,13 @@ static ts_ptr opexe_4(scheme *sc, enum opcodes op) {
       if (!ts_has_prop(car(sc->args)) || !ts_has_prop(cadr(sc->args))) {
         Error_0(sc, "illegal use of put");
       }
-      for (x = symprop(car(sc->args)), y = cadr(sc->args); x != sc->NIL;
+      for (x = symprop(car(sc->args)), y = cadr(sc->args); x != sc->nil;
            x = cdr(x)) {
         if (caar(x) == y) {
           break;
         }
       }
-      if (x != sc->NIL)
+      if (x != sc->nil)
         cdar(x) = caddr(sc->args);
       else
         symprop(car(sc->args)) = ts_cons(sc, ts_cons(sc, y, caddr(sc->args)),
@@ -3729,26 +3729,26 @@ static ts_ptr opexe_4(scheme *sc, enum opcodes op) {
       if (!ts_has_prop(car(sc->args)) || !ts_has_prop(cadr(sc->args))) {
         Error_0(sc, "illegal use of get");
       }
-      for (x = symprop(car(sc->args)), y = cadr(sc->args); x != sc->NIL;
+      for (x = symprop(car(sc->args)), y = cadr(sc->args); x != sc->nil;
            x = cdr(x)) {
         if (caar(x) == y) {
           break;
         }
       }
-      if (x != sc->NIL) {
+      if (x != sc->nil) {
         s_return(sc, cdar(x));
       } else {
-        s_return(sc, sc->NIL);
+        s_return(sc, sc->nil);
       }
 #endif            /* USE_PLIST */
     case OP_QUIT: /* quit */
       if (ts_is_pair(sc->args)) {
         sc->retcode = ts_int_val(car(sc->args));
       }
-      return (sc->NIL);
+      return (sc->nil);
 
     case OP_GC: /* gc */
-      gc(sc, sc->NIL, sc->NIL);
+      gc(sc, sc->nil, sc->nil);
       s_return(sc, sc->T);
 
     case OP_GCVERB: /* gc-verbose */
@@ -3794,7 +3794,7 @@ static ts_ptr opexe_4(scheme *sc, enum opcodes op) {
           break; /* Quiet the compiler */
       }
       p = port_from_filename(sc, strvalue(car(sc->args)), prop);
-      if (p == sc->NIL) {
+      if (p == sc->nil) {
         s_return(sc, sc->F);
       }
       s_return(sc, p);
@@ -3818,23 +3818,23 @@ static ts_ptr opexe_4(scheme *sc, enum opcodes op) {
       p = port_from_string(sc, strvalue(car(sc->args)),
                            strvalue(car(sc->args)) + strlength(car(sc->args)),
                            prop);
-      if (p == sc->NIL) {
+      if (p == sc->nil) {
         s_return(sc, sc->F);
       }
       s_return(sc, p);
     }
     case OP_OPEN_OUTSTRING: /* open-output-string */ {
       ts_ptr p;
-      if (car(sc->args) == sc->NIL) {
+      if (car(sc->args) == sc->nil) {
         p = port_from_scratch(sc);
-        if (p == sc->NIL) {
+        if (p == sc->nil) {
           s_return(sc, sc->F);
         }
       } else {
         p = port_from_string(sc, strvalue(car(sc->args)),
                              strvalue(car(sc->args)) + strlength(car(sc->args)),
-                             ts_port_output);
-        if (p == sc->NIL) {
+                             TS_PORT_OUTPUT);
+        if (p == sc->nil) {
           s_return(sc, sc->F);
         }
       }
@@ -3908,8 +3908,8 @@ static ts_ptr opexe_5(scheme *sc, enum opcodes op) {
       }
       x = sc->inport;
       sc->inport = car(sc->args);
-      x = ts_cons(sc, x, sc->NIL);
-      s_save(sc, OP_SET_INPORT, x, sc->NIL);
+      x = ts_cons(sc, x, sc->nil);
+      s_save(sc, OP_SET_INPORT, x, sc->nil);
       s_goto(sc, OP_READ_INTERNAL);
 
     case OP_READ_CHAR: /* read-char */
@@ -3918,8 +3918,8 @@ static ts_ptr opexe_5(scheme *sc, enum opcodes op) {
       if (ts_is_pair(sc->args)) {
         if (car(sc->args) != sc->inport) {
           x = sc->inport;
-          x = ts_cons(sc, x, sc->NIL);
-          s_save(sc, OP_SET_INPORT, x, sc->NIL);
+          x = ts_cons(sc, x, sc->nil);
+          s_save(sc, OP_SET_INPORT, x, sc->nil);
           sc->inport = car(sc->args);
         }
       }
@@ -3968,39 +3968,39 @@ static ts_ptr opexe_5(scheme *sc, enum opcodes op) {
                     }
           */
         case TOK_VEC:
-          s_save(sc, OP_RDVEC, sc->NIL, sc->NIL);
+          s_save(sc, OP_RDVEC, sc->nil, sc->nil);
           /* fall through */
         case TOK_LPAREN:
           sc->tok = token(sc);
           if (sc->tok == TOK_RPAREN) {
-            s_return(sc, sc->NIL);
+            s_return(sc, sc->nil);
           } else if (sc->tok == TOK_DOT) {
             Error_0(sc, "syntax error: illegal dot expression");
           } else {
             sc->nesting_stack[sc->file_i]++;
-            s_save(sc, OP_RDLIST, sc->NIL, sc->NIL);
+            s_save(sc, OP_RDLIST, sc->nil, sc->nil);
             s_goto(sc, OP_RDSEXPR);
           }
         case TOK_QUOTE:
-          s_save(sc, OP_RDQUOTE, sc->NIL, sc->NIL);
+          s_save(sc, OP_RDQUOTE, sc->nil, sc->nil);
           sc->tok = token(sc);
           s_goto(sc, OP_RDSEXPR);
         case TOK_BQUOTE:
           sc->tok = token(sc);
           if (sc->tok == TOK_VEC) {
-            s_save(sc, OP_RDQQUOTEVEC, sc->NIL, sc->NIL);
+            s_save(sc, OP_RDQQUOTEVEC, sc->nil, sc->nil);
             sc->tok = TOK_LPAREN;
             s_goto(sc, OP_RDSEXPR);
           } else {
-            s_save(sc, OP_RDQQUOTE, sc->NIL, sc->NIL);
+            s_save(sc, OP_RDQQUOTE, sc->nil, sc->nil);
           }
           s_goto(sc, OP_RDSEXPR);
         case TOK_COMMA:
-          s_save(sc, OP_RDUNQUOTE, sc->NIL, sc->NIL);
+          s_save(sc, OP_RDUNQUOTE, sc->nil, sc->nil);
           sc->tok = token(sc);
           s_goto(sc, OP_RDSEXPR);
         case TOK_ATMARK:
-          s_save(sc, OP_RDUQTSP, sc->NIL, sc->NIL);
+          s_save(sc, OP_RDUQTSP, sc->nil, sc->nil);
           sc->tok = token(sc);
           s_goto(sc, OP_RDSEXPR);
         case TOK_ATOM:
@@ -4014,16 +4014,16 @@ static ts_ptr opexe_5(scheme *sc, enum opcodes op) {
           s_return(sc, x);
         case TOK_SHARP: {
           ts_ptr f = find_slot_in_env(sc, sc->envir, sc->SHARP_HOOK, 1);
-          if (f == sc->NIL) {
+          if (f == sc->nil) {
             Error_0(sc, "undefined sharp expression");
           } else {
-            sc->code = ts_cons(sc, slot_value_in_env(f), sc->NIL);
+            sc->code = ts_cons(sc, slot_value_in_env(f), sc->nil);
             s_goto(sc, OP_EVAL);
           }
         }
         case TOK_SHARP_CONST:
           if ((x = mk_sharp_const(sc, readstr_upto(sc, DELIMITERS))) ==
-              sc->NIL) {
+              sc->nil) {
             Error_0(sc, "undefined sharp expression");
           } else {
             s_return(sc, x);
@@ -4054,13 +4054,13 @@ static ts_ptr opexe_5(scheme *sc, enum opcodes op) {
           sc->load_stack[sc->file_i].rep.stdio.curr_line++;
 #endif
         sc->nesting_stack[sc->file_i]--;
-        s_return(sc, reverse_in_place(sc, sc->NIL, sc->args));
+        s_return(sc, reverse_in_place(sc, sc->nil, sc->args));
       } else if (sc->tok == TOK_DOT) {
-        s_save(sc, OP_RDDOT, sc->args, sc->NIL);
+        s_save(sc, OP_RDDOT, sc->args, sc->nil);
         sc->tok = token(sc);
         s_goto(sc, OP_RDSEXPR);
       } else {
-        s_save(sc, OP_RDLIST, sc->args, sc->NIL);
+        s_save(sc, OP_RDLIST, sc->args, sc->nil);
         ;
         s_goto(sc, OP_RDSEXPR);
       }
@@ -4075,10 +4075,10 @@ static ts_ptr opexe_5(scheme *sc, enum opcodes op) {
       }
 
     case OP_RDQUOTE:
-      s_return(sc, ts_cons(sc, sc->QUOTE, ts_cons(sc, sc->value, sc->NIL)));
+      s_return(sc, ts_cons(sc, sc->QUOTE, ts_cons(sc, sc->value, sc->nil)));
 
     case OP_RDQQUOTE:
-      s_return(sc, ts_cons(sc, sc->QQUOTE, ts_cons(sc, sc->value, sc->NIL)));
+      s_return(sc, ts_cons(sc, sc->QQUOTE, ts_cons(sc, sc->value, sc->nil)));
 
     case OP_RDQQUOTEVEC:
       s_return(sc,
@@ -4086,14 +4086,14 @@ static ts_ptr opexe_5(scheme *sc, enum opcodes op) {
                        ts_cons(sc, ts_mk_sym(sc, "vector"),
                                ts_cons(sc,
                                        ts_cons(sc, sc->QQUOTE,
-                                               ts_cons(sc, sc->value, sc->NIL)),
-                                       sc->NIL))));
+                                               ts_cons(sc, sc->value, sc->nil)),
+                                       sc->nil))));
 
     case OP_RDUNQUOTE:
-      s_return(sc, ts_cons(sc, sc->UNQUOTE, ts_cons(sc, sc->value, sc->NIL)));
+      s_return(sc, ts_cons(sc, sc->UNQUOTE, ts_cons(sc, sc->value, sc->nil)));
 
     case OP_RDUQTSP:
-      s_return(sc, ts_cons(sc, sc->UNQUOTESP, ts_cons(sc, sc->value, sc->NIL)));
+      s_return(sc, ts_cons(sc, sc->UNQUOTESP, ts_cons(sc, sc->value, sc->nil)));
 
     case OP_RDVEC:
       /*sc->code=ts_cons(sc,mk_proc(sc,OP_VECTOR),sc->value);
@@ -4136,23 +4136,23 @@ static ts_ptr opexe_5(scheme *sc, enum opcodes op) {
         s_goto(sc, OP_P0LIST);
       } else {
         ts_put_str(sc, "(");
-        s_save(sc, OP_P1LIST, cdr(sc->args), sc->NIL);
+        s_save(sc, OP_P1LIST, cdr(sc->args), sc->nil);
         sc->args = car(sc->args);
         s_goto(sc, OP_P0LIST);
       }
 
     case OP_P1LIST:
       if (ts_is_pair(sc->args)) {
-        s_save(sc, OP_P1LIST, cdr(sc->args), sc->NIL);
+        s_save(sc, OP_P1LIST, cdr(sc->args), sc->nil);
         ts_put_str(sc, " ");
         sc->args = car(sc->args);
         s_goto(sc, OP_P0LIST);
       } else if (ts_is_vec(sc->args)) {
-        s_save(sc, OP_P1LIST, sc->NIL, sc->NIL);
+        s_save(sc, OP_P1LIST, sc->nil, sc->nil);
         ts_put_str(sc, " . ");
         s_goto(sc, OP_P0LIST);
       } else {
-        if (sc->args != sc->NIL) {
+        if (sc->args != sc->nil) {
           ts_put_str(sc, " . ");
           printatom(sc, sc->args, sc->print_flag);
         }
@@ -4169,7 +4169,7 @@ static ts_ptr opexe_5(scheme *sc, enum opcodes op) {
       } else {
         ts_ptr elem = ts_vec_elem(vec, i);
         ivalue_unchecked(cdr(sc->args)) = i + 1;
-        s_save(sc, OP_PVECFROM, sc->args, sc->NIL);
+        s_save(sc, OP_PVECFROM, sc->args, sc->nil);
         sc->args = elem;
         if (i > 0) ts_put_str(sc, " ");
         s_goto(sc, OP_P0LIST);
@@ -4211,7 +4211,7 @@ static ts_ptr opexe_6(scheme *sc, enum opcodes op) {
 
     case OP_GET_CLOSURE: /* get-closure-code */ /* a.k */
       sc->args = car(sc->args);
-      if (sc->args == sc->NIL) {
+      if (sc->args == sc->nil) {
         s_return(sc, sc->F);
       } else if (ts_is_closure(sc->args)) {
         s_return(sc, ts_cons(sc, sc->LAMBDA, ts_closure_code(sc->value)));
@@ -4335,7 +4335,7 @@ void Eval_Cycle(scheme *sc, enum opcodes op) {
             ts_ptr arg = car(arglist);
             j = (int)t[0];
             if (j == TST_LIST[0]) {
-              if (arg != sc->NIL && !ts_is_pair(arg)) break;
+              if (arg != sc->nil && !ts_is_pair(arg)) break;
             } else {
               if (!tests[j].fct(arg)) break;
             }
@@ -4354,14 +4354,14 @@ void Eval_Cycle(scheme *sc, enum opcodes op) {
         }
       }
       if (!ok) {
-        if (_Error_1(sc, msg, 0) == sc->NIL) {
+        if (_Error_1(sc, msg, 0) == sc->nil) {
           return;
         }
         pcd = dispatch_table + sc->op;
       }
     }
     ok_to_freely_gc(sc);
-    if (pcd->func(sc, (enum opcodes)sc->op) == sc->NIL) {
+    if (pcd->func(sc, (enum opcodes)sc->op) == sc->nil) {
       return;
     }
     if (sc->no_memory) {
@@ -4391,7 +4391,7 @@ static void assign_proc(scheme *sc, enum opcodes op, char *name) {
 static ts_ptr mk_proc(scheme *sc, enum opcodes op) {
   ts_ptr y;
 
-  y = get_cell(sc, sc->NIL, sc->NIL);
+  y = get_cell(sc, sc->nil, sc->nil);
   typeflag(y) = (T_PROC | T_ATOM);
   ivalue_unchecked(y) = (int)op;
   set_num_integer(y);
@@ -4595,17 +4595,17 @@ bool ts_init_custom_alloc(scheme *sc, ts_func_alloc malloc,
   sc->free = free;
   sc->last_cell_seg = -1;
   sc->sink = &sc->_sink;
-  sc->NIL = &sc->_NIL;
+  sc->nil = &sc->_NIL;
   sc->T = &sc->_HASHT;
   sc->F = &sc->_HASHF;
   sc->EOF_OBJ = &sc->_EOF_OBJ;
   sc->free_cell = &sc->_NIL;
   sc->fcells = 0;
   sc->no_memory = false;
-  sc->inport = sc->NIL;
-  sc->outport = sc->NIL;
-  sc->save_inport = sc->NIL;
-  sc->loadport = sc->NIL;
+  sc->inport = sc->nil;
+  sc->outport = sc->nil;
+  sc->save_inport = sc->nil;
+  sc->loadport = sc->nil;
   sc->nesting = 0;
   sc->interactive_repl = false;
 
@@ -4615,12 +4615,12 @@ bool ts_init_custom_alloc(scheme *sc, ts_func_alloc malloc,
   }
   sc->gc_verbose = 0;
   dump_stack_initialize(sc);
-  sc->code = sc->NIL;
+  sc->code = sc->nil;
   sc->tracing = 0;
 
-  /* init sc->NIL */
-  typeflag(sc->NIL) = (T_ATOM | MARK);
-  car(sc->NIL) = cdr(sc->NIL) = sc->NIL;
+  /* init sc->nil */
+  typeflag(sc->nil) = (T_ATOM | MARK);
+  car(sc->nil) = cdr(sc->nil) = sc->nil;
   /* init T */
   typeflag(sc->T) = (T_ATOM | MARK);
   car(sc->T) = cdr(sc->T) = sc->T;
@@ -4629,13 +4629,13 @@ bool ts_init_custom_alloc(scheme *sc, ts_func_alloc malloc,
   car(sc->F) = cdr(sc->F) = sc->F;
   /* init sink */
   typeflag(sc->sink) = (T_PAIR | MARK);
-  car(sc->sink) = sc->NIL;
+  car(sc->sink) = sc->nil;
   /* init c_nest */
-  sc->c_nest = sc->NIL;
+  sc->c_nest = sc->nil;
 
   sc->oblist = oblist_initial_value(sc);
   /* init global_env */
-  new_frame_in_env(sc, sc->NIL);
+  new_frame_in_env(sc, sc->nil);
   sc->global_env = sc->envir;
   /* init else */
   x = ts_mk_sym(sc, "else");
@@ -4704,28 +4704,28 @@ void ts_deinit(scheme *sc) {
   char *fname;
 #endif
 
-  sc->oblist = sc->NIL;
-  sc->global_env = sc->NIL;
+  sc->oblist = sc->nil;
+  sc->global_env = sc->nil;
   dump_stack_free(sc);
-  sc->envir = sc->NIL;
-  sc->code = sc->NIL;
-  sc->args = sc->NIL;
-  sc->value = sc->NIL;
+  sc->envir = sc->nil;
+  sc->code = sc->nil;
+  sc->args = sc->nil;
+  sc->value = sc->nil;
   if (ts_is_port(sc->inport)) {
     typeflag(sc->inport) = T_ATOM;
   }
-  sc->inport = sc->NIL;
-  sc->outport = sc->NIL;
+  sc->inport = sc->nil;
+  sc->outport = sc->nil;
   if (ts_is_port(sc->save_inport)) {
     typeflag(sc->save_inport) = T_ATOM;
   }
-  sc->save_inport = sc->NIL;
+  sc->save_inport = sc->nil;
   if (ts_is_port(sc->loadport)) {
     typeflag(sc->loadport) = T_ATOM;
   }
-  sc->loadport = sc->NIL;
+  sc->loadport = sc->nil;
   sc->gc_verbose = false;
-  gc(sc, sc->NIL, sc->NIL);
+  gc(sc, sc->nil, sc->nil);
 
   for (i = 0; i <= sc->last_cell_seg; i++) {
     sc->free(sc->alloc_seg[i]);
@@ -4814,7 +4814,7 @@ void ts_def(scheme *sc, ts_ptr envir, ts_ptr symbol, ts_ptr value) {
   ts_ptr x;
 
   x = find_slot_in_env(sc, envir, symbol, 0);
-  if (x != sc->NIL) {
+  if (x != sc->nil) {
     set_slot_in_env(sc, x, value);
   } else {
     new_slot_spec_in_env(sc, envir, symbol, value);

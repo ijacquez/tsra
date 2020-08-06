@@ -18,7 +18,7 @@ void ts_register_foreign_func_list(scheme *sc, ts_registerable *list,
 }
 
 ts_ptr ts_apply0(scheme *sc, const char *procname) {
-  return ts_eval(sc, ts_cons(sc, ts_mk_sym(sc, procname), sc->NIL));
+  return ts_eval(sc, ts_cons(sc, ts_mk_sym(sc, procname), sc->nil));
 }
 
 void save_from_C_call(scheme *sc) {
@@ -58,7 +58,7 @@ ts_ptr ts_eval(scheme *sc, ts_ptr obj) {
   bool old_repl = sc->interactive_repl;
   sc->interactive_repl = false;
   save_from_C_call(sc);
-  sc->args = sc->NIL;
+  sc->args = sc->nil;
   sc->code = obj;
   sc->retcode = 0;
   Eval_Cycle(sc, OP_EVAL);
@@ -109,7 +109,7 @@ void ts_userdata_set_finalizer(ts_ptr userdata, void (*finalizer)(void *)) {
 }
 
 ts_ptr ts_mk_userdata(scheme *sc, void *ptr) {
-  ts_ptr cell = get_cell(sc, sc->NIL, sc->NIL);
+  ts_ptr cell = get_cell(sc, sc->nil, sc->nil);
 
   typeflag(cell) = (T_USERDATA | T_ATOM);
   cell->userdata.ptr = ptr;

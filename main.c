@@ -47,7 +47,7 @@ int main(int argc, char **argv) {
     if (strcmp(file_name, "-") == 0) {
       fin = stdin;
     } else if (strcmp(file_name, "-1") == 0 || strcmp(file_name, "-c") == 0) {
-      ts_ptr args = sc.NIL;
+      ts_ptr args = sc.nil;
       isfile = file_name[1] == '1';
       file_name = *argv++;
       if (strcmp(file_name, "-") == 0) {
@@ -59,7 +59,7 @@ int main(int argc, char **argv) {
         ts_ptr value = ts_mk_str(&sc, *argv);
         args = ts_cons(&sc, value, args);
       }
-      args = reverse_in_place(&sc, sc.NIL, args);
+      args = reverse_in_place(&sc, sc.nil, args);
       ts_def(&sc, sc.global_env, ts_mk_sym(&sc, "*args*"), args);
 
     } else {

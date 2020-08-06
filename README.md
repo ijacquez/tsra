@@ -45,25 +45,25 @@ The output file will be in the `bin/debug/` folder
 // example: (display "Hello")
 // this version only displays strings
 ts_ptr display(scheme *sc, ts_ptr args) {
-  if (args != sc->NIL) {
+  if (args != sc->nil) {
     if (ts_is_str(ts_pair_car(args))) {
       char *str = ts_str_val(ts_pair_car(args));
       printf("%s", str);
     }
   }
-  return sc->NIL;
+  return sc->nil;
 }
 
 // square -- scheme function
 // example: (square 3)
 ts_ptr square(scheme *sc, ts_ptr args) {
-  if (args != sc->NIL) {
+  if (args != sc->nil) {
     if (ts_is_num(ts_pair_car(args))) {
       double v = ts_real_val(ts_pair_car(args));
       return ts_mk_real(sc, v * v);
     }
   }
-  return sc->NIL;
+  return sc->nil;
 }
 
 int main(void) {

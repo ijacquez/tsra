@@ -27,7 +27,7 @@ ts_ptr ts_load_ext(scheme *sc, ts_ptr args) {
   HMODULE dll_handle;
   void (*module_init)(scheme * sc);
 
-  if ((args != sc->NIL) && ts_is_str((first_arg = ts_pair_car(args)))) {
+  if ((args != sc->nil) && ts_is_str((first_arg = ts_pair_car(args)))) {
     name = ts_str_val(first_arg);
     make_filename(name, filename);
     make_init_fn(name, init_fn);
