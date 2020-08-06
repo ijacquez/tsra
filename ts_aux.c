@@ -1,5 +1,9 @@
 #include "common.h"
 
+/* auxiliary 'module'
+ * this module contains functions that are not needed to build the interpreter 
+   in 'standalone' mode */
+
 void scheme_register_foreign_func(scheme *sc, ts_registerable *sr) {
   ts_def(sc, sc->global_env, ts_mk_sym(sc, sr->name),
          ts_mk_foreign_func(sc, sr->f));
