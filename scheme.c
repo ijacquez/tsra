@@ -1027,16 +1027,14 @@ static ts_ptr mk_sharp_const(scheme *sc, char *name) {
     return (sc->T);
   else if (!strcmp(name, "f"))
     return (sc->F);
-  else if (*name == 'o') { /* #o (octal) */
-    snprintf(tmp, TS_STRBUFFSIZE, "0%s", name + 1);
-    sscanf(tmp, "%o", (int unsigned *)&x);
+  else if (*name == 'o') { /* #o (octal) */  
+    x = strtol(name + 1, NULL, 8);
     return (ts_mk_int(sc, x));
   } else if (*name == 'd') { /* #d (decimal) */
-    sscanf(name + 1, "%d", (int *)&x);
+    x = strtol(name + 1, NULL, 10);
     return (ts_mk_int(sc, x));
   } else if (*name == 'x') { /* #x (hex) */
-    snprintf(tmp, TS_STRBUFFSIZE, "0x%s", name + 1);
-    sscanf(tmp, "%x", (int unsigned *)&x);
+    x = strtol(name + 1, NULL, 16);
     return (ts_mk_int(sc, x));
   } else if (*name == 'b') { /* #b (binary) */
     x = binary_decode(name + 1);
@@ -1052,8 +1050,9 @@ static ts_ptr mk_sharp_const(scheme *sc, char *name) {
     } else if (stricmp(name + 1, "tab") == 0) {
       c = '\t';
     } else if (name[1] == 'x' && name[2] != 0) {
-      int c1 = 0;
-      if (sscanf(name + 2, "%x", (unsigned int *)&c1) == 1 && c1 < UCHAR_MAX) {
+      char *c1_endptr = NULL;
+      int c1 = strtol(name + 2, &c1_endptr, 16);
+      if ((*c1_endptr == '\0') && (c1 < UCHAR_MAX)) {
         c = c1;
       } else {
         return sc->NIL;
