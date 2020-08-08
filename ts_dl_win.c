@@ -9,7 +9,7 @@ static void display_w32_error_msg(const char *additional_message) {
 
   FormatMessage(FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_ALLOCATE_BUFFER,
                 NULL, GetLastError(), 0, (LPTSTR)&msg_buf, 0, NULL);
-  fprintf(stderr, "scheme load-extension: %s: %s", additional_message, msg_buf);
+  fprintf(stderr, "ts_interp load-extension: %s: %s", additional_message, msg_buf);
   LocalFree(msg_buf);
 }
 

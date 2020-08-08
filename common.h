@@ -3,12 +3,12 @@
 
 #include "scheme.h"
 
-ts_ptr reverse_in_place(scheme *sc, ts_ptr term, ts_ptr list);
-void load_named_file(scheme *sc, FILE *fin, const char *filename);
-void dump_stack_reset(scheme *sc);
-ts_ptr get_cell(scheme *sc, ts_ptr a, ts_ptr b);
-ts_ptr find_slot_in_env(scheme *sc, ts_ptr env, ts_ptr sym, int all);
-void load_file(scheme *sc, FILE *fin);
+ts_ptr reverse_in_place(ts_interp *sc, ts_ptr term, ts_ptr list);
+void load_named_file(ts_interp *sc, FILE *fin, const char *filename);
+void dump_stack_reset(ts_interp *sc);
+ts_ptr get_cell(ts_interp *sc, ts_ptr a, ts_ptr b);
+ts_ptr find_slot_in_env(ts_interp *sc, ts_ptr env, ts_ptr sym, int all);
+void load_file(ts_interp *sc, FILE *fin);
 
 #define car(p) ((p)->_object._cons._car)
 #define cdr(p) ((p)->_object._cons._cdr)
@@ -36,7 +36,7 @@ enum opcodes {
   OP_MAXDEFINED
 };
 
-void Eval_Cycle(scheme *sc, enum opcodes op);
+void Eval_Cycle(ts_interp *sc, enum opcodes op);
 
 enum scheme_types {
   T_STRING = 1,

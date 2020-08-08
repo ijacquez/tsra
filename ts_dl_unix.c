@@ -10,7 +10,7 @@ typedef void (*FARPROC)();
 HMODULE dl_attach(const char *module) {
   HMODULE so = dlopen(module, RTLD_LAZY);
   if (!so) {
-    fprintf(stderr, "Error loading scheme extension \"%s\": %s\n", module,
+    fprintf(stderr, "Error loading ts_interp extension \"%s\": %s\n", module,
             dlerror());
   }
   return so;
@@ -22,7 +22,7 @@ FARPROC dl_proc(HMODULE mo, const char *proc) {
   if ((errmsg = dlerror()) == 0) {
     return fp;
   }
-  fprintf(stderr, "Error initializing scheme module \"%s\": %s\n", proc,
+  fprintf(stderr, "Error initializing ts_interp module \"%s\": %s\n", proc,
           errmsg);
   return 0;
 }

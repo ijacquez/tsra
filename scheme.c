@@ -92,7 +92,7 @@ inline INTERFACE bool ts_is_str(ts_ptr p) { return (type(p) == T_STRING); }
 #define strvalue(p) ((p)->_object._string._svalue)
 #define strlength(p) ((p)->_object._string._length)
 
-INTERFACE bool ts_is_list(scheme *sc, ts_ptr p);
+INTERFACE bool ts_is_list(ts_interp *sc, ts_ptr p);
 inline INTERFACE bool ts_is_vec(ts_ptr p) { return (type(p) == T_VECTOR); }
 INTERFACE void ts_fill_vec(ts_ptr vec, ts_ptr obj);
 INTERFACE ts_ptr ts_vec_elem(ts_ptr vec, int ielem);
@@ -216,62 +216,62 @@ static bool is_ascii_name(const char *name, char *pc) {
 
 #endif
 
-static int file_push(scheme *sc, const char *fname);
-static void file_pop(scheme *sc);
-static bool file_interactive(scheme *sc);
+static int file_push(ts_interp *sc, const char *fname);
+static void file_pop(ts_interp *sc);
+static bool file_interactive(ts_interp *sc);
 inline static bool is_one_of(const char *s, char c);
-static int alloc_cellseg(scheme *sc, int n);
+static int alloc_cellseg(ts_interp *sc, int n);
 static int binary_decode(const char *s);
-static ts_ptr _get_cell(scheme *sc, ts_ptr a, ts_ptr b);
-ts_ptr ts_reserve_cells(scheme *sc, int n);
-static ts_ptr get_consecutive_cells(scheme *sc, int n);
-static ts_ptr find_consecutive_cells(scheme *sc, int n);
-static void finalize_cell(scheme *sc, ts_ptr a);
+static ts_ptr _get_cell(ts_interp *sc, ts_ptr a, ts_ptr b);
+ts_ptr ts_reserve_cells(ts_interp *sc, int n);
+static ts_ptr get_consecutive_cells(ts_interp *sc, int n);
+static ts_ptr find_consecutive_cells(ts_interp *sc, int n);
+static void finalize_cell(ts_interp *sc, ts_ptr a);
 static int count_consecutive_cells(ts_ptr x, int needed);
-static ts_ptr mk_number(scheme *sc, ts_num n);
-static char *store_string(scheme *sc, int len, const char *str, char fill);
-ts_ptr ts_mk_vec(scheme *sc, int len);
-static ts_ptr mk_atom(scheme *sc, char *q);
-static ts_ptr mk_sharp_const(scheme *sc, char *name);
-static ts_ptr mk_port(scheme *sc, ts_port *p);
-static ts_ptr port_from_filename(scheme *sc, const char *fn, int prop);
-static ts_ptr port_from_file(scheme *sc, FILE *, int prop);
-static ts_ptr port_from_string(scheme *sc, char *start, char *past_the_end,
+static ts_ptr mk_number(ts_interp *sc, ts_num n);
+static char *store_string(ts_interp *sc, int len, const char *str, char fill);
+ts_ptr ts_mk_vec(ts_interp *sc, int len);
+static ts_ptr mk_atom(ts_interp *sc, char *q);
+static ts_ptr mk_sharp_const(ts_interp *sc, char *name);
+static ts_ptr mk_port(ts_interp *sc, ts_port *p);
+static ts_ptr port_from_filename(ts_interp *sc, const char *fn, int prop);
+static ts_ptr port_from_file(ts_interp *sc, FILE *, int prop);
+static ts_ptr port_from_string(ts_interp *sc, char *start, char *past_the_end,
                                int prop);
-static ts_port *port_rep_from_filename(scheme *sc, const char *fn, int prop);
-static ts_port *port_rep_from_file(scheme *sc, FILE *, int prop);
-static ts_port *port_rep_from_string(scheme *sc, char *start,
+static ts_port *port_rep_from_filename(ts_interp *sc, const char *fn, int prop);
+static ts_port *port_rep_from_file(ts_interp *sc, FILE *, int prop);
+static ts_port *port_rep_from_string(ts_interp *sc, char *start,
                                      char *past_the_end, int prop);
-static void port_close(scheme *sc, ts_ptr p, int flag);
+static void port_close(ts_interp *sc, ts_ptr p, int flag);
 static void mark(ts_ptr a);
-static void gc(scheme *sc, ts_ptr a, ts_ptr b);
+static void gc(ts_interp *sc, ts_ptr a, ts_ptr b);
 static int basic_inchar(ts_port *pt);
-static int inchar(scheme *sc);
-static void backchar(scheme *sc, char c);
-static char *readstr_upto(scheme *sc, const char *delim);
-static ts_ptr readstrexp(scheme *sc);
-inline static int skipspace(scheme *sc);
-static int token(scheme *sc);
-static void printslashstring(scheme *sc, char *s, int len);
-static void atom2str(scheme *sc, ts_ptr l, int f, char **pp, int *plen);
-static void printatom(scheme *sc, ts_ptr l, int f);
-static ts_ptr mk_proc(scheme *sc, enum opcodes op);
-static ts_ptr mk_closure(scheme *sc, ts_ptr c, ts_ptr e);
-static ts_ptr mk_continuation(scheme *sc, ts_ptr d);
-static ts_ptr reverse(scheme *sc, ts_ptr a);
-static ts_ptr revappend(scheme *sc, ts_ptr a, ts_ptr b);
-static void dump_stack_mark(scheme *);
-static ts_ptr opexe_0(scheme *sc, enum opcodes op);
-static ts_ptr opexe_1(scheme *sc, enum opcodes op);
-static ts_ptr opexe_2(scheme *sc, enum opcodes op);
-static ts_ptr opexe_3(scheme *sc, enum opcodes op);
-static ts_ptr opexe_4(scheme *sc, enum opcodes op);
-static ts_ptr opexe_5(scheme *sc, enum opcodes op);
-static ts_ptr opexe_6(scheme *sc, enum opcodes op);
-static void assign_syntax(scheme *sc, char *name);
+static int inchar(ts_interp *sc);
+static void backchar(ts_interp *sc, char c);
+static char *readstr_upto(ts_interp *sc, const char *delim);
+static ts_ptr readstrexp(ts_interp *sc);
+inline static int skipspace(ts_interp *sc);
+static int token(ts_interp *sc);
+static void printslashstring(ts_interp *sc, char *s, int len);
+static void atom2str(ts_interp *sc, ts_ptr l, int f, char **pp, int *plen);
+static void printatom(ts_interp *sc, ts_ptr l, int f);
+static ts_ptr mk_proc(ts_interp *sc, enum opcodes op);
+static ts_ptr mk_closure(ts_interp *sc, ts_ptr c, ts_ptr e);
+static ts_ptr mk_continuation(ts_interp *sc, ts_ptr d);
+static ts_ptr reverse(ts_interp *sc, ts_ptr a);
+static ts_ptr revappend(ts_interp *sc, ts_ptr a, ts_ptr b);
+static void dump_stack_mark(ts_interp *);
+static ts_ptr opexe_0(ts_interp *sc, enum opcodes op);
+static ts_ptr opexe_1(ts_interp *sc, enum opcodes op);
+static ts_ptr opexe_2(ts_interp *sc, enum opcodes op);
+static ts_ptr opexe_3(ts_interp *sc, enum opcodes op);
+static ts_ptr opexe_4(ts_interp *sc, enum opcodes op);
+static ts_ptr opexe_5(ts_interp *sc, enum opcodes op);
+static ts_ptr opexe_6(ts_interp *sc, enum opcodes op);
+static void assign_syntax(ts_interp *sc, char *name);
 static int syntaxnum(ts_ptr p);
-static void assign_proc(scheme *sc, enum opcodes, char *name);
-void load_named_file(scheme *sc, FILE *fin, const char *filename);
+static void assign_proc(ts_interp *sc, enum opcodes, char *name);
+void load_named_file(ts_interp *sc, FILE *fin, const char *filename);
 
 #define num_ivalue(n) (n.is_fixnum ? (n).value.ivalue : (int)(n).value.rvalue)
 #define num_rvalue(n) \
@@ -450,7 +450,7 @@ static int binary_decode(const char *s) {
 }
 
 /* allocate new cell segment */
-static int alloc_cellseg(scheme *sc, int n) {
+static int alloc_cellseg(ts_interp *sc, int n) {
   ts_ptr newp;
   ts_ptr last;
   ts_ptr p;
@@ -502,7 +502,7 @@ static int alloc_cellseg(scheme *sc, int n) {
   return n;
 }
 
-static inline ts_ptr get_cell_x(scheme *sc, ts_ptr a, ts_ptr b) {
+static inline ts_ptr get_cell_x(ts_interp *sc, ts_ptr a, ts_ptr b) {
   if (sc->free_cell != sc->nil) {
     ts_ptr x = sc->free_cell;
     sc->free_cell = cdr(x);
@@ -513,7 +513,7 @@ static inline ts_ptr get_cell_x(scheme *sc, ts_ptr a, ts_ptr b) {
 }
 
 /* get new cell.  parameter a, b is marked by gc. */
-static ts_ptr _get_cell(scheme *sc, ts_ptr a, ts_ptr b) {
+static ts_ptr _get_cell(ts_interp *sc, ts_ptr a, ts_ptr b) {
   ts_ptr x;
 
   if (sc->no_memory) {
@@ -538,7 +538,7 @@ static ts_ptr _get_cell(scheme *sc, ts_ptr a, ts_ptr b) {
 }
 
 /* make sure that there is a given number of cells free */
-ts_ptr ts_reserve_cells(scheme *sc, int n) {
+ts_ptr ts_reserve_cells(ts_interp *sc, int n) {
   if (sc->no_memory) {
     return sc->nil;
   }
@@ -563,7 +563,7 @@ ts_ptr ts_reserve_cells(scheme *sc, int n) {
   return (sc->T);
 }
 
-static ts_ptr get_consecutive_cells(scheme *sc, int n) {
+static ts_ptr get_consecutive_cells(ts_interp *sc, int n) {
   ts_ptr x;
 
   if (sc->no_memory) {
@@ -609,7 +609,7 @@ static int count_consecutive_cells(ts_ptr x, int needed) {
   return n;
 }
 
-static ts_ptr find_consecutive_cells(scheme *sc, int n) {
+static ts_ptr find_consecutive_cells(ts_interp *sc, int n) {
   ts_ptr *pp;
   int cnt;
 
@@ -630,7 +630,7 @@ static ts_ptr find_consecutive_cells(scheme *sc, int n) {
 /* To retain recent allocs before interpreter knows about them -
    Tehom */
 
-static void push_recent_alloc(scheme *sc, ts_ptr recent, ts_ptr extra) {
+static void push_recent_alloc(ts_interp *sc, ts_ptr recent, ts_ptr extra) {
   ts_ptr holder = get_cell_x(sc, recent, extra);
   typeflag(holder) = T_PAIR | T_IMMUTABLE;
   car(holder) = recent;
@@ -638,7 +638,7 @@ static void push_recent_alloc(scheme *sc, ts_ptr recent, ts_ptr extra) {
   car(sc->sink) = holder;
 }
 
-ts_ptr get_cell(scheme *sc, ts_ptr a, ts_ptr b) {
+ts_ptr get_cell(ts_interp *sc, ts_ptr a, ts_ptr b) {
   ts_ptr cell = get_cell_x(sc, a, b);
   /* For right now, include "a" and "b" in "cell" so that gc doesn't
      think they are garbage. */
@@ -650,7 +650,7 @@ ts_ptr get_cell(scheme *sc, ts_ptr a, ts_ptr b) {
   return cell;
 }
 
-static ts_ptr get_vector_object(scheme *sc, int len, ts_ptr init) {
+static ts_ptr get_vector_object(ts_interp *sc, int len, ts_ptr init) {
   ts_ptr cells = get_consecutive_cells(sc, len / 2 + len % 2 + 1);
   if (sc->no_memory) {
     return sc->sink;
@@ -664,7 +664,7 @@ static ts_ptr get_vector_object(scheme *sc, int len, ts_ptr init) {
   return cells;
 }
 
-inline static void ok_to_freely_gc(scheme *sc) { car(sc->sink) = sc->nil; }
+inline static void ok_to_freely_gc(ts_interp *sc) { car(sc->sink) = sc->nil; }
 
 #if defined TSGRIND
 static void check_cell_alloced(ts_ptr p, int expect_alloced) {
@@ -689,7 +689,7 @@ static void check_range_alloced(ts_ptr p, int n, int expect_alloced) {
 /* Medium level cell allocation */
 
 /* get new cons cell */
-ts_ptr _cons(scheme *sc, ts_ptr a, ts_ptr b, bool immutable) {
+ts_ptr _cons(ts_interp *sc, ts_ptr a, ts_ptr b, bool immutable) {
   ts_ptr x = get_cell(sc, a, b);
 
   typeflag(x) = T_PAIR;
@@ -701,11 +701,11 @@ ts_ptr _cons(scheme *sc, ts_ptr a, ts_ptr b, bool immutable) {
   return (x);
 }
 
-INTERFACE ts_ptr ts_cons(scheme *sc, ts_ptr a, ts_ptr b) {
+INTERFACE ts_ptr ts_cons(ts_interp *sc, ts_ptr a, ts_ptr b) {
   return _cons(sc, a, b, 0);
 }
 
-INTERFACE ts_ptr ts_immutable_cons(scheme *sc, ts_ptr a, ts_ptr b) {
+INTERFACE ts_ptr ts_immutable_cons(ts_interp *sc, ts_ptr a, ts_ptr b) {
   return _cons(sc, a, b, 1);
 }
 
@@ -715,12 +715,12 @@ INTERFACE ts_ptr ts_immutable_cons(scheme *sc, ts_ptr a, ts_ptr b) {
 
 static int hash_fn(const char *key, int table_size);
 
-static ts_ptr oblist_initial_value(scheme *sc) {
+static ts_ptr oblist_initial_value(ts_interp *sc) {
   return ts_mk_vec(sc, 461); /* probably should be bigger */
 }
 
 /* returns the new symbol */
-static ts_ptr oblist_add_by_name(scheme *sc, const char *name) {
+static ts_ptr oblist_add_by_name(ts_interp *sc, const char *name) {
   ts_ptr x;
   int location;
 
@@ -734,7 +734,7 @@ static ts_ptr oblist_add_by_name(scheme *sc, const char *name) {
   return x;
 }
 
-inline static ts_ptr oblist_find_by_name(scheme *sc, const char *name) {
+inline static ts_ptr oblist_find_by_name(ts_interp *sc, const char *name) {
   int location;
   ts_ptr x;
   char *s;
@@ -750,7 +750,7 @@ inline static ts_ptr oblist_find_by_name(scheme *sc, const char *name) {
   return sc->nil;
 }
 
-static ts_ptr oblist_all_symbols(scheme *sc) {
+static ts_ptr oblist_all_symbols(ts_interp *sc) {
   int i;
   ts_ptr x;
   ts_ptr ob_list = sc->nil;
@@ -765,9 +765,9 @@ static ts_ptr oblist_all_symbols(scheme *sc) {
 
 #else
 
-static ts_ptr oblist_initial_value(scheme *sc) { return sc->nil; }
+static ts_ptr oblist_initial_value(ts_interp *sc) { return sc->nil; }
 
-inline static ts_ptr oblist_find_by_name(scheme *sc, const char *name) {
+inline static ts_ptr oblist_find_by_name(ts_interp *sc, const char *name) {
   ts_ptr x;
   char *s;
 
@@ -782,7 +782,7 @@ inline static ts_ptr oblist_find_by_name(scheme *sc, const char *name) {
 }
 
 /* returns the new symbol */
-static ts_ptr oblist_add_by_name(scheme *sc, const char *name) {
+static ts_ptr oblist_add_by_name(ts_interp *sc, const char *name) {
   ts_ptr x;
 
   x = ts_immutable_cons(sc, ts_mk_str(sc, name), sc->nil);
@@ -791,11 +791,11 @@ static ts_ptr oblist_add_by_name(scheme *sc, const char *name) {
   sc->oblist = ts_immutable_cons(sc, x, sc->oblist);
   return x;
 }
-static ts_ptr oblist_all_symbols(scheme *sc) { return sc->oblist; }
+static ts_ptr oblist_all_symbols(ts_interp *sc) { return sc->oblist; }
 
 #endif
 
-static ts_ptr mk_port(scheme *sc, ts_port *p) {
+static ts_ptr mk_port(ts_interp *sc, ts_port *p) {
   ts_ptr x = get_cell(sc, sc->nil, sc->nil);
 
   typeflag(x) = T_PORT | T_ATOM;
@@ -803,7 +803,7 @@ static ts_ptr mk_port(scheme *sc, ts_port *p) {
   return (x);
 }
 
-ts_ptr ts_mk_foreign_func(scheme *sc, ts_foreign_func f) {
+ts_ptr ts_mk_foreign_func(ts_interp *sc, ts_foreign_func f) {
   ts_ptr x = get_cell(sc, sc->nil, sc->nil);
 
   typeflag(x) = (T_FOREIGN | T_ATOM);
@@ -811,7 +811,7 @@ ts_ptr ts_mk_foreign_func(scheme *sc, ts_foreign_func f) {
   return (x);
 }
 
-INTERFACE ts_ptr ts_mk_char(scheme *sc, char c) {
+INTERFACE ts_ptr ts_mk_char(ts_interp *sc, char c) {
   ts_ptr x = get_cell(sc, sc->nil, sc->nil);
 
   typeflag(x) = (T_CHARACTER | T_ATOM);
@@ -821,7 +821,7 @@ INTERFACE ts_ptr ts_mk_char(scheme *sc, char c) {
 }
 
 /* get number atom (integer) */
-INTERFACE ts_ptr ts_mk_int(scheme *sc, int n) {
+INTERFACE ts_ptr ts_mk_int(ts_interp *sc, int n) {
   ts_ptr x = get_cell(sc, sc->nil, sc->nil);
 
   typeflag(x) = (T_NUMBER | T_ATOM);
@@ -830,7 +830,7 @@ INTERFACE ts_ptr ts_mk_int(scheme *sc, int n) {
   return (x);
 }
 
-INTERFACE ts_ptr ts_mk_real(scheme *sc, double n) {
+INTERFACE ts_ptr ts_mk_real(ts_interp *sc, double n) {
   ts_ptr x = get_cell(sc, sc->nil, sc->nil);
 
   typeflag(x) = (T_NUMBER | T_ATOM);
@@ -839,7 +839,7 @@ INTERFACE ts_ptr ts_mk_real(scheme *sc, double n) {
   return (x);
 }
 
-static ts_ptr mk_number(scheme *sc, ts_num n) {
+static ts_ptr mk_number(ts_interp *sc, ts_num n) {
   if (n.is_fixnum) {
     return ts_mk_int(sc, n.value.ivalue);
   } else {
@@ -848,7 +848,7 @@ static ts_ptr mk_number(scheme *sc, ts_num n) {
 }
 
 /* allocate name to string area */
-static char *store_string(scheme *sc, int len_str, const char *str, char fill) {
+static char *store_string(ts_interp *sc, int len_str, const char *str, char fill) {
   char *q;
 
   q = (char *)sc->malloc(len_str + 1);
@@ -866,11 +866,11 @@ static char *store_string(scheme *sc, int len_str, const char *str, char fill) {
 }
 
 /* get new string */
-INTERFACE ts_ptr ts_mk_str(scheme *sc, const char *str) {
+INTERFACE ts_ptr ts_mk_str(ts_interp *sc, const char *str) {
   return ts_mk_counted_str(sc, str, strlen(str));
 }
 
-INTERFACE ts_ptr ts_mk_counted_str(scheme *sc, const char *str, int len) {
+INTERFACE ts_ptr ts_mk_counted_str(ts_interp *sc, const char *str, int len) {
   ts_ptr x = get_cell(sc, sc->nil, sc->nil);
   typeflag(x) = (T_STRING | T_ATOM);
   strvalue(x) = store_string(sc, len, str, 0);
@@ -878,7 +878,7 @@ INTERFACE ts_ptr ts_mk_counted_str(scheme *sc, const char *str, int len) {
   return (x);
 }
 
-INTERFACE ts_ptr ts_mk_empty_str(scheme *sc, int len, char fill) {
+INTERFACE ts_ptr ts_mk_empty_str(ts_interp *sc, int len, char fill) {
   ts_ptr x = get_cell(sc, sc->nil, sc->nil);
   typeflag(x) = (T_STRING | T_ATOM);
   strvalue(x) = store_string(sc, len, 0, fill);
@@ -886,7 +886,7 @@ INTERFACE ts_ptr ts_mk_empty_str(scheme *sc, int len, char fill) {
   return (x);
 }
 
-INTERFACE ts_ptr ts_mk_vec(scheme *sc, int len) {
+INTERFACE ts_ptr ts_mk_vec(ts_interp *sc, int len) {
   return get_vector_object(sc, len, sc->nil);
 }
 
@@ -920,7 +920,7 @@ INTERFACE ts_ptr ts_set_vec_elem(ts_ptr vec, int ielem, ts_ptr a) {
 }
 
 /* get new symbol */
-INTERFACE ts_ptr ts_mk_sym(scheme *sc, const char *name) {
+INTERFACE ts_ptr ts_mk_sym(ts_interp *sc, const char *name) {
   ts_ptr x;
 
   /* first check oblist */
@@ -933,7 +933,7 @@ INTERFACE ts_ptr ts_mk_sym(scheme *sc, const char *name) {
   }
 }
 
-INTERFACE ts_ptr ts_gen_sym(scheme *sc) {
+INTERFACE ts_ptr ts_gen_sym(ts_interp *sc) {
   ts_ptr x;
   char name[40];
 
@@ -955,7 +955,7 @@ INTERFACE ts_ptr ts_gen_sym(scheme *sc) {
 }
 
 /* make symbol or number atom from string */
-static ts_ptr mk_atom(scheme *sc, char *q) {
+static ts_ptr mk_atom(ts_interp *sc, char *q) {
   char c, *p;
   int has_dec_point = 0;
   int has_fp_exp = 0;
@@ -1019,7 +1019,7 @@ static ts_ptr mk_atom(scheme *sc, char *q) {
 }
 
 /* make constant */
-static ts_ptr mk_sharp_const(scheme *sc, char *name) {
+static ts_ptr mk_sharp_const(ts_interp *sc, char *name) {
   int x;
   char tmp[TS_STRBUFFSIZE];
 
@@ -1129,7 +1129,7 @@ E6: /* up.  Undo the link switching from steps E4 and E5. */
 }
 
 /* garbage collection. parameter a, b is marked. */
-static void gc(scheme *sc, ts_ptr a, ts_ptr b) {
+static void gc(ts_interp *sc, ts_ptr a, ts_ptr b) {
   ts_ptr p;
   int i;
 
@@ -1196,7 +1196,7 @@ static void gc(scheme *sc, ts_ptr a, ts_ptr b) {
   }
 }
 
-static void finalize_cell(scheme *sc, ts_ptr a) {
+static void finalize_cell(ts_interp *sc, ts_ptr a) {
   if (ts_is_str(a)) {
     sc->free(strvalue(a));
   } else if (ts_is_port(a)) {
@@ -1215,7 +1215,7 @@ static void finalize_cell(scheme *sc, ts_ptr a) {
 
 /* ========== Routines for Reading ========== */
 
-static int file_push(scheme *sc, const char *fname) {
+static int file_push(ts_interp *sc, const char *fname) {
   FILE *fin = NULL;
 
   if (sc->file_i == TS_MAXFIL - 1) return 0;
@@ -1238,7 +1238,7 @@ static int file_push(scheme *sc, const char *fname) {
   return fin != 0;
 }
 
-static void file_pop(scheme *sc) {
+static void file_pop(ts_interp *sc) {
   if (sc->file_i != 0) {
     sc->nesting = sc->nesting_stack[sc->file_i];
     port_close(sc, sc->loadport, TS_PORT_INPUT);
@@ -1247,13 +1247,13 @@ static void file_pop(scheme *sc) {
   }
 }
 
-static bool file_interactive(scheme *sc) {
+static bool file_interactive(ts_interp *sc) {
   return (sc->file_i == 0) &&
          (sc->load_stack[0].rep.stdio.file == stdin) &&
          ((sc->inport->_object._port->kind & TS_PORT_FILE) != 0);
 }
 
-static ts_port *port_rep_from_filename(scheme *sc, const char *fn, int prop) {
+static ts_port *port_rep_from_filename(ts_interp *sc, const char *fn, int prop) {
   FILE *f;
   char *rw;
   ts_port *pt;
@@ -1279,7 +1279,7 @@ static ts_port *port_rep_from_filename(scheme *sc, const char *fn, int prop) {
   return pt;
 }
 
-static ts_ptr port_from_filename(scheme *sc, const char *fn, int prop) {
+static ts_ptr port_from_filename(ts_interp *sc, const char *fn, int prop) {
   ts_port *pt;
   pt = port_rep_from_filename(sc, fn, prop);
   if (pt == 0) {
@@ -1288,7 +1288,7 @@ static ts_ptr port_from_filename(scheme *sc, const char *fn, int prop) {
   return mk_port(sc, pt);
 }
 
-static ts_port *port_rep_from_file(scheme *sc, FILE *f, int prop) {
+static ts_port *port_rep_from_file(ts_interp *sc, FILE *f, int prop) {
   ts_port *pt;
 
   pt = (ts_port *)sc->malloc(sizeof *pt);
@@ -1301,7 +1301,7 @@ static ts_port *port_rep_from_file(scheme *sc, FILE *f, int prop) {
   return pt;
 }
 
-static ts_ptr port_from_file(scheme *sc, FILE *f, int prop) {
+static ts_ptr port_from_file(ts_interp *sc, FILE *f, int prop) {
   ts_port *pt;
   pt = port_rep_from_file(sc, f, prop);
   if (pt == 0) {
@@ -1310,7 +1310,7 @@ static ts_ptr port_from_file(scheme *sc, FILE *f, int prop) {
   return mk_port(sc, pt);
 }
 
-static ts_port *port_rep_from_string(scheme *sc, char *start,
+static ts_port *port_rep_from_string(ts_interp *sc, char *start,
                                      char *past_the_end, int prop) {
   ts_port *pt;
   pt = (ts_port *)sc->malloc(sizeof(ts_port));
@@ -1324,7 +1324,7 @@ static ts_port *port_rep_from_string(scheme *sc, char *start,
   return pt;
 }
 
-static ts_ptr port_from_string(scheme *sc, char *start, char *past_the_end,
+static ts_ptr port_from_string(ts_interp *sc, char *start, char *past_the_end,
                                int prop) {
   ts_port *pt;
   pt = port_rep_from_string(sc, start, past_the_end, prop);
@@ -1336,7 +1336,7 @@ static ts_ptr port_from_string(scheme *sc, char *start, char *past_the_end,
 
 #define BLOCK_SIZE 256
 
-static ts_port *port_rep_from_scratch(scheme *sc) {
+static ts_port *port_rep_from_scratch(ts_interp *sc) {
   ts_port *pt;
   char *start;
   pt = (ts_port *)sc->malloc(sizeof(ts_port));
@@ -1356,7 +1356,7 @@ static ts_port *port_rep_from_scratch(scheme *sc) {
   return pt;
 }
 
-static ts_ptr port_from_scratch(scheme *sc) {
+static ts_ptr port_from_scratch(ts_interp *sc) {
   ts_port *pt;
   pt = port_rep_from_scratch(sc);
   if (pt == 0) {
@@ -1365,7 +1365,7 @@ static ts_ptr port_from_scratch(scheme *sc) {
   return mk_port(sc, pt);
 }
 
-static void port_close(scheme *sc, ts_ptr p, int flag) {
+static void port_close(ts_interp *sc, ts_ptr p, int flag) {
   ts_port *pt = p->_object._port;
   pt->kind &= ~flag;
   if ((pt->kind & (TS_PORT_INPUT | TS_PORT_OUTPUT)) == 0) {
@@ -1384,7 +1384,7 @@ static void port_close(scheme *sc, ts_ptr p, int flag) {
 }
 
 /* get new character from input file */
-static int inchar(scheme *sc) {
+static int inchar(ts_interp *sc) {
   char c;
   ts_port *pt;
 
@@ -1418,7 +1418,7 @@ static int basic_inchar(ts_port *pt) {
 }
 
 /* back character to input buffer */
-static void backchar(scheme *sc, char c) {
+static void backchar(ts_interp *sc, char c) {
   ts_port *pt;
   if (c == EOF) return;
   pt = sc->inport->_object._port;
@@ -1431,7 +1431,7 @@ static void backchar(scheme *sc, char c) {
   }
 }
 
-static int realloc_port_string(scheme *sc, ts_port *p) {
+static int realloc_port_string(ts_interp *sc, ts_port *p) {
   char *start = p->rep.string.start;
   size_t new_size = p->rep.string.past_the_end - start + 1 + BLOCK_SIZE;
   char *str = sc->malloc(new_size);
@@ -1449,7 +1449,7 @@ static int realloc_port_string(scheme *sc, ts_port *p) {
   }
 }
 
-INTERFACE void ts_put_str(scheme *sc, const char *s) {
+INTERFACE void ts_put_str(ts_interp *sc, const char *s) {
   ts_port *pt = sc->outport->_object._port;
   if (pt->kind & TS_PORT_FILE) {
     fputs(s, pt->rep.stdio.file);
@@ -1464,7 +1464,7 @@ INTERFACE void ts_put_str(scheme *sc, const char *s) {
   }
 }
 
-static void putchars(scheme *sc, const char *s, int len) {
+static void putchars(ts_interp *sc, const char *s, int len) {
   ts_port *pt = sc->outport->_object._port;
   if (pt->kind & TS_PORT_FILE) {
     fwrite(s, 1, len, pt->rep.stdio.file);
@@ -1479,7 +1479,7 @@ static void putchars(scheme *sc, const char *s, int len) {
   }
 }
 
-INTERFACE void ts_put_char(scheme *sc, char c) {
+INTERFACE void ts_put_char(ts_interp *sc, char c) {
   ts_port *pt = sc->outport->_object._port;
   if (pt->kind & TS_PORT_FILE) {
     fputc(c, pt->rep.stdio.file);
@@ -1493,7 +1493,7 @@ INTERFACE void ts_put_char(scheme *sc, char c) {
 }
 
 /* read characters up to delimiter, but cater to character constants */
-static char *readstr_upto(scheme *sc, const char *delim) {
+static char *readstr_upto(ts_interp *sc, const char *delim) {
   char *p = sc->strbuff;
 
   while ((p - sc->strbuff < sizeof(sc->strbuff)) &&
@@ -1510,7 +1510,7 @@ static char *readstr_upto(scheme *sc, const char *delim) {
 }
 
 /* read string expression "xxx...xxx" */
-static ts_ptr readstrexp(scheme *sc) {
+static ts_ptr readstrexp(ts_interp *sc) {
   char *p = sc->strbuff;
   char c;
   int c1 = 0;
@@ -1626,7 +1626,7 @@ inline static bool is_one_of(const char *s, char c) {
 }
 
 /* skip white characters */
-inline static int skipspace(scheme *sc) {
+inline static int skipspace(ts_interp *sc) {
   char c = 0, curr_line = 0;
 
   do {
@@ -1651,7 +1651,7 @@ inline static int skipspace(scheme *sc) {
 }
 
 /* get token */
-static int token(scheme *sc) {
+static int token(ts_interp *sc) {
   char c;
   c = skipspace(sc);
   if (c == EOF) {
@@ -1735,7 +1735,7 @@ static int token(scheme *sc) {
 /* ========== Routines for Printing ========== */
 #define ok_abbrev(x) (ts_is_pair(x) && cdr(x) == sc->nil)
 
-static void printslashstring(scheme *sc, char *p, int len) {
+static void printslashstring(ts_interp *sc, char *p, int len) {
   int i;
   unsigned char *s = (unsigned char *)p;
   ts_put_char(sc, '"');
@@ -1783,7 +1783,7 @@ static void printslashstring(scheme *sc, char *p, int len) {
 }
 
 /* print atoms */
-static void printatom(scheme *sc, ts_ptr l, int f) {
+static void printatom(ts_interp *sc, ts_ptr l, int f) {
   char *p;
   int len;
   atom2str(sc, l, f, &p, &len);
@@ -1791,7 +1791,7 @@ static void printatom(scheme *sc, ts_ptr l, int f) {
 }
 
 /* Uses internal buffer unless string pointer is already available */
-static void atom2str(scheme *sc, ts_ptr l, int f, char **pp, int *plen) {
+static void atom2str(ts_interp *sc, ts_ptr l, int f, char **pp, int *plen) {
   char *p;
 
   if (l == sc->nil) {
@@ -1921,7 +1921,7 @@ static void atom2str(scheme *sc, ts_ptr l, int f, char **pp, int *plen) {
 /* ========== Routines for Evaluation Cycle ========== */
 
 /* make closure. c is code. e is environment */
-static ts_ptr mk_closure(scheme *sc, ts_ptr c, ts_ptr e) {
+static ts_ptr mk_closure(ts_interp *sc, ts_ptr c, ts_ptr e) {
   ts_ptr x = get_cell(sc, c, e);
 
   typeflag(x) = T_CLOSURE;
@@ -1931,7 +1931,7 @@ static ts_ptr mk_closure(scheme *sc, ts_ptr c, ts_ptr e) {
 }
 
 /* make continuation. */
-static ts_ptr mk_continuation(scheme *sc, ts_ptr d) {
+static ts_ptr mk_continuation(ts_interp *sc, ts_ptr d) {
   ts_ptr x = get_cell(sc, sc->nil, d);
 
   typeflag(x) = T_CONTINUATION;
@@ -1939,7 +1939,7 @@ static ts_ptr mk_continuation(scheme *sc, ts_ptr d) {
   return (x);
 }
 
-static ts_ptr list_star(scheme *sc, ts_ptr d) {
+static ts_ptr list_star(ts_interp *sc, ts_ptr d) {
   ts_ptr p, q;
   if (cdr(d) == sc->nil) {
     return car(d);
@@ -1957,7 +1957,7 @@ static ts_ptr list_star(scheme *sc, ts_ptr d) {
 }
 
 /* reverse list -- produce new list */
-static ts_ptr reverse(scheme *sc, ts_ptr a) {
+static ts_ptr reverse(ts_interp *sc, ts_ptr a) {
   /* a must be checked by gc */
   ts_ptr p = sc->nil;
 
@@ -1968,7 +1968,7 @@ static ts_ptr reverse(scheme *sc, ts_ptr a) {
 }
 
 /* reverse list --- in-place */
-ts_ptr reverse_in_place(scheme *sc, ts_ptr term, ts_ptr list) {
+ts_ptr reverse_in_place(ts_interp *sc, ts_ptr term, ts_ptr list) {
   ts_ptr p = list, result = term, q;
 
   while (p != sc->nil) {
@@ -1981,7 +1981,7 @@ ts_ptr reverse_in_place(scheme *sc, ts_ptr term, ts_ptr list) {
 }
 
 /* append list -- produce new list (in reverse order) */
-static ts_ptr revappend(scheme *sc, ts_ptr a, ts_ptr b) {
+static ts_ptr revappend(ts_interp *sc, ts_ptr a, ts_ptr b) {
   ts_ptr result = a;
   ts_ptr p = b;
 
@@ -2063,7 +2063,7 @@ static int hash_fn(const char *key, int table_size) {
  * speed to out-weigh the cost of making a new vector.
  */
 
-static void new_frame_in_env(scheme *sc, ts_ptr old_env) {
+static void new_frame_in_env(ts_interp *sc, ts_ptr old_env) {
   ts_ptr new_frame;
 
   /* The interaction-environment has about 300 variables in it. */
@@ -2077,7 +2077,7 @@ static void new_frame_in_env(scheme *sc, ts_ptr old_env) {
   setenvironment(sc->envir);
 }
 
-inline static void new_slot_spec_in_env(scheme *sc, ts_ptr env, ts_ptr variable,
+inline static void new_slot_spec_in_env(ts_interp *sc, ts_ptr env, ts_ptr variable,
                                         ts_ptr value) {
   ts_ptr slot = ts_immutable_cons(sc, variable, value);
 
@@ -2092,7 +2092,7 @@ inline static void new_slot_spec_in_env(scheme *sc, ts_ptr env, ts_ptr variable,
   }
 }
 
-ts_ptr find_slot_in_env(scheme *sc, ts_ptr env, ts_ptr hdl, int all) {
+ts_ptr find_slot_in_env(ts_interp *sc, ts_ptr env, ts_ptr hdl, int all) {
   ts_ptr x, y;
   int location;
 
@@ -2123,18 +2123,18 @@ ts_ptr find_slot_in_env(scheme *sc, ts_ptr env, ts_ptr hdl, int all) {
 
 #else /* USE_ALIST_ENV */
 
-inline static void new_frame_in_env(scheme *sc, ts_ptr old_env) {
+inline static void new_frame_in_env(ts_interp *sc, ts_ptr old_env) {
   sc->envir = ts_immutable_cons(sc, sc->nil, old_env);
   setenvironment(sc->envir);
 }
 
-inline static void new_slot_spec_in_env(scheme *sc, ts_ptr env, ts_ptr variable,
+inline static void new_slot_spec_in_env(ts_interp *sc, ts_ptr env, ts_ptr variable,
                                         ts_ptr value) {
   car(env) =
       ts_immutable_cons(sc, ts_immutable_cons(sc, variable, value), car(env));
 }
 
-static ts_ptr find_slot_in_env(scheme *sc, ts_ptr env, ts_ptr hdl, int all) {
+static ts_ptr find_slot_in_env(ts_interp *sc, ts_ptr env, ts_ptr hdl, int all) {
   ts_ptr x, y;
   for (x = env; x != sc->nil; x = cdr(x)) {
     for (y = car(x); y != sc->nil; y = cdr(y)) {
@@ -2157,11 +2157,11 @@ static ts_ptr find_slot_in_env(scheme *sc, ts_ptr env, ts_ptr hdl, int all) {
 
 #endif /* USE_ALIST_ENV else */
 
-inline static void new_slot_in_env(scheme *sc, ts_ptr variable, ts_ptr value) {
+inline static void new_slot_in_env(ts_interp *sc, ts_ptr variable, ts_ptr value) {
   new_slot_spec_in_env(sc, sc->envir, variable, value);
 }
 
-inline static void set_slot_in_env(scheme *sc, ts_ptr slot, ts_ptr value) {
+inline static void set_slot_in_env(ts_interp *sc, ts_ptr slot, ts_ptr value) {
   cdr(slot) = value;
 }
 
@@ -2169,7 +2169,7 @@ inline ts_ptr slot_value_in_env(ts_ptr slot) { return cdr(slot); }
 
 /* ========== Evaluation Cycle ========== */
 
-static ts_ptr _Error_1(scheme *sc, const char *s, ts_ptr a) {
+static ts_ptr _Error_1(ts_interp *sc, const char *s, ts_ptr a) {
   const char *str = s;
 #if USE_ERROR_HOOK
   ts_ptr x;
@@ -2251,7 +2251,7 @@ struct dump_stack_frame {
 
 #define STACK_GROWTH 3
 
-static void s_save(scheme *sc, enum opcodes op, ts_ptr args, ts_ptr code) {
+static void s_save(ts_interp *sc, enum opcodes op, ts_ptr args, ts_ptr code) {
   int nframes = (int)sc->dump;
   struct dump_stack_frame *next_frame;
 
@@ -2270,7 +2270,7 @@ static void s_save(scheme *sc, enum opcodes op, ts_ptr args, ts_ptr code) {
   sc->dump = (ts_ptr)(nframes + 1);
 }
 
-static ts_ptr _s_return(scheme *sc, ts_ptr a) {
+static ts_ptr _s_return(ts_interp *sc, ts_ptr a) {
   int nframes = (int)sc->dump;
   struct dump_stack_frame *frame;
 
@@ -2288,25 +2288,25 @@ static ts_ptr _s_return(scheme *sc, ts_ptr a) {
   return sc->T;
 }
 
-inline void dump_stack_reset(scheme *sc) {
+inline void dump_stack_reset(ts_interp *sc) {
   /* in this implementation, sc->dump is the number of frames on the stack */
   sc->dump = (ts_ptr)0;
 }
 
-inline static void dump_stack_initialize(scheme *sc) {
+inline static void dump_stack_initialize(ts_interp *sc) {
   sc->dump_size = 0;
   sc->dump_base = NULL;
   dump_stack_reset(sc);
 }
 
-static void dump_stack_free(scheme *sc) {
+static void dump_stack_free(ts_interp *sc) {
   free(sc->dump_base);
   sc->dump_base = NULL;
   sc->dump = (ts_ptr)0;
   sc->dump_size = 0;
 }
 
-inline static void dump_stack_mark(scheme *sc) {
+inline static void dump_stack_mark(ts_interp *sc) {
   int nframes = (int)sc->dump;
   int i;
   for (i = 0; i < nframes; i++) {
@@ -2320,13 +2320,13 @@ inline static void dump_stack_mark(scheme *sc) {
 
 #else
 
-inline void dump_stack_reset(scheme *sc) { sc->dump = sc->nil; }
+inline void dump_stack_reset(ts_interp *sc) { sc->dump = sc->nil; }
 
-inline static void dump_stack_initialize(scheme *sc) { dump_stack_reset(sc); }
+inline static void dump_stack_initialize(ts_interp *sc) { dump_stack_reset(sc); }
 
-static void dump_stack_free(scheme *sc) { sc->dump = sc->nil; }
+static void dump_stack_free(ts_interp *sc) { sc->dump = sc->nil; }
 
-static ts_ptr _s_return(scheme *sc, ts_ptr a) {
+static ts_ptr _s_return(ts_interp *sc, ts_ptr a) {
   sc->value = (a);
   if (sc->dump == sc->nil) return sc->nil;
   sc->op = ts_int_val(car(sc->dump));
@@ -2337,18 +2337,18 @@ static ts_ptr _s_return(scheme *sc, ts_ptr a) {
   return sc->T;
 }
 
-static void s_save(scheme *sc, enum opcodes op, ts_ptr args, ts_ptr code) {
+static void s_save(ts_interp *sc, enum opcodes op, ts_ptr args, ts_ptr code) {
   sc->dump = ts_cons(sc, sc->envir, ts_cons(sc, (code), sc->dump));
   sc->dump = ts_cons(sc, (args), sc->dump);
   sc->dump = ts_cons(sc, ts_mk_int(sc, (int)(op)), sc->dump);
 }
 
-inline static void dump_stack_mark(scheme *sc) { mark(sc->dump); }
+inline static void dump_stack_mark(ts_interp *sc) { mark(sc->dump); }
 #endif
 
 #define s_retbool(tf) s_return(sc, (tf) ? sc->T : sc->F)
 
-static ts_ptr opexe_0(scheme *sc, enum opcodes op) {
+static ts_ptr opexe_0(ts_interp *sc, enum opcodes op) {
   ts_ptr x, y;
 
   switch (op) {
@@ -2749,7 +2749,7 @@ static ts_ptr opexe_0(scheme *sc, enum opcodes op) {
   return sc->T;
 }
 
-static ts_ptr opexe_1(scheme *sc, enum opcodes op) {
+static ts_ptr opexe_1(ts_interp *sc, enum opcodes op) {
   ts_ptr x, y;
 
   switch (op) {
@@ -2961,7 +2961,7 @@ static ts_ptr opexe_1(scheme *sc, enum opcodes op) {
   return sc->T;
 }
 
-static ts_ptr opexe_2(scheme *sc, enum opcodes op) {
+static ts_ptr opexe_2(ts_interp *sc, enum opcodes op) {
   ts_ptr x;
   ts_num v;
 #if USE_MATH
@@ -3464,7 +3464,7 @@ static ts_ptr opexe_2(scheme *sc, enum opcodes op) {
   return sc->T;
 }
 
-bool ts_is_list(scheme *sc, ts_ptr a) { return ts_list_len(sc, a) >= 0; }
+bool ts_is_list(ts_interp *sc, ts_ptr a) { return ts_list_len(sc, a) >= 0; }
 
 /* Result is:
    proper list: length
@@ -3472,7 +3472,7 @@ bool ts_is_list(scheme *sc, ts_ptr a) { return ts_list_len(sc, a) >= 0; }
    not even a pair: -2
    dotted list: -2 minus length before dot
 */
-int ts_list_len(scheme *sc, ts_ptr a) {
+int ts_list_len(ts_interp *sc, ts_ptr a) {
   int i = 0;
   ts_ptr slow, fast;
 
@@ -3499,7 +3499,7 @@ int ts_list_len(scheme *sc, ts_ptr a) {
   }
 }
 
-static ts_ptr opexe_3(scheme *sc, enum opcodes op) {
+static ts_ptr opexe_3(ts_interp *sc, enum opcodes op) {
   ts_ptr x;
   ts_num v;
   int (*comp_func)(ts_num, ts_num) = 0;
@@ -3607,7 +3607,7 @@ static ts_ptr opexe_3(scheme *sc, enum opcodes op) {
   return sc->T;
 }
 
-static ts_ptr opexe_4(scheme *sc, enum opcodes op) {
+static ts_ptr opexe_4(ts_interp *sc, enum opcodes op) {
   ts_ptr x, y;
 
   switch (op) {
@@ -3884,7 +3884,7 @@ static ts_ptr opexe_4(scheme *sc, enum opcodes op) {
   return sc->T;
 }
 
-static ts_ptr opexe_5(scheme *sc, enum opcodes op) {
+static ts_ptr opexe_5(ts_interp *sc, enum opcodes op) {
   ts_ptr x;
 
   if (sc->nesting != 0) {
@@ -4183,7 +4183,7 @@ static ts_ptr opexe_5(scheme *sc, enum opcodes op) {
   return sc->T;
 }
 
-static ts_ptr opexe_6(scheme *sc, enum opcodes op) {
+static ts_ptr opexe_6(ts_interp *sc, enum opcodes op) {
   ts_ptr x, y;
   int v;
 
@@ -4235,7 +4235,7 @@ static ts_ptr opexe_6(scheme *sc, enum opcodes op) {
   return sc->T; /* NOTREACHED */
 }
 
-typedef ts_ptr (*dispatch_func)(scheme *, enum opcodes);
+typedef ts_ptr (*dispatch_func)(ts_interp *, enum opcodes);
 
 typedef bool (*test_predicate)(ts_ptr);
 static bool is_any(ts_ptr p) { return true; }
@@ -4303,7 +4303,7 @@ static const char *procname(ts_ptr x) {
 }
 
 /* kernel of this interpreter */
-void Eval_Cycle(scheme *sc, enum opcodes op) {
+void Eval_Cycle(ts_interp *sc, enum opcodes op) {
   sc->op = op;
   for (;;) {
     op_code_info *pcd = dispatch_table + sc->op;
@@ -4373,14 +4373,14 @@ void Eval_Cycle(scheme *sc, enum opcodes op) {
 
 /* ========== Initialization of internal keywords ========== */
 
-static void assign_syntax(scheme *sc, char *name) {
+static void assign_syntax(ts_interp *sc, char *name) {
   ts_ptr x;
 
   x = oblist_add_by_name(sc, name);
   typeflag(x) |= T_SYNTAX;
 }
 
-static void assign_proc(scheme *sc, enum opcodes op, char *name) {
+static void assign_proc(ts_interp *sc, enum opcodes op, char *name) {
   ts_ptr x, y;
 
   x = ts_mk_sym(sc, name);
@@ -4388,7 +4388,7 @@ static void assign_proc(scheme *sc, enum opcodes op, char *name) {
   new_slot_in_env(sc, x, y);
 }
 
-static ts_ptr mk_proc(scheme *sc, enum opcodes op) {
+static ts_ptr mk_proc(ts_interp *sc, enum opcodes op) {
   ts_ptr y;
 
   y = get_cell(sc, sc->nil, sc->nil);
@@ -4555,8 +4555,8 @@ static struct ts_interface vtbl = {
 };
 #endif
 
-scheme *ts_init_new() {
-  scheme *sc = (scheme *)malloc(sizeof(scheme));
+ts_interp *ts_init_new() {
+  ts_interp *sc = (ts_interp *)malloc(sizeof(ts_interp));
   if (!ts_init(sc)) {
     free(sc);
     return 0;
@@ -4565,8 +4565,8 @@ scheme *ts_init_new() {
   }
 }
 
-scheme *ts_init_new_custom_alloc(ts_func_alloc malloc, ts_func_dealloc free) {
-  scheme *sc = (scheme *)malloc(sizeof(scheme));
+ts_interp *ts_init_new_custom_alloc(ts_func_alloc malloc, ts_func_dealloc free) {
+  ts_interp *sc = (ts_interp *)malloc(sizeof(ts_interp));
   if (!ts_init_custom_alloc(sc, malloc, free)) {
     free(sc);
     return 0;
@@ -4575,9 +4575,9 @@ scheme *ts_init_new_custom_alloc(ts_func_alloc malloc, ts_func_dealloc free) {
   }
 }
 
-int ts_init(scheme *sc) { return ts_init_custom_alloc(sc, malloc, free); }
+int ts_init(ts_interp *sc) { return ts_init_custom_alloc(sc, malloc, free); }
 
-bool ts_init_custom_alloc(scheme *sc, ts_func_alloc malloc,
+bool ts_init_custom_alloc(ts_interp *sc, ts_func_alloc malloc,
                           ts_func_dealloc free) {
   int i, n = sizeof(dispatch_table) / sizeof(dispatch_table[0]);
   ts_ptr x;
@@ -4679,25 +4679,25 @@ bool ts_init_custom_alloc(scheme *sc, ts_func_alloc malloc,
   return !sc->no_memory;
 }
 
-void ts_set_in_port_file(scheme *sc, FILE *fin) {
+void ts_set_in_port_file(ts_interp *sc, FILE *fin) {
   sc->inport = port_from_file(sc, fin, TS_PORT_INPUT);
 }
 
-void ts_set_in_port_str(scheme *sc, char *start, char *past_the_end) {
+void ts_set_in_port_str(ts_interp *sc, char *start, char *past_the_end) {
   sc->inport = port_from_string(sc, start, past_the_end, TS_PORT_INPUT);
 }
 
-void ts_set_out_port_file(scheme *sc, FILE *fout) {
+void ts_set_out_port_file(ts_interp *sc, FILE *fout) {
   sc->outport = port_from_file(sc, fout, TS_PORT_OUTPUT);
 }
 
-void ts_set_out_port_str(scheme *sc, char *start, char *past_the_end) {
+void ts_set_out_port_str(ts_interp *sc, char *start, char *past_the_end) {
   sc->outport = port_from_string(sc, start, past_the_end, TS_PORT_OUTPUT);
 }
 
-void ts_set_extern_data(scheme *sc, void *p) { sc->ext_data = p; }
+void ts_set_extern_data(ts_interp *sc, void *p) { sc->ext_data = p; }
 
-void ts_deinit(scheme *sc) {
+void ts_deinit(ts_interp *sc) {
   int i;
 
 #if SHOW_ERROR_LINE
@@ -4753,9 +4753,9 @@ bool is_file_exist(const char *fname) {
   return false;
 }
 
-void load_file(scheme *sc, FILE *fin) { load_named_file(sc, fin, 0); }
+void load_file(ts_interp *sc, FILE *fin) { load_named_file(sc, fin, 0); }
 
-void load_named_file(scheme *sc, FILE *fin, const char *filename) {
+void load_named_file(ts_interp *sc, FILE *fin, const char *filename) {
   if (fin == NULL) {
     fprintf(stderr, "File pointer can not be NULL when loading a file\n");
     return;
@@ -4789,7 +4789,7 @@ void load_named_file(scheme *sc, FILE *fin, const char *filename) {
   }
 }
 
-void ts_load_str(scheme *sc, const char *cmd) {
+void ts_load_str(ts_interp *sc, const char *cmd) {
   dump_stack_reset(sc);
   sc->envir = sc->global_env;
   sc->file_i = 0;
@@ -4810,7 +4810,7 @@ void ts_load_str(scheme *sc, const char *cmd) {
   }
 }
 
-void ts_def(scheme *sc, ts_ptr envir, ts_ptr symbol, ts_ptr value) {
+void ts_def(ts_interp *sc, ts_ptr envir, ts_ptr symbol, ts_ptr value) {
   ts_ptr x;
 
   x = find_slot_in_env(sc, envir, symbol, 0);

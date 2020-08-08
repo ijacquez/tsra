@@ -7,7 +7,7 @@
 bool is_file_exist(const char *fname);
 
 int main(int argc, char **argv) {
-  scheme sc;
+  ts_interp sc;
   FILE *fin = NULL;
   const char *file_name = "init.scm";
   int retcode;

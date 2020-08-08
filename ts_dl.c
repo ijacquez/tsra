@@ -19,13 +19,13 @@
 static void make_filename(const char *name, char *filename);
 static void make_init_fn(const char *name, char *init_fn);
 
-ts_ptr ts_load_ext(scheme *sc, ts_ptr args) {
+ts_ptr ts_load_ext(ts_interp *sc, ts_ptr args) {
   ts_ptr first_arg;
   ts_ptr retval;
   char filename[MAXPATHLEN], init_fn[MAXPATHLEN + 6];
   char *name;
   HMODULE dll_handle;
-  void (*module_init)(scheme * sc);
+  void (*module_init)(ts_interp * sc);
 
   if ((args != sc->nil) && ts_is_str((first_arg = ts_pair_car(args)))) {
     name = ts_str_val(first_arg);
@@ -35,7 +35,7 @@ ts_ptr ts_load_ext(scheme *sc, ts_ptr args) {
     if (dll_handle == 0) {
       retval = sc->F;
     } else {
-      module_init = (void (*)(scheme *))dl_proc(dll_handle, init_fn);
+      module_init = (void (*)(ts_interp *))dl_proc(dll_handle, init_fn);
       if (module_init != 0) {
         (*module_init)(sc);
         retval = sc->T;

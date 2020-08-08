@@ -4,12 +4,12 @@
  * this module contains functions that are not needed to build the interpreter 
    in 'standalone' mode */
 
-void scheme_register_foreign_func(scheme *sc, ts_registerable *sr) {
+void scheme_register_foreign_func(ts_interp *sc, ts_registerable *sr) {
   ts_def(sc, sc->global_env, ts_mk_sym(sc, sr->name),
          ts_mk_foreign_func(sc, sr->f));
 }
 
-void ts_register_foreign_func_list(scheme *sc, ts_registerable *list,
+void ts_register_foreign_func_list(ts_interp *sc, ts_registerable *list,
                                    int count) {
   int i;
   for (i = 0; i < count; i++) {
@@ -17,11 +17,11 @@ void ts_register_foreign_func_list(scheme *sc, ts_registerable *list,
   }
 }
 
-ts_ptr ts_apply0(scheme *sc, const char *procname) {
+ts_ptr ts_apply0(ts_interp *sc, const char *procname) {
   return ts_eval(sc, ts_cons(sc, ts_mk_sym(sc, procname), sc->nil));
 }
 
-void save_from_C_call(scheme *sc) {
+void save_from_C_call(ts_interp *sc) {
   ts_ptr saved_data =
       ts_cons(sc, car(sc->sink), ts_cons(sc, sc->envir, sc->dump));
   /* Push */
@@ -31,7 +31,7 @@ void save_from_C_call(scheme *sc) {
   dump_stack_reset(sc);
 }
 
-void restore_from_C_call(scheme *sc) {
+void restore_from_C_call(ts_interp *sc) {
   car(sc->sink) = caar(sc->c_nest);
   sc->envir = cadar(sc->c_nest);
   sc->dump = cdr(cdar(sc->c_nest));
@@ -40,7 +40,7 @@ void restore_from_C_call(scheme *sc) {
 }
 
 /* "func" and "args" are assumed to be already eval'ed. */
-ts_ptr ts_call(scheme *sc, ts_ptr func, ts_ptr args) {
+ts_ptr ts_call(ts_interp *sc, ts_ptr func, ts_ptr args) {
   bool old_repl = sc->interactive_repl;
   sc->interactive_repl = false;
   save_from_C_call(sc);
@@ -54,7 +54,7 @@ ts_ptr ts_call(scheme *sc, ts_ptr func, ts_ptr args) {
   return sc->value;
 }
 
-ts_ptr ts_eval(scheme *sc, ts_ptr obj) {
+ts_ptr ts_eval(ts_interp *sc, ts_ptr obj) {
   bool old_repl = sc->interactive_repl;
   sc->interactive_repl = false;
   save_from_C_call(sc);
@@ -67,7 +67,7 @@ ts_ptr ts_eval(scheme *sc, ts_ptr obj) {
   return sc->value;
 }
 
-ts_err ts_load_file(scheme *sc, const char *name) {
+ts_err ts_load_file(ts_interp *sc, const char *name) {
   int status;
   FILE *file = fopen(name, "r");
 
@@ -93,7 +93,7 @@ int ts_vec_len(ts_ptr vec) {
   return ts_type_err;
 }
 
-ts_ptr ts_get_global(scheme *sc, ts_ptr env, const char *name) {
+ts_ptr ts_get_global(ts_interp *sc, ts_ptr env, const char *name) {
   ts_ptr sym = ts_mk_sym(sc, name);
   ts_ptr slot = find_slot_in_env(sc, env, sym, 0);
 
@@ -108,7 +108,7 @@ void ts_userdata_set_finalizer(ts_ptr userdata, void (*finalizer)(void *)) {
   userdata->userdata.finalizer = finalizer;
 }
 
-ts_ptr ts_mk_userdata(scheme *sc, void *ptr) {
+ts_ptr ts_mk_userdata(ts_interp *sc, void *ptr) {
   ts_ptr cell = get_cell(sc, sc->nil, sc->nil);
 
   typeflag(cell) = (T_USERDATA | T_ATOM);

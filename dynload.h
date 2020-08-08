@@ -7,6 +7,6 @@
 
 #include "scheme.h"
 
-TS_EXPORT ts_ptr ts_load_ext(scheme *sc, ts_ptr arglist);
+TS_EXPORT ts_ptr ts_load_ext(ts_interp *sc, ts_ptr arglist);
 
 #endif
