@@ -177,11 +177,12 @@ struct ts_interp {
   int dump_size;   /* number of frames allocated for dump stack */
 };
 
-typedef enum ts_err {
-  ts_fopen_err = -1,
-  ts_fclose_err = -2,
-  ts_type_err = -3,
-} ts_err;
+typedef enum ts_status {
+  TS_OK = 0,
+  TS_FOPEN_ERR = -1,
+  TS_FCLOSE_ERR = -2,
+  TS_TYPE_ERR = -3,
+} ts_status;
 
 typedef struct ts_registerable {
   ts_foreign_func f;
@@ -198,7 +199,7 @@ TS_EXPORT void ts_set_in_port_file(ts_interp *sc, FILE *fin);
 TS_EXPORT void ts_set_in_port_str(ts_interp *sc, char *start, char *past_the_end);
 TS_EXPORT void ts_set_out_port_file(ts_interp *sc, FILE *fin);
 TS_EXPORT void ts_set_out_port_str(ts_interp *sc, char *start, char *past_the_end);
-TS_EXPORT ts_err ts_load_file(ts_interp *sc, const char *name);
+TS_EXPORT ts_status ts_load_file(ts_interp *sc, const char *name);
 TS_EXPORT void ts_load_str(ts_interp *sc, const char *cmd);
 TS_EXPORT ts_ptr ts_apply0(ts_interp *sc, const char *procname);
 TS_EXPORT ts_ptr ts_call(ts_interp *sc, ts_ptr func, ts_ptr args);
@@ -344,7 +345,7 @@ struct ts_interface {
   ts_ptr (*mk_empty_str)(ts_interp *sc, int len, char fill);
   ts_ptr (*load_ext)(ts_interp *sc, ts_ptr arglist);
   bool (*has_prop)(ts_ptr p);
-  ts_err (*load_file)(ts_interp *sc, const char *name);
+  ts_status (*load_file)(ts_interp *sc, const char *name);
   ts_ptr (*apply0)(ts_interp *sc, const char *procname);
   ts_ptr (*call)(ts_interp *sc, ts_ptr func, ts_ptr args);
   ts_ptr (*eval)(ts_interp *sc, ts_ptr obj);

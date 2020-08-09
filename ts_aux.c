@@ -67,22 +67,22 @@ ts_ptr ts_eval(ts_interp *sc, ts_ptr obj) {
   return sc->value;
 }
 
-ts_err ts_load_file(ts_interp *sc, const char *name) {
+ts_status ts_load_file(ts_interp *sc, const char *name) {
   int status;
   FILE *file = fopen(name, "r");
 
   if (file == NULL) {
-    return ts_fopen_err;
+    return TS_FOPEN_ERR;
   }
 
   load_file(sc, file);
   status = fclose(file);
 
   if (status == EOF) {
-    return ts_fclose_err;
+    return TS_FCLOSE_ERR;
   }
 
-  return 0;
+  return TS_OK;
 }
 
 int ts_vec_len(ts_ptr vec) {
@@ -90,7 +90,7 @@ int ts_vec_len(ts_ptr vec) {
     return ts_int_val(vec);
   }
 
-  return ts_type_err;
+  return TS_TYPE_ERR;
 }
 
 ts_ptr ts_get_global(ts_interp *sc, ts_ptr env, const char *name) {
