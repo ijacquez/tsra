@@ -275,6 +275,7 @@ TS_EXPORT ts_ptr ts_mk_userdata(ts_interp *sc, void *ptr);
 TS_EXPORT bool ts_is_userdata(ts_ptr ptr);
 TS_EXPORT void ts_userdata_set_finalizer(ts_ptr userdata,
                                          void (*finalizer)(void *));
+TS_EXPORT ts_ptr ts_mk_bool(ts_interp *sc, bool b);
 
 struct ts_interface {
   void (*def)(ts_interp *sc, ts_ptr env, ts_ptr symbol, ts_ptr value);
@@ -355,6 +356,7 @@ struct ts_interface {
   ts_ptr (*mk_userdata)(ts_interp *sc, void *ptr);
   bool (*is_userdata)(ts_ptr ptr);
   void (*userdata_set_finalizer)(ts_ptr userdata, void (*finalizer)(void *));
+  ts_ptr (*mk_bool)(ts_interp *sc, bool b);
 };
 
 #endif

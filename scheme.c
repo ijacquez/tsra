@@ -4540,7 +4540,9 @@ static struct ts_interface vtbl = {
     ts_mk_userdata,
     ts_is_userdata,
     ts_userdata_set_finalizer,
+    ts_mk_bool,
 #else
+    NULL,
     NULL,
     NULL,
     NULL,

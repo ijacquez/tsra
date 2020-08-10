@@ -117,3 +117,7 @@ ts_ptr ts_mk_userdata(ts_interp *sc, void *ptr) {
 
   return cell;
 }
+
+ts_ptr ts_mk_bool(ts_interp *sc, bool b) {
+  return b ? sc->T : sc->F;
+}
