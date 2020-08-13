@@ -22,7 +22,7 @@ ts_load_file
 
    ts_status ts_load_file(ts_interp *sc, const char *name);
 
-Loads and runs the given file. If there are no errors, it will return
+Loads and runs the given file. If there are no errors it will return
 ``TS_OK`` and in case of errors ``TS_FOPEN_ERR`` or ``TS_FCLOSE_ERR``.
 
 ts_vec_len
@@ -41,7 +41,7 @@ ts_get_global
 
    ts_ptr ts_get_global(ts_interp *sc, ts_ptr env, const char *name);
 
-Gets a scheme value by name, in case of error return ``sc->nil``.
+Gets a scheme value from environment ``env`` by name, in case of error return ``sc->nil``.
 
 ts_is_userdata
 --------------
