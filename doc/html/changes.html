@@ -1,0 +1,129 @@
+<h1 id="changelog">Changelog</h1>
+<h2 id="tsra-0.0.4">TSRA 0.0.4</h2>
+<ul>
+<li>Added <code>ts_mk_bool</code> function</li>
+</ul>
+<h2 id="tsra-0.0.3">TSRA 0.0.3</h2>
+<ul>
+<li>Makefile replaced with premake5</li>
+<li>Added <code>userdata</code> scheme type</li>
+<li>Added Windows support (successful cross-compilation)</li>
+</ul>
+<h2 id="tsra-0.0.2">TSRA 0.0.2</h2>
+<ul>
+<li><code>hasprop</code> function renamed to <code>ts_has_prop</code></li>
+<li><code>USE_SCHEME_STACK</code> define renamed to <code>USE_STACK</code></li>
+<li><code>ts_load_named_file</code> function removed from public API</li>
+<li><code>ts_load_file</code> function implementation changed</li>
+<li>Added <code>vec_len</code> function</li>
+<li>Added <code>ts_get_global</code> function</li>
+<li><code>ts_apply0</code> function added to <code>ts_interface</code> struct</li>
+<li><code>ts_call</code> function added <code>ts_interface</code> struct</li>
+<li><code>ts_eval</code> function added to <code>ts_interface</code> struct</li>
+<li>Mac OS 9 support code removed</li>
+<li>For integers the <code>int</code> type is now used instead of the <code>long</code> type</li>
+<li><code>ts_eqv</code> function added to <code>ts_interface</code> struct</li>
+<li><code>ts_set_extern_data</code> function added to <code>ts_interface</code> struct</li>
+<li><code>ts_set_out_port_str</code> function added to <code>ts_interface</code> struct</li>
+<li><code>ts_set_out_port_file</code> function added to <code>ts_interface</code> struct</li>
+<li><code>ts_set_in_port_str</code> function added to <code>ts_interface</code> struct</li>
+<li><code>ts_set_in_port_file</code> function added to <code>ts_interface</code> struct</li>
+<li><code>ts_deinit</code> function added to <code>ts_interface</code> struct</li>
+<li><code>ts_register_foreign_func_list</code> function added to <code>ts_interface</code> struct</li>
+<li><code>ts_has_prop</code> function added to <code>ts_interface</code> struct</li>
+<li><code>ts_mk_empty_str</code> function added to <code>ts_interface</code> struct</li>
+<li><code>ts_load_ext</code> function added to <code>ts_interface</code> struct</li>
+</ul>
+<h2 id="tsra-0.0.1">TSRA 0.0.1</h2>
+<ul>
+<li><code>set_vector_elem</code> function renamed to <code>ts_set_vec_elem</code></li>
+<li><code>vector_elem</code> function renamed to <code>ts_vec_elem</code></li>
+<li><code>fill_vector</code> function renamed to <code>ts_fill_vec</code></li>
+<li><code>is_list</code> function renamed to <code>ts_is_list</code></li>
+<li><code>_cons</code> function renamed to <code>ts_cons</code></li>
+<li><code>is_macro</code> function renamed to <code>ts_is_macro</code></li>
+<li><code>is_symbol</code> function renamed to <code>ts_is_sym</code></li>
+<li><code>is_pair</code> function renamed to <code>ts_is_pair</code></li>
+<li><code>ivalue</code> function renamed to <code>ts_int_val</code></li>
+<li><code>set_immutable</code> function renamed to <code>ts_set_immutable</code></li>
+<li><code>is_immutable</code> function renamed to <code>ts_is_immutable</code></li>
+<li><code>is_environment</code> function renamed to <code>ts_is_env</code></li>
+<li><code>is_promise</code> function renamed to <code>ts_is_promise</code></li>
+<li><code>closure_env</code> function renamed to <code>ts_closure_env</code></li>
+<li><code>closure_code</code> function renamed to <code>ts_closure_code</code></li>
+<li><code>is_closure</code> function renamed to <code>ts_is_closure</code></li>
+<li><code>syntaxname</code> function renamed to <code>ts_syntax_name</code></li>
+<li><code>is_foreign</code> function renamed to <code>ts_is_foreign</code></li>
+<li><code>is_proc</code> function renamed to <code>ts_is_proc</code></li>
+<li><code>is_syntax</code> function renamed to <code>ts_is_syntax</code></li>
+<li><code>symname</code> function renamed to <code>ts_sym_name</code></li>
+<li><code>set_cdr</code> function renamed to <code>ts_set_cdr</code></li>
+<li><code>set_car</code> function renamed to <code>ts_set_car</code></li>
+<li><code>pair_cdr</code> function renamed to <code>ts_pair_cdr</code></li>
+<li><code>pair_car</code> function renamed to <code>ts_pair_car</code></li>
+<li><code>is_port</code> function renamed to <code>ts_is_port</code></li>
+<li><code>is_vector</code> function renamed to <code>ts_is_vec</code></li>
+<li><code>charvalue</code> function renamed to <code>ts_char_val</code></li>
+<li><code>is_character</code> function renamed to <code>ts_is_char</code></li>
+<li><code>is_real</code> function renamed to <code>ts_is_real</code></li>
+<li><code>is_integer</code> function renamed to <code>ts_is_int</code></li>
+<li><code>rvalue</code> function renamed to <code>ts_real_val</code></li>
+<li><code>nvalue</code> function renamed to <code>ts_num_val</code></li>
+<li><code>is_number</code> function renamed to <code>ts_is_num</code></li>
+<li><code>string_value</code> function renamed to <code>ts_str_val</code></li>
+<li><code>is_string</code> function renamed to <code>ts_is_str</code></li>
+<li><code>putcharacter</code> function renamed to <code>ts_put_char</code></li>
+<li><code>mk_vector</code> function renamed to <code>ts_mk_vec</code></li>
+<li><code>reserve_cells</code> function renamed to <code>ts_reserve_cells</code></li>
+<li><code>eqv</code> function renamed to <code>ts_eqv</code></li>
+<li><code>list_length</code> function renamed to <code>ts_list_len</code></li>
+<li><code>putstr</code> function renamed to <code>ts_put_str</code></li>
+<li><code>mk_foreign_func</code> function renamed to <code>ts_mk_foreign_func</code></li>
+<li><code>mk_character</code> function renamed to <code>ts_mk_char</code></li>
+<li><code>mk_empty_string</code> function renamed to <code>ts_mk_empty_str</code></li>
+<li><code>mk_counted_string</code> function renamed to <code>ts_mk_counted_str</code></li>
+<li><code>mk_string</code> function renamed to <code>ts_mk_str</code></li>
+<li><code>gensym</code> function renamed to <code>ts_gen_sym</code></li>
+<li><code>mk_symbol</code> function renamed to <code>ts_mk_sym</code></li>
+<li><code>mk_real</code> function renamed to <code>ts_mk_real</code></li>
+<li><code>mk_integer</code> function renamed to <code>ts_mk_int</code></li>
+<li><code>scheme_define</code> function renamed to <code>ts_def</code></li>
+<li><code>scheme_set_external_data</code> function renamed to <code>ts_set_extern_data</code></li>
+<li><code>scheme_eval</code> function renamed to <code>ts_eval</code></li>
+<li><code>scheme_call</code> function renamed to <code>ts_call</code></li>
+<li><code>scheme_apply0</code> function renamed to <code>ts_apply0</code></li>
+<li><code>scheme_load_string</code> function renamed to <code>ts_load_str</code></li>
+<li><code>scheme_load_named_file</code> function renamed to <code>ts_load_named_file</code></li>
+<li><code>scheme_load_file</code> function renamed to <code>ts_load_file</code></li>
+<li><code>scheme_set_output_port_string</code> function renamed to <code>ts_set_out_port_str</code></li>
+<li><code>scheme_set_output_port_file</code> function renamed to <code>ts_set_out_port_file</code></li>
+<li><code>scheme_set_input_port_string</code> function renamed to <code>ts_set_in_port_str</code></li>
+<li><code>scheme_set_input_port_file</code> function renamed to <code>ts_set_in_port_file</code></li>
+<li><code>scheme_deinit</code> function renamed to <code>ts_deinit</code></li>
+<li><code>scheme_init_custom_alloc</code> function renamed to <code>ts_init_custom_alloc</code></li>
+<li><code>scheme_init</code> function renamed to <code>ts_init</code></li>
+<li><code>scheme_init_new_custom_alloc</code> function renamed to <code>ts_init_new_custom_alloc</code></li>
+<li><code>scheme_init_new</code> function renamed to <code>ts_init_new</code></li>
+<li><code>scheme_register_foreign_func_list</code> function renamed to <code>ts_register_foreign_func_list</code></li>
+<li><code>port_kind</code> stuct declaration moved to scheme.h</li>
+<li><code>cell</code> stuct declaration moved to scheme.h</li>
+<li><code>port</code> stuct declaration moved to scheme.h</li>
+<li><code>scheme</code> stuct declaration moved to scheme.h</li>
+<li><code>port_kind</code> enum renamed to <code>ts_port_kind</code></li>
+<li><code>num</code> struct renamed to <code>ts_num</code></li>
+<li><code>port</code> struct renamed to <code>ts_port</code></li>
+<li><code>cell</code> struct renamed to <code>ts_cell</code></li>
+<li><code>scheme_interface</code> struct renamed to <code>ts_interface</code></li>
+<li><code>scheme_registerable</code> struct renamed to <code>ts_registerable</code></li>
+<li><code>features defines</code> moved to scheme.c</li>
+<li><code>EXPORT</code> define renamed to <code>TS_EXPORT</code></li>
+<li><code>STRBUFFSIZE</code> define renamed to <code>TS_STRBUFFSIZE</code></li>
+<li><code>LINESIZE</code> define renamed to <code>TS_LINESIZE</code></li>
+<li><code>MAXFIL</code> define renamed to <code>TS_MAXFIL</code></li>
+<li><code>CELL_NSEGMENT</code> define renamed to <code>TS_CELL_NSEGMENT</code></li>
+<li><code>INLINE</code> defined as <code>inline</code> keyword by default</li>
+<li><code>pointer</code> typedef renamed to <code>ts_ptr</code></li>
+<li><code>func_alloc</code> typedef renamed to <code>ts_func_alloc</code></li>
+<li><code>func_dealloc</code> typedef renamed to <code>ts_func_dealloc</code></li>
+<li><code>foreign_func</code> typedef renamed to <code>ts_foreign_func</code></li>
+</ul>
