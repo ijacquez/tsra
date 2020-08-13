@@ -1,0 +1,30 @@
+<h1 id="api-reference">API Reference</h1>
+<h2 id="ts_status">ts_status</h2>
+<div class="sourceCode" id="cb1"><pre class="sourceCode c"><code class="sourceCode c"><a class="sourceLine" id="cb1-1" title="1"><span class="kw">typedef</span> <span class="kw">enum</span> ts_status {</a>
+<a class="sourceLine" id="cb1-2" title="2">  TS_OK = <span class="dv">0</span>,</a>
+<a class="sourceLine" id="cb1-3" title="3">  TS_FOPEN_ERR = <span class="dv">-1</span>,</a>
+<a class="sourceLine" id="cb1-4" title="4">  TS_FCLOSE_ERR = <span class="dv">-2</span>,</a>
+<a class="sourceLine" id="cb1-5" title="5">  TS_TYPE_ERR = <span class="dv">-3</span>,</a>
+<a class="sourceLine" id="cb1-6" title="6">} ts_status;</a></code></pre></div>
+<p>This enum contains error codes that any function can return.</p>
+<h2 id="ts_load_file">ts_load_file</h2>
+<div class="sourceCode" id="cb2"><pre class="sourceCode c"><code class="sourceCode c"><a class="sourceLine" id="cb2-1" title="1">ts_status ts_load_file(ts_interp *sc, <span class="dt">const</span> <span class="dt">char</span> *name);</a></code></pre></div>
+<p>Loads and runs the given file. If there are no errors, it will return <code>TS_OK</code> and in case of errors <code>TS_FOPEN_ERR</code> or <code>TS_FCLOSE_ERR</code>.</p>
+<h2 id="ts_vec_len">ts_vec_len</h2>
+<div class="sourceCode" id="cb3"><pre class="sourceCode c"><code class="sourceCode c"><a class="sourceLine" id="cb3-1" title="1"><span class="dt">int</span> ts_vec_len(ts_ptr vec);</a></code></pre></div>
+<p>Gets the vector length, in case of error can return <code>TS_TYPE_ERR</code>.</p>
+<h2 id="ts_get_global">ts_get_global</h2>
+<div class="sourceCode" id="cb4"><pre class="sourceCode c"><code class="sourceCode c"><a class="sourceLine" id="cb4-1" title="1">ts_ptr ts_get_global(ts_interp *sc, ts_ptr env, <span class="dt">const</span> <span class="dt">char</span> *name);</a></code></pre></div>
+<p>Gets a scheme value by name, in case of error return <code>sc-&gt;nil</code>.</p>
+<h2 id="ts_is_userdata">ts_is_userdata</h2>
+<div class="sourceCode" id="cb5"><pre class="sourceCode c"><code class="sourceCode c"><a class="sourceLine" id="cb5-1" title="1"><span class="dt">bool</span> ts_is_userdata(ts_ptr ptr);</a></code></pre></div>
+<p>Checks if the given scheme pointer is <code>userdata</code>.</p>
+<h2 id="ts_userdata_set_finalizer">ts_userdata_set_finalizer</h2>
+<div class="sourceCode" id="cb6"><pre class="sourceCode c"><code class="sourceCode c"><a class="sourceLine" id="cb6-1" title="1"><span class="dt">void</span> ts_userdata_set_finalizer(ts_ptr userdata, <span class="dt">void</span> (*finalizer)(<span class="dt">void</span> *))</a></code></pre></div>
+<p>Sets the finalizer function (destructor) for the userdata value.</p>
+<h2 id="ts_mk_userdata">ts_mk_userdata</h2>
+<div class="sourceCode" id="cb7"><pre class="sourceCode c"><code class="sourceCode c"><a class="sourceLine" id="cb7-1" title="1">ts_ptr ts_mk_userdata(ts_interp *sc, <span class="dt">void</span> *ptr);</a></code></pre></div>
+<p>Creates a scheme userdata from any C pointer.</p>
+<h2 id="ts_mk_bool">ts_mk_bool</h2>
+<div class="sourceCode" id="cb8"><pre class="sourceCode c"><code class="sourceCode c"><a class="sourceLine" id="cb8-1" title="1">ts_ptr ts_mk_bool(ts_interp *sc, <span class="dt">bool</span> b);</a></code></pre></div>
+<p>Converts C bool to scheme bool.</p>
