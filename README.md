@@ -44,7 +44,7 @@ The output file will be in the `bin/debug/` folder
 // display -- scheme function
 // example: (display "Hello")
 // this version only displays strings
-ts_ptr display(scheme *sc, ts_ptr args) {
+ts_ptr display(ts_interp *sc, ts_ptr args) {
   if (args != sc->nil) {
     if (ts_is_str(ts_pair_car(args))) {
       char *str = ts_str_val(ts_pair_car(args));
@@ -56,7 +56,7 @@ ts_ptr display(scheme *sc, ts_ptr args) {
 
 // square -- scheme function
 // example: (square 3)
-ts_ptr square(scheme *sc, ts_ptr args) {
+ts_ptr square(ts_interp *sc, ts_ptr args) {
   if (args != sc->nil) {
     if (ts_is_num(ts_pair_car(args))) {
       double v = ts_real_val(ts_pair_car(args));
@@ -67,7 +67,7 @@ ts_ptr square(scheme *sc, ts_ptr args) {
 }
 
 int main(void) {
-  scheme *sc;
+  ts_interp *sc;
 
   // init scheme interpreter
   sc = ts_init_new();
@@ -107,7 +107,7 @@ Save the code above to a file named `example.c`
 
 Compile `example.c` file
 ```
-$ gcc example.c libtinyscheme.a -ldl -lm
+$ gcc example.c bin/debug/libtsra.a -ldl -lm
 ```  
 
 Run `a.out` file  
