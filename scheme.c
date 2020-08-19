@@ -560,7 +560,7 @@ ts_ptr ts_reserve_cells(ts_interp *sc, int n) {
       return sc->nil;
     }
   }
-  return (sc->T);
+  return (sc->t);
 }
 
 static ts_ptr get_consecutive_cells(ts_interp *sc, int n) {
@@ -1024,9 +1024,9 @@ static ts_ptr mk_sharp_const(ts_interp *sc, char *name) {
   char tmp[TS_STRBUFFSIZE];
 
   if (!strcmp(name, "t"))
-    return (sc->T);
+    return (sc->t);
   else if (!strcmp(name, "f"))
-    return (sc->F);
+    return (sc->f);
   else if (*name == 'o') { /* #o (octal) */  
     x = strtol(name + 1, NULL, 8);
     return (ts_mk_int(sc, x));
@@ -1519,7 +1519,7 @@ static ts_ptr readstrexp(ts_interp *sc) {
   for (;;) {
     c = inchar(sc);
     if (c == EOF || p - sc->strbuff > sizeof(sc->strbuff) - 1) {
-      return sc->F;
+      return sc->f;
     }
     switch (state) {
       case st_ok:
@@ -1591,7 +1591,7 @@ static ts_ptr readstrexp(ts_interp *sc) {
             state = st_ok;
           }
         } else {
-          return sc->F;
+          return sc->f;
         }
         break;
       case st_oct1:
@@ -1601,7 +1601,7 @@ static ts_ptr readstrexp(ts_interp *sc) {
           backchar(sc, c);
           state = st_ok;
         } else {
-          if (state == st_oct2 && c1 >= 32) return sc->F;
+          if (state == st_oct2 && c1 >= 32) return sc->f;
 
           c1 = (c1 << 3) + (c - '0');
 
@@ -1796,9 +1796,9 @@ static void atom2str(ts_interp *sc, ts_ptr l, int f, char **pp, int *plen) {
 
   if (l == sc->nil) {
     p = "()";
-  } else if (l == sc->T) {
+  } else if (l == sc->t) {
     p = "#t";
-  } else if (l == sc->F) {
+  } else if (l == sc->f) {
     p = "#f";
   } else if (l == sc->eof_obj) {
     p = "#<EOF>";
@@ -1994,7 +1994,7 @@ static ts_ptr revappend(ts_interp *sc, ts_ptr a, ts_ptr b) {
     return result;
   }
 
-  return sc->F; /* signal an error */
+  return sc->f; /* signal an error */
 }
 
 /* equivalence of atoms */
@@ -2032,8 +2032,8 @@ int ts_eqv(ts_ptr a, ts_ptr b) {
 
 /* true or false value macro */
 /* () is #t in R5RS */
-#define is_true(p) ((p) != sc->F)
-#define is_false(p) ((p) == sc->F)
+#define is_true(p) ((p) != sc->f)
+#define is_false(p) ((p) == sc->f)
 
 /* ========== Environment implementation  ========== */
 
@@ -2209,7 +2209,7 @@ static ts_ptr _Error_1(ts_interp *sc, const char *s, ts_ptr a) {
     ts_set_immutable(car(sc->code));
     sc->code = ts_cons(sc, slot_value_in_env(x), sc->code);
     sc->op = (int)OP_EVAL;
-    return sc->T;
+    return sc->t;
   }
 #endif
 
@@ -2221,7 +2221,7 @@ static ts_ptr _Error_1(ts_interp *sc, const char *s, ts_ptr a) {
   sc->args = ts_cons(sc, ts_mk_str(sc, str), sc->args);
   ts_set_immutable(car(sc->args));
   sc->op = (int)OP_ERR0;
-  return sc->T;
+  return sc->t;
 }
 #define Error_1(sc, s, a) return _Error_1(sc, s, a)
 #define Error_0(sc, s) return _Error_1(sc, s, 0)
@@ -2234,7 +2234,7 @@ static ts_ptr _Error_1(ts_interp *sc, const char *s, ts_ptr a) {
 #define s_goto(sc, a) \
   BEGIN               \
   sc->op = (int)(a);  \
-  return sc->T;       \
+  return sc->t;       \
   END
 
 #define s_return(sc, a) return _s_return(sc, a)
@@ -2285,7 +2285,7 @@ static ts_ptr _s_return(ts_interp *sc, ts_ptr a) {
   sc->envir = frame->envir;
   sc->code = frame->code;
   sc->dump = (ts_ptr)nframes;
-  return sc->T;
+  return sc->t;
 }
 
 inline void dump_stack_reset(ts_interp *sc) {
@@ -2334,7 +2334,7 @@ static ts_ptr _s_return(ts_interp *sc, ts_ptr a) {
   sc->envir = caddr(sc->dump);
   sc->code = cadddr(sc->dump);
   sc->dump = cddddr(sc->dump);
-  return sc->T;
+  return sc->t;
 }
 
 static void s_save(ts_interp *sc, enum opcodes op, ts_ptr args, ts_ptr code) {
@@ -2346,7 +2346,7 @@ static void s_save(ts_interp *sc, enum opcodes op, ts_ptr args, ts_ptr code) {
 inline static void dump_stack_mark(ts_interp *sc) { mark(sc->dump); }
 #endif
 
-#define s_retbool(tf) s_return(sc, (tf) ? sc->T : sc->F)
+#define s_retbool(tf) s_return(sc, (tf) ? sc->t : sc->f)
 
 static ts_ptr opexe_0(ts_interp *sc, enum opcodes op) {
   ts_ptr x, y;
@@ -2746,7 +2746,7 @@ static ts_ptr opexe_0(ts_interp *sc, enum opcodes op) {
       snprintf(sc->strbuff, TS_STRBUFFSIZE, "%d: illegal operator", sc->op);
       Error_0(sc, sc->strbuff);
   }
-  return sc->T;
+  return sc->t;
 }
 
 static ts_ptr opexe_1(ts_interp *sc, enum opcodes op) {
@@ -2825,7 +2825,7 @@ static ts_ptr opexe_1(ts_interp *sc, enum opcodes op) {
 
     case OP_AND0: /* and */
       if (sc->code == sc->nil) {
-        s_return(sc, sc->T);
+        s_return(sc, sc->t);
       }
       s_save(sc, OP_AND1, sc->nil, cdr(sc->code));
       sc->code = car(sc->code);
@@ -2844,7 +2844,7 @@ static ts_ptr opexe_1(ts_interp *sc, enum opcodes op) {
 
     case OP_OR0: /* or */
       if (sc->code == sc->nil) {
-        s_return(sc, sc->F);
+        s_return(sc, sc->f);
       }
       s_save(sc, OP_OR1, sc->nil, cdr(sc->code));
       sc->code = car(sc->code);
@@ -2958,7 +2958,7 @@ static ts_ptr opexe_1(ts_interp *sc, enum opcodes op) {
       snprintf(sc->strbuff, TS_STRBUFFSIZE, "%d: illegal operator", sc->op);
       Error_0(sc, sc->strbuff);
   }
-  return sc->T;
+  return sc->t;
 }
 
 static ts_ptr opexe_2(ts_interp *sc, enum opcodes op) {
@@ -3227,7 +3227,7 @@ static ts_ptr opexe_2(ts_interp *sc, enum opcodes op) {
           if (*ep == 0) {
             s_return(sc, ts_mk_int(sc, iv));
           } else {
-            s_return(sc, sc->F);
+            s_return(sc, sc->f);
           }
         }
       }
@@ -3461,7 +3461,7 @@ static ts_ptr opexe_2(ts_interp *sc, enum opcodes op) {
       snprintf(sc->strbuff, TS_STRBUFFSIZE, "%d: illegal operator", sc->op);
       Error_0(sc, sc->strbuff);
   }
-  return sc->T;
+  return sc->t;
 }
 
 bool ts_is_list(ts_interp *sc, ts_ptr a) { return ts_list_len(sc, a) >= 0; }
@@ -3508,7 +3508,7 @@ static ts_ptr opexe_3(ts_interp *sc, enum opcodes op) {
     case OP_NOT: /* not */
       s_retbool(is_false(car(sc->args)));
     case OP_BOOLP: /* boolean? */
-      s_retbool(car(sc->args) == sc->F || car(sc->args) == sc->T);
+      s_retbool(car(sc->args) == sc->f || car(sc->args) == sc->t);
     case OP_EOFOBJP: /* boolean? */
       s_retbool(car(sc->args) == sc->eof_obj);
     case OP_NULLP: /* null? */
@@ -3604,7 +3604,7 @@ static ts_ptr opexe_3(ts_interp *sc, enum opcodes op) {
       snprintf(sc->strbuff, TS_STRBUFFSIZE, "%d: illegal operator", sc->op);
       Error_0(sc, sc->strbuff);
   }
-  return sc->T;
+  return sc->t;
 }
 
 static ts_ptr opexe_4(ts_interp *sc, enum opcodes op) {
@@ -3653,7 +3653,7 @@ static ts_ptr opexe_4(ts_interp *sc, enum opcodes op) {
         }
       }
       ts_put_str(sc, "\n");
-      s_return(sc, sc->T);
+      s_return(sc, sc->t);
 
     case OP_ERR0: /* error */
       sc->retcode = -1;
@@ -3700,7 +3700,7 @@ static ts_ptr opexe_4(ts_interp *sc, enum opcodes op) {
       while (cdr(y) != sc->nil) {
         x = revappend(sc, x, car(y));
         y = cdr(y);
-        if (x == sc->F) {
+        if (x == sc->f) {
           Error_0(sc, "non-list argument to append");
         }
       }
@@ -3723,7 +3723,7 @@ static ts_ptr opexe_4(ts_interp *sc, enum opcodes op) {
       else
         symprop(car(sc->args)) = ts_cons(sc, ts_cons(sc, y, caddr(sc->args)),
                                          symprop(car(sc->args)));
-      s_return(sc, sc->T);
+      s_return(sc, sc->t);
 
     case OP_GET: /* get */
       if (!ts_has_prop(car(sc->args)) || !ts_has_prop(cadr(sc->args))) {
@@ -3749,13 +3749,13 @@ static ts_ptr opexe_4(ts_interp *sc, enum opcodes op) {
 
     case OP_GC: /* gc */
       gc(sc, sc->nil, sc->nil);
-      s_return(sc, sc->T);
+      s_return(sc, sc->t);
 
     case OP_GCVERB: /* gc-verbose */
     {
       bool was = sc->gc_verbose;
 
-      sc->gc_verbose = (car(sc->args) != sc->F);
+      sc->gc_verbose = (car(sc->args) != sc->f);
       s_retbool(was);
     }
 
@@ -3764,7 +3764,7 @@ static ts_ptr opexe_4(ts_interp *sc, enum opcodes op) {
         Error_0(sc, "new-segment: argument must be a number");
       }
       alloc_cellseg(sc, (int)ts_int_val(car(sc->args)));
-      s_return(sc, sc->T);
+      s_return(sc, sc->t);
 
     case OP_OBLIST: /* oblist */
       s_return(sc, oblist_all_symbols(sc));
@@ -3795,7 +3795,7 @@ static ts_ptr opexe_4(ts_interp *sc, enum opcodes op) {
       }
       p = port_from_filename(sc, strvalue(car(sc->args)), prop);
       if (p == sc->nil) {
-        s_return(sc, sc->F);
+        s_return(sc, sc->f);
       }
       s_return(sc, p);
     }
@@ -3819,7 +3819,7 @@ static ts_ptr opexe_4(ts_interp *sc, enum opcodes op) {
                            strvalue(car(sc->args)) + strlength(car(sc->args)),
                            prop);
       if (p == sc->nil) {
-        s_return(sc, sc->F);
+        s_return(sc, sc->f);
       }
       s_return(sc, p);
     }
@@ -3828,14 +3828,14 @@ static ts_ptr opexe_4(ts_interp *sc, enum opcodes op) {
       if (car(sc->args) == sc->nil) {
         p = port_from_scratch(sc);
         if (p == sc->nil) {
-          s_return(sc, sc->F);
+          s_return(sc, sc->f);
         }
       } else {
         p = port_from_string(sc, strvalue(car(sc->args)),
                              strvalue(car(sc->args)) + strlength(car(sc->args)),
                              TS_PORT_OUTPUT);
         if (p == sc->nil) {
-          s_return(sc, sc->F);
+          s_return(sc, sc->f);
         }
       }
       s_return(sc, p);
@@ -3859,17 +3859,17 @@ static ts_ptr opexe_4(ts_interp *sc, enum opcodes op) {
           s_return(sc, s);
         }
       }
-      s_return(sc, sc->F);
+      s_return(sc, sc->f);
     }
 #endif
 
     case OP_CLOSE_INPORT: /* close-input-port */
       port_close(sc, car(sc->args), TS_PORT_INPUT);
-      s_return(sc, sc->T);
+      s_return(sc, sc->t);
 
     case OP_CLOSE_OUTPORT: /* close-output-port */
       port_close(sc, car(sc->args), TS_PORT_OUTPUT);
-      s_return(sc, sc->T);
+      s_return(sc, sc->t);
 
     case OP_INT_ENV: /* interaction-environment */
       s_return(sc, sc->global_env);
@@ -3881,7 +3881,7 @@ static ts_ptr opexe_4(ts_interp *sc, enum opcodes op) {
       snprintf(sc->strbuff, TS_STRBUFFSIZE, "%d: illegal operator", sc->op);
       Error_0(sc, sc->strbuff);
   }
-  return sc->T;
+  return sc->t;
 }
 
 static ts_ptr opexe_5(ts_interp *sc, enum opcodes op) {
@@ -4007,7 +4007,7 @@ static ts_ptr opexe_5(ts_interp *sc, enum opcodes op) {
           s_return(sc, mk_atom(sc, readstr_upto(sc, DELIMITERS)));
         case TOK_DQUOTE:
           x = readstrexp(sc);
-          if (x == sc->F) {
+          if (x == sc->f) {
             Error_0(sc, "Error reading string");
           }
           ts_set_immutable(x);
@@ -4114,10 +4114,10 @@ static ts_ptr opexe_5(ts_interp *sc, enum opcodes op) {
         s_goto(sc, OP_PVECFROM);
       } else if (ts_is_env(sc->args)) {
         ts_put_str(sc, "#<ENVIRONMENT>");
-        s_return(sc, sc->T);
+        s_return(sc, sc->t);
       } else if (!ts_is_pair(sc->args)) {
         printatom(sc, sc->args, sc->print_flag);
-        s_return(sc, sc->T);
+        s_return(sc, sc->t);
       } else if (car(sc->args) == sc->quote && ok_abbrev(cdr(sc->args))) {
         ts_put_str(sc, "'");
         sc->args = cadr(sc->args);
@@ -4157,7 +4157,7 @@ static ts_ptr opexe_5(ts_interp *sc, enum opcodes op) {
           printatom(sc, sc->args, sc->print_flag);
         }
         ts_put_str(sc, ")");
-        s_return(sc, sc->T);
+        s_return(sc, sc->t);
       }
     case OP_PVECFROM: {
       int i = ivalue_unchecked(cdr(sc->args));
@@ -4165,7 +4165,7 @@ static ts_ptr opexe_5(ts_interp *sc, enum opcodes op) {
       int len = ivalue_unchecked(vec);
       if (i == len) {
         ts_put_str(sc, ")");
-        s_return(sc, sc->T);
+        s_return(sc, sc->t);
       } else {
         ts_ptr elem = ts_vec_elem(vec, i);
         ivalue_unchecked(cdr(sc->args)) = i + 1;
@@ -4180,7 +4180,7 @@ static ts_ptr opexe_5(ts_interp *sc, enum opcodes op) {
       snprintf(sc->strbuff, TS_STRBUFFSIZE, "%d: illegal operator", sc->op);
       Error_0(sc, sc->strbuff);
   }
-  return sc->T;
+  return sc->t;
 }
 
 static ts_ptr opexe_6(ts_interp *sc, enum opcodes op) {
@@ -4206,19 +4206,19 @@ static ts_ptr opexe_6(ts_interp *sc, enum opcodes op) {
       if (ts_is_pair(y)) {
         s_return(sc, car(y));
       } else {
-        s_return(sc, sc->F);
+        s_return(sc, sc->f);
       }
 
     case OP_GET_CLOSURE: /* get-closure-code */ /* a.k */
       sc->args = car(sc->args);
       if (sc->args == sc->nil) {
-        s_return(sc, sc->F);
+        s_return(sc, sc->f);
       } else if (ts_is_closure(sc->args)) {
         s_return(sc, ts_cons(sc, sc->lambda, ts_closure_code(sc->value)));
       } else if (ts_is_macro(sc->args)) {
         s_return(sc, ts_cons(sc, sc->lambda, ts_closure_code(sc->value)));
       } else {
-        s_return(sc, sc->F);
+        s_return(sc, sc->f);
       }
     case OP_CLOSUREP: /* closure? */
       /*
@@ -4232,7 +4232,7 @@ static ts_ptr opexe_6(ts_interp *sc, enum opcodes op) {
       snprintf(sc->strbuff, TS_STRBUFFSIZE, "%d: illegal operator", sc->op);
       Error_0(sc, sc->strbuff);
   }
-  return sc->T; /* NOTREACHED */
+  return sc->t; /* NOTREACHED */
 }
 
 typedef ts_ptr (*dispatch_func)(ts_interp *, enum opcodes);
@@ -4598,8 +4598,8 @@ bool ts_init_custom_alloc(ts_interp *sc, ts_func_alloc malloc,
   sc->last_cell_seg = -1;
   sc->sink = &sc->_sink;
   sc->nil = &sc->_nil;
-  sc->T = &sc->_hasht;
-  sc->F = &sc->_hashf;
+  sc->t = &sc->_hasht;
+  sc->f = &sc->_hashf;
   sc->eof_obj = &sc->_eof_obj;
   sc->free_cell = &sc->_nil;
   sc->fcells = 0;
@@ -4624,11 +4624,11 @@ bool ts_init_custom_alloc(ts_interp *sc, ts_func_alloc malloc,
   typeflag(sc->nil) = (T_ATOM | MARK);
   car(sc->nil) = cdr(sc->nil) = sc->nil;
   /* init T */
-  typeflag(sc->T) = (T_ATOM | MARK);
-  car(sc->T) = cdr(sc->T) = sc->T;
+  typeflag(sc->t) = (T_ATOM | MARK);
+  car(sc->t) = cdr(sc->t) = sc->t;
   /* init F */
-  typeflag(sc->F) = (T_ATOM | MARK);
-  car(sc->F) = cdr(sc->F) = sc->F;
+  typeflag(sc->f) = (T_ATOM | MARK);
+  car(sc->f) = cdr(sc->f) = sc->f;
   /* init sink */
   typeflag(sc->sink) = (T_PAIR | MARK);
   car(sc->sink) = sc->nil;
@@ -4641,7 +4641,7 @@ bool ts_init_custom_alloc(ts_interp *sc, ts_func_alloc malloc,
   sc->global_env = sc->envir;
   /* init else */
   x = ts_mk_sym(sc, "else");
-  new_slot_in_env(sc, x, sc->T);
+  new_slot_in_env(sc, x, sc->t);
 
   assign_syntax(sc, "lambda");
   assign_syntax(sc, "quote");

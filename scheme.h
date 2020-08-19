@@ -113,9 +113,9 @@ struct ts_interp {
   struct ts_cell _nil;
   ts_ptr nil; /* special cell representing empty cell */
   struct ts_cell _hasht;
-  ts_ptr T; /* special cell representing #t */
+  ts_ptr t; /* special cell representing #t */
   struct ts_cell _hashf;
-  ts_ptr F; /* special cell representing #f */
+  ts_ptr f; /* special cell representing #f */
   struct ts_cell _eof_obj;
   ts_ptr eof_obj;    /* special cell representing end-of-file object */
   ts_ptr oblist;     /* pointer to symbol table */

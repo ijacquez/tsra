@@ -33,18 +33,18 @@ ts_ptr ts_load_ext(ts_interp *sc, ts_ptr args) {
     make_init_fn(name, init_fn);
     dll_handle = dl_attach(filename);
     if (dll_handle == 0) {
-      retval = sc->F;
+      retval = sc->f;
     } else {
       module_init = (void (*)(ts_interp *))dl_proc(dll_handle, init_fn);
       if (module_init != 0) {
         (*module_init)(sc);
-        retval = sc->T;
+        retval = sc->t;
       } else {
-        retval = sc->F;
+        retval = sc->f;
       }
     }
   } else {
-    retval = sc->F;
+    retval = sc->f;
   }
 
   return (retval);
