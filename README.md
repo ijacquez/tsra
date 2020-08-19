@@ -1,3 +1,5 @@
+# Deprecated. You can use [s7 scheme](https://ccrma.stanford.edu/software/snd/snd/s7.html) or [Chibi scheme](https://github.com/ashinn/chibi-scheme)
+
 # Tinyscheme revised API
 Tinyscheme fork focused on extending API and fixing bugs. 
 
